@@ -34,8 +34,16 @@ class App extends React.Component {
   }
 
   render() {
+    const sourceUrl = "https://github.com/eluv-io/stream-sample";
     return (
-      this.App()
+      <div className="app-container">
+        <main>
+          { this.App() }
+        </main>
+        <footer>
+          Source available at <a href={sourceUrl} target="_blank">{ sourceUrl }</a>
+        </footer>
+      </div>
     );
   }
 }

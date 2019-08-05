@@ -2,10 +2,28 @@
 @import "~elv-components-js/src/stylesheets/styles";
 
 .app {
+  height: 100%;
+}
+
+.app-container {
+  display: grid;
+  grid-template-columns: 100%;
+  grid-template-rows: 1fr auto;
+  height: 100%;
+  min-height: 100%;
+}
+
+main {
   display: flex;
   height: 100%;
   justify-content: center;
-  padding: $elv-spacing-s 0;
+  width: 100%;
+}
+
+footer {
+  color: $elv-color-text-lighter;
+  padding: $elv-spacing-xs $elv-spacing-s;
+  text-align: right;
 }
 
 .controls-container {
@@ -22,7 +40,7 @@
 
   h1 {
     font-size: 20px;
-    margin: $elv-spacing-xs 0 $elv-spacing-s;
+    margin: $elv-spacing-s 0;
     text-align: center;
   }
 
