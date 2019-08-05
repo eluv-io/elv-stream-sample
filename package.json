@@ -1,10 +1,10 @@
 {
-  "name": "elv-video-editor",
+  "name": "elv-stream-sample",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "license": "MIT",
-  "homepage": "https://github.com/eluv-io/elv-video-editor",
+  "homepage": "https://github.com/eluv-io/elv-stream-sample",
   "scripts": {
     "serve": "webpack-dev-server --hot --port 8084",
     "build": "rm -rf dist/* && NODE_ENV=production node ./node_modules/webpack-cli/bin/cli.js -p --progress --colors --devtool none",
@@ -32,6 +32,7 @@
     "prop-types": "^15.7.2",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
+    "urijs": "^1.19.1",
     "video.js": "^7.6.0",
     "videojs-contrib-dash": "^2.11.0"
   },

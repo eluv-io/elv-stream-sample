@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import HLSPlayer from "../../node_modules/hls.js/dist/hls";
 import DashJS from "dashjs";
+import URI from "urijs";
 
 class Video extends React.Component {
   constructor(props) {
@@ -13,12 +14,13 @@ class Video extends React.Component {
   InitializeVideo(video) {
     if(!video) { return; }
 
-    const videoUrl = this.props.playoutOptions.playoutUrl;
+    let videoUrl = this.props.playoutOptions.playoutUrl;
     if(this.props.videoType === "hls") {
       if(video.canPlayType("application/vnd.apple.mpegURL")) {
         // This browser can play HLS natively
         video.src = videoUrl;
       } else {
+        videoUrl = URI(videoUrl).addSearch("player_profile", "hls-js").toString();
         const player = new HLSPlayer();
         player.loadSource(videoUrl);
         player.attachMedia(video);
