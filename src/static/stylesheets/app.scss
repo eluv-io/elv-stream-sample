@@ -1,0 +1,38 @@
+@import "~elv-components-js/src/stylesheets/defaults";
+@import "~elv-components-js/src/stylesheets/styles";
+
+.app {
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  padding: $elv-spacing-s 0;
+}
+
+.controls-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 80%;
+}
+
+.video-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  h1 {
+    font-size: 20px;
+    margin: $elv-spacing-xs 0 $elv-spacing-s;
+    text-align: center;
+  }
+
+  video {
+    cursor: pointer;
+    width: 100%;
+  }
+}
+
+.-elv-tab {
+  text-align: center;
+  width: 125px;
+}
