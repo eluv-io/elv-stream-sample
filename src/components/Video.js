@@ -38,7 +38,13 @@ class Video extends React.Component {
         });
       }
 
-      player.initialize(video, videoUrl, false);
+      // Subtitles are enabled by default - disable them
+      player.on(
+        DashJS.MediaPlayer.events.CAN_PLAY,
+        () => player.setTextTrack(-1)
+      );
+
+      player.initialize(video, videoUrl);
     }
   }
 
@@ -52,7 +58,7 @@ class Video extends React.Component {
           crossOrigin="anonymous"
           ref={this.InitializeVideo}
           muted={false}
-          autoPlay={false}
+          autoPlay={true}
           controls={true}
           preload="auto"
         />

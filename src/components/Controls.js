@@ -169,8 +169,11 @@ class Controls extends React.Component {
         { this.Video() }
         <LoadingElement loading={this.state.loading && !this.state.error} fullPage={true}>
           <div className="controls">
-            { this.DrmSelector() }
-            { this.TypeSelector() }
+            <div className="control-block">
+              <h4>Stream Options</h4>
+              { this.DrmSelector() }
+              { this.TypeSelector() }
+            </div>
           </div>
         </LoadingElement>
       </div>

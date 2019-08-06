@@ -1,10 +1,11 @@
 import "./static/stylesheets/app.scss";
 
 import React from "react";
-import { render } from "react-dom";
-import { LoadingElement } from "elv-components-js";
+import {render} from "react-dom";
+import {ImageIcon, LoadingElement} from "elv-components-js";
 import Controls from "./components/Controls";
 import {InitializeClient} from "./Utils";
+import GithubIcon from "./static/icons/github.svg";
 
 class App extends React.Component {
   constructor(props) {
@@ -23,6 +24,16 @@ class App extends React.Component {
     });
   }
 
+  SourceLink() {
+    const sourceUrl = "https://github.com/eluv-io/stream-sample";
+    return (
+      <a className="source-link" href={sourceUrl} target="_blank">
+        <ImageIcon className="github-icon" icon={GithubIcon} />
+        Source available on GitHub
+      </a>
+    );
+  }
+
   App() {
     if(!this.state.client) {
       return <LoadingElement loading={true} fullPage={true}/>;
@@ -34,14 +45,13 @@ class App extends React.Component {
   }
 
   render() {
-    const sourceUrl = "https://github.com/eluv-io/stream-sample";
     return (
       <div className="app-container">
         <main>
           { this.App() }
         </main>
         <footer>
-          Source available at <a href={sourceUrl} target="_blank">{ sourceUrl }</a>
+          { this.SourceLink() }
         </footer>
       </div>
     );

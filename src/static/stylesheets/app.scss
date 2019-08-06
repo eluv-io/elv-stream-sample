@@ -2,6 +2,7 @@
 @import "~elv-components-js/src/stylesheets/styles";
 
 .app {
+  color: $elv-color-text-dark;
   height: 100%;
 }
 
@@ -22,8 +23,29 @@ main {
 
 footer {
   color: $elv-color-text-lighter;
+  display: flex;
+  justify-content: flex-end;
   padding: $elv-spacing-xs $elv-spacing-s;
-  text-align: right;
+}
+
+.source-link {
+  align-items: center;
+  border: 1px solid $elv-color-mediumgray;
+  border-radius: 3px;
+  display: flex;
+  font-size: 14px;
+  padding: $elv-spacing-xs $elv-spacing-s;
+  width: auto;
+
+  .github-icon {
+    height: 20px;
+    margin-right: $elv-spacing-xs;
+    width: 20px;
+  }
+
+  &:hover {
+    background-color: $elv-color-lightestgray;
+  }
 }
 
 .version-hash-entry {
@@ -34,7 +56,7 @@ footer {
   input {
     color: $elv-color-text-light;
     font-size: 18px;
-    height: 2.5em;
+    height: 2.2em;
     margin-right: $elv-spacing-xs;
     padding-left: $elv-spacing-xs;
     width: 100%;
@@ -43,6 +65,10 @@ footer {
   .-elv-button {
     height: 100%;
     width: 200px;
+
+    &.elv-button {
+      font-size: 20px;
+    }
   }
 }
 
@@ -59,13 +85,31 @@ footer {
   height: 100%;
   width: 80%;
 
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: $elv-spacing-s;
+  }
+
+  .control-block {
+    border: 1px solid $elv-color-lightgray;
+    border-radius: 3px;
+    display: inline-block;
+    margin: 0 $elv-spacing-xs $elv-spacing-xs 0;
+    padding: $elv-spacing-s $elv-spacing-m 0;
+  }
+
+  h4 {
+    font-size: 18px;
+    text-align: center;
+  }
+
   .selection {
     align-items: center;
     display: flex;
     margin: $elv-spacing-m 0;
 
     label {
-      font-weight: bold;
       width: 100px;
     }
 
@@ -93,21 +137,21 @@ footer {
   justify-content: center;
 
   h1 {
-    font-size: 24px;
+    font-size: 2.2rem;
+    font-weight: normal;
     margin: $elv-spacing-l 0 0;
     text-align: center;
   }
 
   h3 {
     font-size: 14px;
-    font-style: italic;
     padding: $elv-spacing-s $elv-spacing-l;
   }
 
   video {
     background-color: $elv-color-bg-black;
     cursor: pointer;
-    max-height: 60vh;
+    max-height: 50vh;
     width: 100%;
   }
 }
