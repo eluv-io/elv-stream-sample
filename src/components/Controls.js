@@ -9,11 +9,11 @@ class Controls extends React.Component {
     super(props);
 
     this.state = {
-      versionHash: "hq__BKxnV4pungALdVzZe1oSwZJp4P1RLjzwwK9bp8HuFmjcTFM87ewN3pCjpJBgzdzEnb383kKY5H",
+      versionHash: "hq__5DS92kGeb5v3ktMLaDBNxFnAjshM92APZ98SydiczP7vPguFuyJ4Pgz3rL7EZt1TD1Ks5jHW96",
       videoType: "hls",
       video: undefined,
       availableDRMs: [],
-      drm: undefined
+      drm: "aes-128"
     };
 
     this.LoadVideo = this.LoadVideo.bind(this);
@@ -47,7 +47,7 @@ class Controls extends React.Component {
   }
 
   DrmSelector() {
-    const options = [["clear", undefined]].concat(this.state.availableDRMs.map(drm => [drm, drm]));
+    const options = this.state.availableDRMs.map(drm => [drm, drm]);
 
     return (
       <Tabs
