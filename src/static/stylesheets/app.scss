@@ -26,11 +26,65 @@ footer {
   text-align: right;
 }
 
+.version-hash-entry {
+  align-items: center;
+  display: flex;
+  margin-top: $elv-spacing-m;
+
+  input {
+    color: $elv-color-text-light;
+    font-size: 18px;
+    height: 2.5em;
+    margin-right: $elv-spacing-xs;
+    padding-left: $elv-spacing-xs;
+    width: 100%;
+  }
+
+  .-elv-button {
+    height: 100%;
+    width: 200px;
+  }
+}
+
+.error-message {
+  color: $elv-color-red;
+  font-size: 16px;
+  padding: $elv-spacing-s;
+  text-align: center;
+}
+
 .controls-container {
   display: flex;
   flex-direction: column;
   height: 100%;
   width: 80%;
+
+  .selection {
+    align-items: center;
+    display: flex;
+    margin: $elv-spacing-m 0;
+
+    label {
+      font-weight: bold;
+      width: 100px;
+    }
+
+    .-elv-tab-container {
+      margin: 0;
+    }
+
+    .-elv-tab {
+      text-align: center;
+      width: 125px;
+
+      &.secondary {
+        &.selected {
+          background: $elv-color-action-primary;
+          color: $elv-color-text-white;
+        }
+      }
+    }
+  }
 }
 
 .video-container {
@@ -39,18 +93,21 @@ footer {
   justify-content: center;
 
   h1 {
-    font-size: 20px;
-    margin: $elv-spacing-s 0;
+    font-size: 24px;
+    margin: $elv-spacing-l 0 0;
     text-align: center;
   }
 
+  h3 {
+    font-size: 14px;
+    font-style: italic;
+    padding: $elv-spacing-s $elv-spacing-l;
+  }
+
   video {
+    background-color: $elv-color-bg-black;
     cursor: pointer;
+    max-height: 60vh;
     width: 100%;
   }
-}
-
-.-elv-tab {
-  text-align: center;
-  width: 125px;
 }

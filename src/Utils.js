@@ -49,27 +49,41 @@ export const AvailableDRMs = async () => {
 };
 
 export const LoadVideo = async ({client, versionHash, drm}) => {
-  const metadata = await client.ContentObjectMetadata({versionHash});
-
-  const playoutOptions = await client.PlayoutOptions({
-    versionHash,
-    protocols: ["dash", "hls"],
-    drms: drm ? [drm] : []
-  });
-
-  const posterUrl = await client.Rep({
-    versionHash,
-    rep: "player_background",
-    channelAuth: true
-  });
-
   const { objectId } = client.utils.DecodeVersionHash(versionHash);
-  const authToken = client.authClient.channelContentTokens[objectId];
 
-  return {
-    metadata,
-    playoutOptions,
-    posterUrl,
-    authToken
-  };
+  if(objectId.length !== 32) {
+    throw new Error("Invalid version hash");
+  }
+
+  try {
+    const metadata = await client.ContentObjectMetadata({versionHash});
+
+    const playoutOptions = await client.PlayoutOptions({
+      versionHash,
+      protocols: ["dash", "hls"],
+      drms: drm ? [drm] : []
+    });
+
+    const posterUrl = await client.Rep({
+      versionHash,
+      rep: "player_background",
+      channelAuth: true
+    });
+
+    const authToken = await client.GenerateStateChannelToken({objectId});
+
+    return {
+      metadata,
+      playoutOptions,
+      posterUrl,
+      authToken
+    };
+  } catch(error) {
+    // eslint-disable-next-line no-console
+    console.error("Failed to load content:");
+    // eslint-disable-next-line no-console
+    console.error(error);
+
+    throw new Error("Failed to load content");
+  }
 };

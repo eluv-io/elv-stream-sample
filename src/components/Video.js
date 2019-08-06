@@ -16,15 +16,11 @@ class Video extends React.Component {
 
     let videoUrl = this.props.playoutOptions.playoutUrl;
     if(this.props.videoType === "hls") {
-      if(video.canPlayType("application/vnd.apple.mpegURL")) {
-        // This browser can play HLS natively
-        video.src = videoUrl;
-      } else {
-        videoUrl = URI(videoUrl).addSearch("player_profile", "hls-js").toString();
-        const player = new HLSPlayer();
-        player.loadSource(videoUrl);
-        player.attachMedia(video);
-      }
+      videoUrl = URI(videoUrl).addSearch("player_profile", "hls-js").toString();
+
+      const player = new HLSPlayer();
+      player.loadSource(videoUrl);
+      player.attachMedia(video);
     } else {
       const player = DashJS.MediaPlayer().create();
 
@@ -50,6 +46,7 @@ class Video extends React.Component {
     return (
       <div className="video-container">
         <h1>{this.props.metadata.name}</h1>
+        <h3>{this.props.metadata.description}</h3>
         <video
           poster={this.props.posterUrl}
           crossOrigin="anonymous"
