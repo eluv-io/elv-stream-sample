@@ -52,7 +52,6 @@ class Video extends React.Component {
     return (
       <div className="video-container">
         <h1>{this.props.metadata.name}</h1>
-        <h3>{this.props.metadata.description}</h3>
         <video
           poster={this.props.posterUrl}
           crossOrigin="anonymous"

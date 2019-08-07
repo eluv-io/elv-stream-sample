@@ -5,6 +5,8 @@ import {render} from "react-dom";
 import {ImageIcon, LoadingElement} from "elv-components-js";
 import Controls from "./components/Controls";
 import {InitializeClient} from "./Utils";
+
+import Logo from "./static/images/Logo.png";
 import GithubIcon from "./static/icons/github.svg";
 
 class App extends React.Component {
@@ -47,6 +49,12 @@ class App extends React.Component {
   render() {
     return (
       <div className="app-container">
+        <header>
+          <ImageIcon className="logo" icon={Logo}/>
+          <h1>
+            Video Streaming Sample
+          </h1>
+        </header>
         <main>
           { this.App() }
         </main>
