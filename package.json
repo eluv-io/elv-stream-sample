@@ -33,6 +33,7 @@
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "urijs": "^1.19.1",
+    "victory": "^32.3.4",
     "video.js": "^7.6.0",
     "videojs-contrib-dash": "^2.11.0"
   },
