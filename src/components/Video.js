@@ -3,36 +3,57 @@ import PropTypes from "prop-types";
 import HLSPlayer from "../../node_modules/hls.js/dist/hls";
 import DashJS from "dashjs";
 import URI from "urijs";
-import { VictoryLine, VictoryChart,VictoryAxis, VictoryTheme, VictoryScatter, VictoryLegend } from "victory";
+import { VictoryLine, VictoryChart,VictoryAxis, VictoryTheme, VictoryScatter, VictoryLegend, VictoryContainer, VictoryLabel } from "victory";
 import {CalculateHTTPMetrics} from "../Utils.js";
 
 class LineGraph extends React.Component {
   constructor() {
     super();
-    /* function bindings */
+
+    this.state = {
+      chartWidth: 0,
+      axisFontSize: 10,
+      /* to-do add other specifics for styling */
+      // lineSize: 5,
+    }
   }
+
+  componentDidMount() {
+   this.setState({
+     chartWidth: window.innerWidth
+   });
+   window.addEventListener('resize', this.updateDimensions.bind(this));
+ }
+
+ /* clear event listener */
+ componentWillUnmount(){
+   window.removeEventListener('resize', this.updateDimensions.bind(this));
+ }
+
+ updateDimensions(event) {
+   console.log(event.target)
+   let size = "4vw";
+   this.setState({
+     chartWidth: event.target.innerWidth,
+     axisFontSize: size,
+   })
+ }
 
   render(){
 
-    //   let el =(  tickValues={[1, 2, 3, 4]}
-    //   tickFormat={["Quarter 1", "Quarter 2", "Quarter 3", "Quarter 4"]}
-    // );
-
-    /*
-
-      parent: { border: "1px solid #ccc"},
-  */
+    const fontSize = this.state.axisFontSize;
 
     return(
 
-      <div style={{ display: "flex", flexWrap: "wrap" }}>
+      <svg viewBox={"0 0" + " "+ this.state.chartWidth +" " + "350"}  preserveAspectRatio="none" width="100%">
 
         <VictoryChart
           theme={VictoryTheme.material}
           maxDomain={{ y: this.props.max }}
           minDomain={{ y: 0 }}
-          height={200}
-          width={200}
+          standalone={false}
+          width={this.state.chartWidth}
+          height={350}
         >
 
           <VictoryLegend
@@ -49,18 +70,18 @@ class LineGraph extends React.Component {
           <VictoryAxis
             // tickValues specifies both the number of ticks and where
             // they are placed on the axis
+            label="Time (s)"
+            axisLabelComponent={<VictoryLabel dy={20}/>}
 
-            style={{tickLabels: { fill: "#ceded7", fontSize: 2.5 }}}
+            style={{tickLabels: { fill: "#ceded7", fontSize: this.state.axisFontSize }}}
           />
           <VictoryAxis
             dependentAxis
             // tickFormat specifies how ticks should be displayed
-            style={{tickLabels: { fill: "#ceded7", fontSize: 2.5 }}}
+            style={{tickLabels: { fill: "#ceded7", fontSize: this.state.axisFontSize }}}
           />
 
           <VictoryLine
-
-            interpolation="natural"
             style={{
               data: { stroke: this.props.color, strokeWidth: 1 },
             }}
@@ -72,7 +93,9 @@ class LineGraph extends React.Component {
             style={{ data: { fill: this.props.color } }}
           />
         </VictoryChart>
-      </div>
+
+        </svg>
+
     );
   }
 }
@@ -150,6 +173,7 @@ class Video extends React.Component {
       player.initialize(video, videoUrl);
       this.sessionStartTime = new Date().getTime() / 1000;
       this.SetupDashCharts(player);
+      this.setState({chartsEnabled: true});
     }
   }
 
@@ -209,6 +233,8 @@ class Video extends React.Component {
         time: performance.now() - events.t0,
       });
     });
+
+    /* TO-DO: check other event listeners that could affect metrics */
 
     // hls.on(HLSPlayer.Events.LEVEL_SWITCHING, function(event, data) {
     // events.level.push({
@@ -333,7 +359,6 @@ class Video extends React.Component {
   render() {
 
     let el = null;
-    //
     if(this.state.chartsEnabled){
 
       let bufferData = this.state.bufferData;
