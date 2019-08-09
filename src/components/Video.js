@@ -10,7 +10,6 @@ class LineGraph extends React.Component {
   constructor() {
     super();
     /* function bindings */
-
   }
 
   render(){
@@ -53,7 +52,6 @@ class Video extends React.Component {
     this.UpdateMetrics = this.UpdateMetrics.bind(this);
     this.StopMetricsInterval = this.StopMetricsInterval.bind(this);
     this.GetTimeForPlot = this.GetTimeForPlot.bind(this);
-
   }
 
   GetInitialState(){
@@ -63,9 +61,7 @@ class Video extends React.Component {
       bufferData: [],
       bitrateData: [],
       latencyData: [],
-      // bufferData: [{time: 0, y: 0}],
-      // bitrateData: [{time: 0, y: 0}],
-      // latencyData: [{time: 0, y: 0}],
+
       buffer:         {color: "#00589d", label: "Video Buffer Level"},
       bitrate:        {color: "#ff7900", label: "Video Bitrate (kbps)"},
       latency:        {color: "#329d61", label: "Video Latency (ms)"},
@@ -204,19 +200,19 @@ class Video extends React.Component {
       <div>
         <React.Fragment>
 
-          <LineGraph data = {bufferData} color = {this.state.bufferColor} max = {bufferMax}  />
+          <LineGraph data = {bufferData} color = {this.state.buffer.color} max = {bufferMax}  />
 
         </React.Fragment>
 
         <React.Fragment>
 
-          <LineGraph data = {latencyData} color = {this.state.latencyColor} max = {latencyMax} />
+          <LineGraph data = {latencyData} color = {this.state.latency.color} max = {latencyMax} />
 
         </React.Fragment>
 
         <React.Fragment>
 
-          <LineGraph data = {bitrateData} color = {this.state.bitrateColor} max = {bitrateMax} />
+          <LineGraph data = {bitrateData} color = {this.state.bitrate.color} max = {bitrateMax} />
 
         </React.Fragment>
 
@@ -261,6 +257,7 @@ function SetupHLSCharts(hls){
 
   let events;
   let stats;
+  // let bufferingIdx;
 
   events = {
     t0     : performance.now(),
@@ -273,7 +270,7 @@ function SetupHLSCharts(hls){
 
   hls.on(HLSPlayer.Events.MEDIA_ATTACHED, function(){
     // logStatus('Media element attached');
-    bufferingIdx = -1;
+    // bufferingIdx = -1;
     events.video.push({
       time: performance.now() - events.t0,
       type: "Media attached"
@@ -366,6 +363,9 @@ function SetupHLSCharts(hls){
     stats.fragparsingMs = Math.round(this.sumParsing);
     stats.autoLevelCappingLast = hls.autoLevelCapping;
   });
+
+  // console.log(events); 
+
 }
 
 export default Video;
