@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import HLSPlayer from "../../node_modules/hls.js/dist/hls";
 import DashJS from "dashjs";
 import URI from "urijs";
-import { VictoryLine, VictoryChart,VictoryAxis, VictoryTheme, VictoryScatter, VictoryLegend, VictoryContainer, VictoryLabel } from "victory";
+import { VictoryLine, VictoryChart,VictoryAxis, VictoryTheme, VictoryScatter, VictoryLegend, VictoryLabel } from "victory";
 import {CalculateHTTPMetrics} from "../Utils.js";
 
 class LineGraph extends React.Component {
@@ -15,33 +15,31 @@ class LineGraph extends React.Component {
       axisFontSize: 10,
       /* to-do add other specifics for styling */
       // lineSize: 5,
-    }
+    };
   }
 
   componentDidMount() {
-   this.setState({
-     chartWidth: window.innerWidth
-   });
-   window.addEventListener('resize', this.updateDimensions.bind(this));
- }
+    this.setState({
+      chartWidth: window.innerWidth
+    });
+    window.addEventListener("resize", this.updateDimensions.bind(this));
+  }
 
- /* clear event listener */
- componentWillUnmount(){
-   window.removeEventListener('resize', this.updateDimensions.bind(this));
- }
+  /* clear event listener */
+  componentWillUnmount(){
+    window.removeEventListener("resize", this.updateDimensions.bind(this));
+  }
 
- updateDimensions(event) {
-   console.log(event.target)
-   let size = "4vw";
-   this.setState({
-     chartWidth: event.target.innerWidth,
-     axisFontSize: size,
-   })
- }
+  updateDimensions(event) {
+    // let size = "4vw";
+    let size = "8px";
+    this.setState({
+      chartWidth: event.target.innerWidth,
+      axisFontSize: size,
+    });
+  }
 
   render(){
-
-    const fontSize = this.state.axisFontSize;
 
     return(
 
@@ -94,7 +92,7 @@ class LineGraph extends React.Component {
           />
         </VictoryChart>
 
-        </svg>
+      </svg>
 
     );
   }
