@@ -24,6 +24,7 @@
     ]
   },
   "dependencies": {
+    "chart.js": "^1.1.1",
     "dashjs": "^3.0.0",
     "elv-client-js": "git+https://github.com/eluv-io/elv-client-js.git#develop",
     "elv-components-js": "git+https://github.com/eluv-io/elv-components-js.git#develop",
@@ -31,6 +32,7 @@
     "pre-commit": "^1.2.2",
     "prop-types": "^15.7.2",
     "react": "^16.8.6",
+    "react-chartjs": "^1.2.0",
     "react-dom": "^16.8.6",
     "urijs": "^1.19.1",
     "victory": "^32.3.4",
