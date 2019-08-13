@@ -2,10 +2,8 @@ import React from "react";
 import PropTypes from "prop-types";
 import {LoadVideo, AvailableDRMs} from "../Utils";
 import Video from "./Video";
-import Tabs from "elv-components-js/src/components/Tabs";
-import Action from "elv-components-js/components/Action";
 import {onEnterPressed} from "elv-components-js";
-import LoadingElement from "elv-components-js/components/LoadingElement";
+import {Action, LoadingElement, Tabs} from "elv-components-js";
 
 // Appropriately capitalize options
 const Format = (string) => {
@@ -49,7 +47,8 @@ class Controls extends React.Component {
     try {
       this.setState({
         loading: true,
-        video: undefined
+        video: undefined,
+        error: undefined
       });
 
       const {metadata, playoutOptions, posterUrl, authToken} = await LoadVideo({
@@ -70,14 +69,13 @@ class Controls extends React.Component {
       });
     } catch(error) {
       this.setState({
-        error
+        error,
+        loading: false
       });
     }
   }
 
   DrmSelector() {
-    if(this.state.loading) { return null; }
-
     const options = this.state.availableDRMs.map(drm => [Format(drm), drm]);
 
     return (
@@ -100,8 +98,6 @@ class Controls extends React.Component {
   }
 
   TypeSelector() {
-    if(this.state.loading) { return null; }
-
     const options = Object.keys(this.state.video.playoutOptions)
       .map(type => [Format(type), type]);
 
@@ -118,9 +114,12 @@ class Controls extends React.Component {
     );
   }
 
-  VersionHashEntry() {
+  ContentSelection() {
+    if(this.state.loading) { return null; }
+
     return (
-      <div className="version-hash-entry">
+      <div className="control-block content-selection">
+        <h4>Load Content</h4>
         <input
           type="text"
           placeholder="Version Hash"
@@ -146,7 +145,7 @@ class Controls extends React.Component {
   }
 
   Video() {
-    if(this.state.loading) { return null; }
+    if(this.state.loading || this.state.error) { return null; }
 
     return (
       <Video
@@ -161,20 +160,28 @@ class Controls extends React.Component {
     );
   }
 
+  StreamOptions() {
+    if(this.state.loading || this.state.error) { return; }
+
+    return (
+      <div className="control-block">
+        <h4>Stream Options</h4>
+        { this.DrmSelector() }
+        { this.TypeSelector() }
+      </div>
+    );
+  }
+
   render() {
     return (
       <div className="controls-container">
-        { this.VersionHashEntry() }
-        { this.ErrorMessage() }
-        { this.Video() }
         <LoadingElement loading={this.state.loading && !this.state.error} fullPage={true}>
+          { this.ErrorMessage() }
           <div className="controls">
-            <div className="control-block">
-              <h4>Stream Options</h4>
-              { this.DrmSelector() }
-              { this.TypeSelector() }
-            </div>
+            { this.ContentSelection() }
+            { this.StreamOptions() }
           </div>
+          { this.Video() }
         </LoadingElement>
       </div>
     );
