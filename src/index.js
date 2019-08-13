@@ -2,7 +2,7 @@ import "./static/stylesheets/app.scss";
 
 import React from "react";
 import {render} from "react-dom";
-import {ImageIcon, LoadingElement} from "elv-components-js";
+import {IconLink, ImageIcon, LoadingElement} from "elv-components-js";
 import Controls from "./components/Controls";
 import {InitializeClient} from "./Utils";
 
@@ -50,7 +50,7 @@ class App extends React.Component {
     return (
       <div className="app-container">
         <header>
-          <ImageIcon className="logo" icon={Logo}/>
+          <IconLink href="https://eluv.io" className="logo" icon={Logo} label="Eluvio"/>
           <h1>
             Video Streaming Sample
           </h1>

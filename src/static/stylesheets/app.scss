@@ -30,8 +30,6 @@ header {
   padding: $elv-spacing-xs $elv-spacing-s;
 
   .logo {
-    height: 35px;
-    padding: $elv-spacing-xxs 0;
     width: auto;
   }
 
@@ -110,7 +108,7 @@ footer {
     padding: $elv-spacing-s $elv-spacing-m 0;
 
     &.content-selection {
-      flex-grow: 1000;
+      flex-grow: 5;
     }
 
     & > * {
@@ -118,7 +116,7 @@ footer {
     }
 
     button {
-      font-size: 1rem;
+      font-size: 0.9rem;
     }
   }
 
@@ -137,7 +135,12 @@ footer {
   .selection {
     align-items: center;
     display: flex;
+    margin-bottom: $elv-spacing-xs;
     width: 100%;
+
+    &:last-child {
+      margin: 0;
+    }
 
     label {
       font-size: 1rem;
@@ -170,7 +173,7 @@ footer {
   justify-content: center;
 
   h1 {
-    font-size: 1.3rem;
+    font-size: 1.5rem;
     font-weight: normal;
     margin: $elv-spacing-s 0;
     text-align: center;

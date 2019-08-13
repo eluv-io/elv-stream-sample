@@ -154,8 +154,10 @@ class Controls extends React.Component {
     return (
       <div className="control-block">
         <h4>Stream Options</h4>
-        { this.DrmSelector() }
-        { this.TypeSelector() }
+        <div className="selection-container">
+          { this.DrmSelector() }
+          { this.TypeSelector() }
+        </div>
       </div>
     );
   }
@@ -208,8 +210,10 @@ class Controls extends React.Component {
     return (
       <div className="control-block">
         <h4>Graph Options</h4>
-        { this.SampleWindow() }
-        { this.SamplePeriod() }
+        <div className="selection-container">
+          { this.SampleWindow() }
+          { this.SamplePeriod() }
+        </div>
       </div>
     );
   }
