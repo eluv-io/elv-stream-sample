@@ -16,7 +16,7 @@ class Graph extends React.Component {
 
     const visibleData = this.props.data.filter(({x}) => x >= xMax - (2 * this.props.windowSize));
 
-    let yMax = Math.max(...(visibleData.map(point => point.y)), 0);
+    let yMax = visibleData.length > 0 ? Math.max(...(visibleData.map(point => point.y))) : 1;
     yMax *= 1.1;
 
     return (

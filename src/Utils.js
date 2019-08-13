@@ -49,13 +49,13 @@ export const AvailableDRMs = async () => {
 };
 
 export const LoadVideo = async ({client, versionHash, drm}) => {
-  const { objectId } = client.utils.DecodeVersionHash(versionHash);
-
-  if(objectId.length !== 32) {
-    throw new Error("Invalid version hash");
-  }
-
   try {
+    const { objectId } = client.utils.DecodeVersionHash(versionHash);
+
+    if(objectId.length !== 32) {
+      throw new Error("Failed to load content: Invalid version hash");
+    }
+
     const metadata = await client.ContentObjectMetadata({versionHash});
 
     const playoutOptions = await client.PlayoutOptions({

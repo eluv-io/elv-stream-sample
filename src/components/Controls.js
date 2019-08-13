@@ -24,11 +24,13 @@ class Controls extends React.Component {
 
     this.state = {
       loading: true,
-      versionHash: "hq__5DS92kGeb5v3ktMLaDBNxFnAjshM92APZ98SydiczP7vPguFuyJ4Pgz3rL7EZt1TD1Ks5jHW96",
+      versionHash: "hq__49wKscUYfsVgxymBRdKPmTq3DMqZFqhfuZzfnWcLnk56tSXUQjHkbGuiD8BEmCBLykGnmNf87t",
       videoType: "hls",
       video: undefined,
       availableDRMs: [],
-      drm: "aes-128"
+      drm: "aes-128",
+      sampleWindow: 20,
+      samplePeriod: 250
     };
 
     this.LoadVideo = this.LoadVideo.bind(this);
@@ -74,6 +76,18 @@ class Controls extends React.Component {
       });
     }
   }
+
+  ErrorMessage() {
+    if(!this.state.error) { return null; }
+
+    return (
+      <div className="error-message">
+        {this.state.error.message}
+      </div>
+    );
+  }
+
+  /* Stream Options */
 
   DrmSelector() {
     const options = this.state.availableDRMs.map(drm => [Format(drm), drm]);
@@ -134,12 +148,68 @@ class Controls extends React.Component {
     );
   }
 
-  ErrorMessage() {
-    if(!this.state.error) { return null; }
+  StreamOptions() {
+    if(this.state.loading || this.state.error) { return; }
 
     return (
-      <div className="error-message">
-        {this.state.error.message}
+      <div className="control-block">
+        <h4>Stream Options</h4>
+        { this.DrmSelector() }
+        { this.TypeSelector() }
+      </div>
+    );
+  }
+
+  /* Graph Options */
+
+  SampleWindow() {
+    const options = [
+      ["Small", 20],
+      ["Medium", 60],
+      ["Large", 300]
+    ];
+
+    return (
+      <div className="selection">
+        <label htmlFor="protocol">Window</label>
+        <Tabs
+          options={options}
+          selected={this.state.sampleWindow}
+          onChange={value => this.setState({sampleWindow: value})}
+          className="secondary"
+        />
+      </div>
+    );
+  }
+
+  SamplePeriod() {
+    const options = [
+      ["Fast", 250],
+      ["Medium", 500],
+      ["Slow", 1000]
+    ];
+
+    return (
+      <div className="selection">
+        <label htmlFor="protocol">Period</label>
+        <Tabs
+          options={options}
+          selected={this.state.samplePeriod}
+          onChange={value => this.setState({samplePeriod: value})}
+          className="secondary"
+        />
+      </div>
+    );
+  }
+
+  GraphOptions() {
+    if(this.state.loading || this.state.error) { return; }
+
+    return (
+      <div className="control-block">
+        <h4>Graph Options</h4>
+        { this.SampleWindow() }
+        { this.SamplePeriod() }
       </div>
     );
   }
@@ -156,19 +226,9 @@ class Controls extends React.Component {
         playoutOptions={this.state.video.playoutOptions[this.state.videoType]}
         posterUrl={this.state.video.posterUrl}
         videoType={this.state.videoType}
+        sampleWindow={this.state.sampleWindow}
+        samplePeriod={this.state.samplePeriod}
       />
-    );
-  }
-
-  StreamOptions() {
-    if(this.state.loading || this.state.error) { return; }
-
-    return (
-      <div className="control-block">
-        <h4>Stream Options</h4>
-        { this.DrmSelector() }
-        { this.TypeSelector() }
-      </div>
     );
   }
 
@@ -177,11 +237,12 @@ class Controls extends React.Component {
       <div className="controls-container">
         <LoadingElement loading={this.state.loading && !this.state.error} fullPage={true}>
           { this.ErrorMessage() }
+          { this.Video() }
           <div className="controls">
             { this.ContentSelection() }
             { this.StreamOptions() }
+            { this.GraphOptions() }
           </div>
-          { this.Video() }
         </LoadingElement>
       </div>
     );

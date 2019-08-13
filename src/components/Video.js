@@ -13,10 +13,11 @@ class Video extends React.Component {
 
     this.state = {
       bufferData: [],
-      bitrateData: [],
       latencyData: [],
-      graphWindowSize: 20,
-      sampleInterval: 250
+      bitrateData: [],
+      initialTime: undefined,
+      player: undefined,
+      video: undefined
     };
 
     this.metricsInterval = null;
@@ -25,53 +26,41 @@ class Video extends React.Component {
   }
 
   componentWillUnmount(){
-    clearInterval(this.metricsInterval);
-    this.metricsInterval = undefined;
+    this.StopSampling();
+  }
+
+  componentDidUpdate(prevProps) {
+    // If sample period has changed, restart interval
+    if(prevProps.samplePeriod !== this.props.samplePeriod) {
+      this.StopSampling();
+      this.StartSampling();
+    }
   }
 
   InitializeVideo(video) {
     if(!video) { return; }
 
     let playoutUrl = this.props.playoutOptions.playoutUrl;
-    if(this.props.videoType === "hls") {
-      this.InitializeHLS(video, playoutUrl);
-    } else {
-      this.InitializeDash(video, playoutUrl);
-    }
+
+    const player = this.props.videoType === "hls" ?
+      this.InitializeHLS(video, playoutUrl) : this.InitializeDash(video, playoutUrl);
+
+    this.setState({
+      initialTime: performance.now(),
+      player,
+      video
+    }, this.StartSampling);
   }
 
   InitializeHLS(video, playoutUrl) {
     playoutUrl = URI(playoutUrl).addSearch("player_profile", "hls-js").toString();
 
     const player = new HLSPlayer();
-    const initialTime = performance.now();
 
     player.loadSource(playoutUrl);
     player.attachMedia(video);
 
-    this.metricsInterval = setInterval(() => {
-      const currentTime = (performance.now() - initialTime) / 1000;
-      const stats = player.streamController.stats;
-
-      if(!stats) { return; }
-
-      const bufferInfo = BufferHelper.bufferInfo(video, video.currentTime, 0);
-
-      this.setState({
-        bitrateData: this.state.bitrateData.concat({
-          x: currentTime,
-          y: (Math.round((8 * stats.total) / (stats.tbuffered - stats.trequest)) / 10) || 0
-        }),
-        latencyData: this.state.latencyData.concat({
-          x: currentTime,
-          y: (stats.tfirst - stats.trequest) / 1000
-        }),
-        bufferData: this.state.bufferData.concat({
-          x: currentTime,
-          y: (bufferInfo.len) || 0
-        })
-      });
-    }, this.state.sampleInterval);
+    return player;
   }
 
   InitializeDash(video, playoutUrl) {
@@ -97,66 +86,117 @@ class Video extends React.Component {
       () => player.setTextTrack(-1)
     );
 
-    const initialTime = performance.now();
-
-    this.metricsInterval = setInterval(() => {
-      let dashMetrics = player.getDashMetrics();
-      let dashAdapter = player.getDashAdapter();
-
-      let bufferLevel, bitrate, repSwitch, periodIdx;
-
-      if(dashMetrics && this.streamInfo) {
-        periodIdx = this.streamInfo.index;
-        repSwitch = dashMetrics.getCurrentRepresentationSwitch("video", true);
-        bufferLevel = dashMetrics.getCurrentBufferLevel("video", true);
-        bitrate = repSwitch ? Math.round(dashAdapter.getBandwidthForRepresentation(repSwitch.to, periodIdx) / 1000) : 0;
-      }
-
-      const requests = dashMetrics.getHttpRequests("video");
-      const requestWindow =
-        requests
-          .slice(-20)
-          .filter(req =>
-            req.responsecode >= 200 &&
-            req.responsecode < 300 &&
-            req.type === "MediaSegment" &&
-            req._stream === "video" &&
-            !!req._mediaduration
-          )
-          .slice(-2);
-
-      let latency = 0;
-      if(requestWindow.length > 0) {
-        const latencyTimes = requestWindow.map(req =>
-          Math.abs(req.tresponse.getTime() - req.trequest.getTime()) / 1000
-        );
-
-        latency = latencyTimes.reduce((l, r) => l + r) / latencyTimes.length;
-      }
-
-      const currentTime = (performance.now() - initialTime) / 1000;
-
-      this.setState({
-        bufferData: this.state.bufferData.concat({
-          x: currentTime,
-          y: bufferLevel,
-        }),
-        latencyData: this.state.latencyData.concat({
-          x: currentTime,
-          y: latency
-        }),
-        bitrateData: this.state.bitrateData.concat({
-          x: currentTime,
-          y: bitrate
-        })
-      });
-    }, this.state.sampleInterval);
-
-    player.on(DashJS.MediaPlayer.events.PERIOD_SWITCH_COMPLETED, (e) => {
-      this.streamInfo = e.toStreamInfo;
-    });
-
     player.initialize(video, playoutUrl);
+
+    return player;
+  }
+
+  // Discard old samples that are no longer visible
+  TrimSamples() {
+    // Max visible samples is 300 seconds times 4 samples per second
+    const maxSamples = 300 * 4;
+
+    // Trim after threshold is reached to avoid trimming after every sample
+    const trimThreshold = maxSamples * 1.1;
+
+    // Earliest visible time is 300 seconds ago
+    const minVisibleTime =  ((performance.now() - this.state.initialTime) / 1000) - 300;
+
+    const trim = data => data.slice(-maxSamples).filter(({x}) => x > minVisibleTime);
+
+    if(this.state.bufferData.length > trimThreshold) {
+      this.setState({
+        bufferData: trim(this.state.bufferData)
+      });
+    }
+
+    if(this.state.latencyData.length > trimThreshold) {
+      this.setState({
+        latencyData: trim(this.state.latencyData)
+      });
+    }
+
+    if(this.state.bitrateData.length > trimThreshold) {
+      this.setState({
+        bitrateData: trim(this.state.bitrateData)
+      });
+    }
+  }
+
+  StopSampling() {
+    clearInterval(this.metricsInterval);
+    this.metricsInterval = undefined;
+  }
+
+  StartSampling() {
+    if(this.props.videoType === "hls") {
+      this.metricsInterval = setInterval(() => {
+        const currentTime = (performance.now() - this.state.initialTime) / 1000;
+        const stats = this.state.player.streamController.stats;
+
+        if(!stats) { return; }
+
+        const bufferInfo = BufferHelper.bufferInfo(this.state.video, this.state.video.currentTime, 0);
+        const bitrate = this.state.player.currentLevel >= 0 ? this.state.player.levels[this.state.player.currentLevel].bitrate : 0;
+
+        this.setState({
+          bufferData: this.state.bufferData.concat({
+            x: currentTime,
+            y: (bufferInfo.len) || 0
+          }),
+          latencyData: this.state.latencyData.concat({
+            x: currentTime,
+            y: stats.tfirst - stats.trequest
+          }),
+          bitrateData: this.state.bitrateData.concat({
+            x: currentTime,
+            y: bitrate / 1000
+          }),
+        });
+
+        this.TrimSamples();
+      }, this.props.samplePeriod);
+    } else {
+      this.metricsInterval = setInterval(() => {
+        const currentTime = (performance.now() - this.state.initialTime) / 1000;
+        const dashMetrics = this.state.player.getDashMetrics();
+
+        const bitrateIndex = this.state.player.getQualityFor("video");
+        const bitrate = this.state.player.getBitrateInfoListFor("video")[bitrateIndex].bitrate;
+        const bufferLevel = dashMetrics.getCurrentBufferLevel("video", true);
+
+        const requests = dashMetrics.getHttpRequests("video");
+        const lastRequest =
+          requests
+            .slice(-20)
+            .filter(req =>
+              req.responsecode >= 200 &&
+              req.responsecode < 300 &&
+              req.type === "MediaSegment" &&
+              req._stream === "video" &&
+              !!req._mediaduration
+            ).pop();
+
+        const latency = lastRequest ? lastRequest.tresponse.getTime() - lastRequest.trequest.getTime() : 0;
+
+        this.setState({
+          bufferData: this.state.bufferData.concat({
+            x: currentTime,
+            y: bufferLevel,
+          }),
+          latencyData: this.state.latencyData.concat({
+            x: currentTime,
+            y: latency
+          }),
+          bitrateData: this.state.bitrateData.concat({
+            x: currentTime,
+            y: bitrate / 1000
+          })
+        });
+
+        this.TrimSamples();
+      }, this.props.samplePeriod);
+    }
   }
 
   render() {
@@ -177,19 +217,19 @@ class Video extends React.Component {
             name="Buffer Level (s)"
             data={this.state.bufferData}
             color={"#00589d"}
-            windowSize={this.state.graphWindowSize}
+            windowSize={this.props.sampleWindow}
           />
           <Graph
             name="Latency (ms)"
             data={this.state.latencyData}
             color={"#329d61"}
-            windowSize={this.state.graphWindowSize}
+            windowSize={this.props.sampleWindow}
           />
           <Graph
             name="Bitrate (kbps)"
             data={this.state.bitrateData}
             color={"#ff7900"}
-            windowSize={this.state.graphWindowSize}
+            windowSize={this.props.sampleWindow}
           />
         </div>
       </div>
@@ -204,6 +244,8 @@ Video.propTypes = {
   playoutOptions: PropTypes.object.isRequired,
   posterUrl: PropTypes.string,
   videoType: PropTypes.string.isRequired,
+  sampleWindow: PropTypes.number.isRequired,
+  samplePeriod: PropTypes.number.isRequired
 };
 
 export default Video;
