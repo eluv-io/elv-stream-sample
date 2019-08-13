@@ -67,26 +67,6 @@ footer {
   }
 }
 
-.version-hash-entry {
-  align-items: center;
-  display: flex;
-  margin-top: $elv-spacing-m;
-
-  input {
-    color: $elv-color-text-light;
-    flex-grow: 1;
-    font-size: 18px;
-    height: 40px;
-    margin-right: $elv-spacing-xs;
-    padding-left: $elv-spacing-xs;
-  }
-
-  .-elv-button {
-    height: 40px;
-    width: 175px;
-  }
-}
-
 .error-message {
   color: $elv-color-red;
   font-size: 16px;
@@ -107,11 +87,25 @@ footer {
   }
 
   .control-block {
+    align-items: center;
     border: 1px solid $elv-color-lightgray;
     border-radius: 3px;
-    display: inline-block;
-    margin: 0 $elv-spacing-xs $elv-spacing-xs 0;
+    display: flex;
+    flex-direction: column;
+    margin: 0 $elv-spacing-s $elv-spacing-xs 0;
     padding: $elv-spacing-s $elv-spacing-m 0;
+
+    &:last-child {
+      margin-right: 0;
+    }
+
+    &.content-selection {
+      flex-grow: 1;
+    }
+
+    & > * {
+      margin-bottom: $elv-spacing-s;
+    }
   }
 
   h4 {
@@ -120,10 +114,16 @@ footer {
     text-align: center;
   }
 
+  input {
+    font-size: 14px;
+    height: 2.2rem;
+    width: 100%;
+  }
+
   .selection {
     align-items: center;
     display: flex;
-    margin: $elv-spacing-s 0;
+    width: 100%;
 
     label {
       width: 100px;
@@ -164,7 +164,27 @@ footer {
     background-color: $elv-color-bg-black;
     cursor: pointer;
     height: 100%;
-    max-height: 50vh;
+    max-height: 40vh;
     width: 100%;
+  }
+}
+
+.graphs-container {
+  display: flex;
+  justify-content: space-between;
+  margin-top: $elv-spacing-s;
+
+  .graph-container {
+    flex-grow: 1;
+    margin: 0;
+    padding: 0;
+
+    h3 {
+      color: $elv-color-text-light;
+      font-size: 18px;
+      padding-bottom: $elv-spacing-xs;
+      padding-left: 50px;
+      text-align: center;
+    }
   }
 }
