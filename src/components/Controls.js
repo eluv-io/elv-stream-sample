@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import {LoadVideo, AvailableDRMs} from "../Utils";
+import {LoadVideo} from "../Utils";
 import Video from "./Video";
 import {onEnterPressed} from "elv-components-js";
 import {Action, LoadingElement, Tabs} from "elv-components-js";
@@ -24,26 +24,24 @@ class Controls extends React.Component {
 
     this.state = {
       loading: true,
-      versionHash: "hq__AYz8bPvMBicMzo9jaRScUSEf7DdMh8bxix9A68GkN24cWVBurFxAhLPp9moDhfAHkKNPi6yDiB",
-      videoType: "hls",
-      video: undefined,
+      showControls: false,
+      versionHash: "hq__EAt4BVedkShkEJxZX7CTiFvhdg7zpwZdaS2cQua9u4bwehBCyeKeFZT5MDYwUMRDMES94Z44M1",
       availableDRMs: [],
+      availableProtocols: ["hls", "dash"],
+      protocol: "hls",
+      video: undefined,
       drm: "aes-128",
-      sampleWindow: 20,
-      samplePeriod: 250
+      graphScale: 20
     };
 
     this.LoadVideo = this.LoadVideo.bind(this);
   }
 
   async componentDidMount() {
-    const availableDRMs = await AvailableDRMs();
-    this.setState({availableDRMs});
-
-    await this.LoadVideo();
+    await this.LoadVideo(this.state.protocol);
   }
 
-  async LoadVideo() {
+  async LoadVideo(protocol) {
     if(!this.state.versionHash) { return; }
 
     try {
@@ -53,15 +51,17 @@ class Controls extends React.Component {
         error: undefined
       });
 
-      const {metadata, playoutOptions, posterUrl, authToken} = await LoadVideo({
+      const {metadata, playoutOptions, availableDRMs, posterUrl, authToken} = await LoadVideo({
         client: this.props.client,
         versionHash: this.state.versionHash,
-        drm: this.state.drm
+        protocol
       });
 
       this.setState({
         loading: false,
-        videoType: Object.keys(playoutOptions)[0],
+        availableDRMs,
+        protocol,
+        drm: availableDRMs[0],
         video: {
           metadata,
           playoutOptions,
@@ -89,7 +89,23 @@ class Controls extends React.Component {
 
   /* Stream Options */
 
-  DrmSelector() {
+  ProtocolSelection() {
+    const options = this.state.availableProtocols.map(type => [Format(type), type]);
+
+    return (
+      <div className="selection">
+        <label htmlFor="protocol">Protocol</label>
+        <Tabs
+          options={options}
+          selected={this.state.protocol}
+          onChange={protocol => this.LoadVideo(protocol)}
+          className="secondary"
+        />
+      </div>
+    );
+  }
+
+  DrmSelection() {
     const options = this.state.availableDRMs.map(drm => [Format(drm), drm]);
 
     return (
@@ -98,30 +114,7 @@ class Controls extends React.Component {
         <Tabs
           options={options}
           selected={this.state.drm}
-          onChange={drm => {
-            if(this.state.drm === drm) { return; }
-
-            this.setState({
-              drm
-            }, this.LoadVideo);
-          }}
-          className="secondary"
-        />
-      </div>
-    );
-  }
-
-  TypeSelector() {
-    const options = Object.keys(this.state.video.playoutOptions)
-      .map(type => [Format(type), type]);
-
-    return (
-      <div className="selection">
-        <label htmlFor="protocol">Protocol</label>
-        <Tabs
-          options={options}
-          selected={this.state.videoType}
-          onChange={type => this.setState({videoType: type})}
+          onChange={drm => this.setState({drm})}
           className="secondary"
         />
       </div>
@@ -139,11 +132,31 @@ class Controls extends React.Component {
           placeholder="Version Hash"
           value={this.state.versionHash}
           onChange={(event) => this.setState({versionHash: event.target.value})}
-          onKeyPress={onEnterPressed(() => this.LoadVideo())}
+          onKeyPress={onEnterPressed(() => this.LoadVideo(this.state.protocol))}
         />
-        <Action onClick={this.LoadVideo}>
-          Load Content
+        <Action onClick={() => this.LoadVideo(this.state.protocol)}>
+          Load
         </Action>
+      </div>
+    );
+  }
+
+  GraphScale() {
+    const options = [
+      ["20s", 20],
+      ["60s", 60],
+      ["300s", 300]
+    ];
+
+    return (
+      <div className="selection">
+        <label htmlFor="protocol">Graph Scale</label>
+        <Tabs
+          options={options}
+          selected={this.state.graphScale}
+          onChange={value => this.setState({graphScale: value})}
+          className="secondary"
+        />
       </div>
     );
   }
@@ -155,66 +168,31 @@ class Controls extends React.Component {
       <div className="control-block">
         <h4>Stream Options</h4>
         <div className="selection-container">
-          { this.DrmSelector() }
-          { this.TypeSelector() }
+          { this.ProtocolSelection() }
+          { this.DrmSelection() }
+          { this.GraphScale() }
         </div>
       </div>
     );
   }
 
-  /* Graph Options */
-
-  SampleWindow() {
-    const options = [
-      ["Small", 20],
-      ["Medium", 60],
-      ["Large", 300]
-    ];
-
-    return (
-      <div className="selection">
-        <label htmlFor="protocol">Window</label>
-        <Tabs
-          options={options}
-          selected={this.state.sampleWindow}
-          onChange={value => this.setState({sampleWindow: value})}
-          className="secondary"
-        />
+  ControlsSection() {
+    const toggleButton = (
+      <div
+        onClick={() => this.setState({showControls: !this.state.showControls})}
+        className="toggle-controls"
+      >
+        {this.state.showControls ? "▲ Hide Controls" : "▼ Show Controls"}
       </div>
     );
-  }
-
-  SamplePeriod() {
-    const options = [
-      ["Fast", 250],
-      ["Medium", 500],
-      ["Slow", 1000]
-    ];
 
     return (
-      <div className="selection">
-        <label htmlFor="protocol">Period</label>
-        <Tabs
-          options={options}
-          selected={this.state.samplePeriod}
-          onChange={value => this.setState({samplePeriod: value})}
-          className="secondary"
-        />
-      </div>
-    );
-  }
-
-  GraphOptions() {
-    if(this.state.loading || this.state.error) { return; }
-
-    return (
-      <div className="control-block">
-        <h4>Graph Options</h4>
-        <div className="selection-container">
-          { this.SampleWindow() }
-          { this.SamplePeriod() }
+      <React.Fragment>
+        { toggleButton }
+        <div className={`controls ${this.state.showControls ? "" : "hidden"}`}>
+          { this.StreamOptions() }
         </div>
-      </div>
+      </React.Fragment>
     );
   }
 
@@ -223,15 +201,15 @@ class Controls extends React.Component {
 
     return (
       <Video
-        key={`video-${this.state.videoType}`}
+        key={`video-${this.state.protocol}-${this.state.drm}`}
         authToken={this.state.video.authToken}
         drm={this.state.drm}
         metadata={this.state.video.metadata}
-        playoutOptions={this.state.video.playoutOptions[this.state.videoType]}
+        playoutOptions={this.state.video.playoutOptions[this.state.protocol]}
         posterUrl={this.state.video.posterUrl}
-        videoType={this.state.videoType}
-        sampleWindow={this.state.sampleWindow}
-        samplePeriod={this.state.samplePeriod}
+        protocol={this.state.protocol}
+        sampleWindow={this.state.graphScale}
+        samplePeriod={250}
       />
     );
   }
@@ -241,12 +219,9 @@ class Controls extends React.Component {
       <div className="controls-container">
         <LoadingElement loading={this.state.loading && !this.state.error} fullPage={true}>
           { this.ErrorMessage() }
-          <div className="controls">
-            { this.ContentSelection() }
-            { this.StreamOptions() }
-            { this.GraphOptions() }
-          </div>
+          { this.ContentSelection() }
           { this.Video() }
+          { this.ControlsSection() }
         </LoadingElement>
       </div>
     );

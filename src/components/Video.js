@@ -2,7 +2,6 @@ import React from "react";
 import PropTypes from "prop-types";
 import HLSPlayer from "../../node_modules/hls.js/dist/hls";
 import {BufferHelper} from "../../node_modules/hls.js/src/utils/buffer-helper";
-
 import DashJS from "dashjs";
 import URI from "urijs";
 import Graph from "./Graph";
@@ -20,9 +19,9 @@ class Video extends React.Component {
       video: undefined
     };
 
-    this.metricsInterval = null;
-
     this.InitializeVideo = this.InitializeVideo.bind(this);
+    this.StartSampling = this.StartSampling.bind(this);
+    this.StopSampling = this.StopSampling.bind(this);
   }
 
   componentWillUnmount(){
@@ -42,14 +41,18 @@ class Video extends React.Component {
 
     let playoutUrl = this.props.playoutOptions.playoutUrl;
 
-    const player = this.props.videoType === "hls" ?
-      this.InitializeHLS(video, playoutUrl) : this.InitializeDash(video, playoutUrl);
+    const player = this.props.protocol === "hls" ?
+      this.InitializeHLS(video, playoutUrl) :
+      this.InitializeDash(video, playoutUrl);
 
     this.setState({
       initialTime: performance.now(),
       player,
       video
     }, this.StartSampling);
+
+    // Stop sampling when video has ended
+    video.addEventListener("ended", this.StopSampling);
   }
 
   InitializeHLS(video, playoutUrl) {
@@ -129,7 +132,7 @@ class Video extends React.Component {
   }
 
   StartSampling() {
-    if(this.props.videoType === "hls") {
+    if(this.props.protocol === "hls") {
       this.metricsInterval = setInterval(() => {
         const currentTime = (performance.now() - this.state.initialTime) / 1000;
         const stats = this.state.player.streamController.stats;
@@ -243,7 +246,7 @@ Video.propTypes = {
   metadata: PropTypes.object,
   playoutOptions: PropTypes.object.isRequired,
   posterUrl: PropTypes.string,
-  videoType: PropTypes.string.isRequired,
+  protocol: PropTypes.string.isRequired,
   sampleWindow: PropTypes.number.isRequired,
   samplePeriod: PropTypes.number.isRequired
 };

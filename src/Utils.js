@@ -48,7 +48,7 @@ export const AvailableDRMs = async () => {
   return availableDRMs;
 };
 
-export const LoadVideo = async ({client, versionHash, drm}) => {
+export const LoadVideo = async ({client, versionHash, protocol}) => {
   try {
     const { objectId } = client.utils.DecodeVersionHash(versionHash);
 
@@ -56,9 +56,11 @@ export const LoadVideo = async ({client, versionHash, drm}) => {
 
     const playoutOptions = await client.PlayoutOptions({
       versionHash,
-      protocols: ["dash", "hls"],
-      drms: drm ? [drm] : []
+      protocols: [protocol],
+      drms: await AvailableDRMs()
     });
+
+    const availableDRMs = Object.keys(playoutOptions[protocol].drms);
 
     const posterUrl = await client.Rep({
       versionHash,
@@ -71,6 +73,7 @@ export const LoadVideo = async ({client, versionHash, drm}) => {
     return {
       metadata,
       playoutOptions,
+      availableDRMs,
       posterUrl,
       authToken
     };

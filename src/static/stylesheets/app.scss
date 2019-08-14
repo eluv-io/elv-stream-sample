@@ -90,46 +90,48 @@ footer {
   height: 100%;
   width: 80%;
 
-  .controls {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin-top: $elv-spacing-s;
-  }
-
   .control-block {
     align-items: center;
     border: 1px solid $elv-color-lightgray;
     border-radius: 3px;
     display: flex;
     flex-direction: column;
-    flex-grow: 1;
+    justify-content: center;
     margin: 0 $elv-spacing-xxs $elv-spacing-xs;
     padding: $elv-spacing-s $elv-spacing-m 0;
-
-    &.content-selection {
-      flex-grow: 5;
-    }
+    width: 30rem;
 
     & > * {
       margin-bottom: $elv-spacing-s;
-    }
-
-    button {
-      font-size: 0.9rem;
     }
   }
 
   h4 {
     font-size: 1rem;
-    margin: 0;
+    margin: 0 0 $elv-spacing-s;
     text-align: center;
+    width: 100%;
   }
 
-  input {
-    font-size: 0.9rem;
-    height: 2.2rem;
-    width: 100%;
+  .content-selection {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin: $elv-spacing-s auto $elv-spacing-xs;
+    padding-bottom: $elv-spacing-xxs;
+    width: 50%;
+
+    input {
+      flex-grow: 1;
+      font-size: 0.9rem;
+      height: 2.2rem;
+      padding: $elv-spacing-xs;
+    }
+
+    button {
+      font-size: 0.9rem;
+      height: 2.2rem;
+      margin-left: $elv-spacing-xs;
+    }
   }
 
   .selection {
@@ -144,7 +146,7 @@ footer {
 
     label {
       font-size: 1rem;
-      width: 6rem;
+      width: 7rem;
     }
 
     .-elv-tab-container {
@@ -163,6 +165,20 @@ footer {
           color: $elv-color-text-white;
         }
       }
+    }
+  }
+
+  .toggle-controls {
+    @include elv-no-select;
+    color: $elv-color-text-light;
+    cursor: pointer;
+  }
+
+  .controls {
+    margin-top: $elv-spacing-s;
+
+    &.hidden {
+      display: none;
     }
   }
 }
