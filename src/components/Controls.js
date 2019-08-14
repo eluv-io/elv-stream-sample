@@ -18,6 +18,10 @@ const Format = (string) => {
   return string.charAt(0).toUpperCase() + string.slice(1);
 };
 
+const availableContent = {
+  "Stargate Origins Trailer (4K)": "hq__EAt4BVedkShkEJxZX7CTiFvhdg7zpwZdaS2cQua9u4bwehBCyeKeFZT5MDYwUMRDMES94Z44M1"
+};
+
 class Controls extends React.Component {
   constructor(props) {
     super(props);
@@ -25,7 +29,7 @@ class Controls extends React.Component {
     this.state = {
       loading: true,
       showControls: false,
-      versionHash: "hq__EAt4BVedkShkEJxZX7CTiFvhdg7zpwZdaS2cQua9u4bwehBCyeKeFZT5MDYwUMRDMES94Z44M1",
+      versionHash: Object.values(availableContent)[0],
       availableDRMs: [],
       availableProtocols: ["hls", "dash"],
       protocol: "hls",
@@ -122,11 +126,23 @@ class Controls extends React.Component {
   }
 
   ContentSelection() {
-    if(this.state.loading) { return null; }
+    const availableContentOptions = Object.keys(availableContent)
+      .map(title => [title, availableContent[title]]);
 
     return (
       <div className="control-block content-selection">
-        <h4>Load Content</h4>
+        <Tabs
+          options={availableContentOptions}
+          selected={this.state.versionHash}
+          onChange={versionHash => {
+            this.setState({
+              versionHash
+            }, () => this.LoadVideo(this.state.protocol));
+          }}
+          className="available-content secondary"
+          tabClassName="available-content-selection"
+        />
+
         <input
           type="text"
           placeholder="Version Hash"
@@ -177,6 +193,8 @@ class Controls extends React.Component {
   }
 
   ControlsSection() {
+    if(this.state.error) { return null; }
+
     const toggleButton = (
       <div
         onClick={() => this.setState({showControls: !this.state.showControls})}
@@ -217,9 +235,9 @@ class Controls extends React.Component {
   render() {
     return (
       <div className="controls-container">
+        { this.ContentSelection() }
         <LoadingElement loading={this.state.loading && !this.state.error} fullPage={true}>
           { this.ErrorMessage() }
-          { this.ContentSelection() }
           { this.Video() }
           { this.ControlsSection() }
         </LoadingElement>

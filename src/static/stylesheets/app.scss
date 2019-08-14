@@ -120,6 +120,26 @@ footer {
     padding-bottom: $elv-spacing-xxs;
     width: 50%;
 
+    .available-content {
+      flex-direction: column;
+      margin-bottom: $elv-spacing-s;
+      width: 100%;
+    }
+
+    .available-content-selection {
+      flex-grow: 1;
+      font-size: 1rem;
+      width: 100%;
+
+      &.-elv-tab {
+        border: 1px solid $elv-color-lightgray;
+
+        &:not(:last-child) {
+          border-bottom: 0;
+        }
+      }
+    }
+
     input {
       flex-grow: 1;
       font-size: 0.9rem;
@@ -148,23 +168,28 @@ footer {
       font-size: 1rem;
       width: 7rem;
     }
+  }
 
-    .-elv-tab-container {
-      margin: 0;
-    }
+  .-elv-tab-container {
+    margin: 0;
 
-    .-elv-tab {
-      font-size: 0.9rem;
-      padding: $elv-spacing-xs;
-      text-align: center;
-      width: 6rem;
-
-      &.secondary {
+    &.secondary {
+      .-elv-tab {
         &.selected {
           background: $elv-color-action-primary;
-          color: $elv-color-text-white;
         }
       }
+    }
+  }
+
+  .-elv-tab {
+    font-size: 0.9rem;
+    padding: $elv-spacing-xs;
+    text-align: center;
+    width: 6rem;
+
+    &.selected {
+      color: $elv-color-text-white;
     }
   }
 
