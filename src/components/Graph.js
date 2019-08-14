@@ -23,7 +23,7 @@ class Graph extends React.Component {
       <div className="graph-container">
         <h3>{this.props.name}</h3>
         <VictoryChart
-          height={200}
+          height={300}
           padding={{left: 50, bottom: 50}}
           theme={VictoryTheme.material}
           maxDomain={{x: xMax, y: yMax}}

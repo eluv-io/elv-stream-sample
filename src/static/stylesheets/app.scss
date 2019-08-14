@@ -175,6 +175,8 @@ footer {
 
     &.secondary {
       .-elv-tab {
+        padding: $elv-spacing-xs 0;
+
         &.selected {
           background: $elv-color-action-primary;
         }
@@ -197,6 +199,8 @@ footer {
     @include elv-no-select;
     color: $elv-color-text-light;
     cursor: pointer;
+    padding: $elv-spacing-xs 0;
+    width: 10rem;
   }
 
   .controls {
@@ -228,21 +232,78 @@ footer {
   }
 }
 
-.graphs-container {
+.metrics-container {
   display: flex;
+  height: 300px;
   justify-content: space-between;
-  margin-top: $elv-spacing-s;
+  margin: $elv-spacing-s 0 $elv-spacing-l;
 
   .graph-container {
-    flex-grow: 1;
+    flex-grow: 0;
     margin: 0;
     padding: 0;
+  }
 
-    h3 {
-      color: $elv-color-text-light;
-      font-size: 0.95rem;
-      padding-bottom: $elv-spacing-xs;
-      text-align: center;
+  h3 {
+    color: $elv-color-text-light;
+    font-size: 0.95rem;
+    padding-bottom: $elv-spacing-xs;
+    text-align: center;
+  }
+
+  .segments-container {
+    flex-grow: 1;
+    padding: 0 0 $elv-spacing-l $elv-spacing-l;
+  }
+
+  .segments {
+    border: 1px solid $elv-color-mediumgray;
+    color: $elv-color-text-light;
+    display: grid;
+    font-size: 0.8rem;
+    grid-auto-rows: 2.2rem;
+    grid-template-columns: 5rem 1fr 6rem 6rem 1fr 3fr;
+    height: 100%;
+    margin-top: $elv-spacing-xxs;
+    overflow-y: scroll;
+    width: 100%;
+
+    div {
+      align-items: center;
+      background-color: $elv-color-white;
+      border-top: 1px solid $elv-color-lightgray;
+      display: flex;
+      justify-content: center;
+    }
+
+    .segments-header {
+      border: 0;
+      font-weight: 600;
+    }
+
+    .timing {
+      border-left: 1px solid $elv-color-lightergray;
+      font-size: 0.6rem;
+      justify-content: flex-start;
+
+      .latency,
+      .download {
+        align-items: center;
+        display: flex;
+        height: 50%;
+        justify-content: center;
+        overflow: hidden;
+        text-align: center;
+      }
+
+      .latency {
+        background-color: $elv-color-lightergray;
+      }
+
+      .download {
+        background-color: $elv-color-mediumblue;
+        color: $elv-color-white;
+      }
     }
   }
 }
