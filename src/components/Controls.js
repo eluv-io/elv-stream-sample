@@ -24,7 +24,7 @@ class Controls extends React.Component {
 
     this.state = {
       loading: true,
-      versionHash: "hq__49wKscUYfsVgxymBRdKPmTq3DMqZFqhfuZzfnWcLnk56tSXUQjHkbGuiD8BEmCBLykGnmNf87t",
+      versionHash: "hq__AYz8bPvMBicMzo9jaRScUSEf7DdMh8bxix9A68GkN24cWVBurFxAhLPp9moDhfAHkKNPi6yDiB",
       videoType: "hls",
       video: undefined,
       availableDRMs: [],
@@ -241,12 +241,12 @@ class Controls extends React.Component {
       <div className="controls-container">
         <LoadingElement loading={this.state.loading && !this.state.error} fullPage={true}>
           { this.ErrorMessage() }
-          { this.Video() }
           <div className="controls">
             { this.ContentSelection() }
             { this.StreamOptions() }
             { this.GraphOptions() }
           </div>
+          { this.Video() }
         </LoadingElement>
       </div>
     );
