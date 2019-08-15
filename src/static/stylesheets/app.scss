@@ -44,8 +44,10 @@ header {
 
 main {
   display: flex;
+  flex-direction: column;
   height: 100%;
   justify-content: center;
+  align-items: center;
   margin-bottom: $elv-spacing-l;
   width: 100%;
 }
@@ -121,23 +123,7 @@ footer {
     width: 50%;
 
     .available-content {
-      flex-direction: column;
       margin-bottom: $elv-spacing-s;
-      width: 100%;
-    }
-
-    .available-content-selection {
-      flex-grow: 1;
-      font-size: 1rem;
-      width: 100%;
-
-      &.-elv-tab {
-        border: 1px solid $elv-color-lightgray;
-
-        &:not(:last-child) {
-          border-bottom: 0;
-        }
-      }
     }
 
     input {
@@ -167,31 +153,6 @@ footer {
     label {
       font-size: 1rem;
       width: 7rem;
-    }
-  }
-
-  .-elv-tab-container {
-    margin: 0;
-
-    &.secondary {
-      .-elv-tab {
-        padding: $elv-spacing-xs 0;
-
-        &.selected {
-          background: $elv-color-action-primary;
-        }
-      }
-    }
-  }
-
-  .-elv-tab {
-    font-size: 0.9rem;
-    padding: $elv-spacing-xs;
-    text-align: center;
-    width: 6rem;
-
-    &.selected {
-      color: $elv-color-text-white;
     }
   }
 
@@ -318,6 +279,40 @@ footer {
 
       .download {
         background-color: $elv-color-mediumblue;
+      }
+    }
+  }
+}
+
+.-elv-tab-container {
+  &.-elv-tab-container {
+    margin: 0;
+
+    &.secondary {
+      .-elv-tab {
+        font-size: 0.9rem;
+        padding: $elv-spacing-xs;
+        text-align: center;
+        width: 6rem;
+
+        &.selected {
+          color: $elv-color-text-white;
+          background: $elv-color-action-primary;
+        }
+      }
+    }
+
+    &.vertical-tabs {
+      flex-direction: column;
+      width: 100%;
+
+      .-elv-tab {
+        width: 100%;
+        border: 1px solid $elv-color-lightgray;
+
+        &:not(:last-child) {
+          border-bottom: 0;
+        }
       }
     }
   }

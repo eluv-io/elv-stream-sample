@@ -10,7 +10,7 @@ module.exports = {
   entry: "./src/index.js",
   target: "web",
   output: {
-    path: Path.resolve(__dirname, "dist"),
+    path: Path.resolve(__dirname, "dist", "main"),
     filename: "index.js",
     chunkFilename: "[name].bundle.js"
   },
@@ -48,10 +48,16 @@ module.exports = {
   mode: "development",
   devtool: "eval-source-map",
   plugins: [
-    new CopyWebpackPlugin([{
-      from: Path.join(__dirname, "configuration.js"),
-      to: Path.join(__dirname, "dist", "configuration.js")
-    }]),
+    new CopyWebpackPlugin([
+      {
+        from: Path.join(__dirname, "configuration.js"),
+        to: Path.join(__dirname, "dist", "main", "configuration.js")
+      },
+      {
+        from: Path.join(__dirname, "configuration.js"),
+        to: Path.join(__dirname, "dist", "dev", "configuration.js")
+      }
+    ]),
     new HtmlWebpackPlugin({
       title: "Eluvio Stream Sample",
       template: Path.join(__dirname, "src", "index.html"),

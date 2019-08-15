@@ -7,7 +7,9 @@
   "homepage": "https://github.com/eluv-io/elv-stream-sample",
   "scripts": {
     "serve": "webpack-dev-server --hot --port 8084",
-    "build": "rm -rf dist/* && NODE_ENV=production node ./node_modules/webpack-cli/bin/cli.js -p --progress --colors --devtool none",
+    "serve-dev": "webpack-dev-server --entry ./src/Dev.js --hot --port 8084",
+    "build": "rm -rf dist/main/* && NODE_ENV=production node ./node_modules/webpack-cli/bin/cli.js -p --progress --colors --devtool none",
+    "build-dev": "rm -rf dist/dev/* && NODE_ENV=production node ./node_modules/webpack-cli/bin/cli.js --entry ./src/Dev.js --output-path ./dist/dev/ -p --progress --colors --devtool none",
     "add-build": "git add dist",
     "lint": "npm run fix-scss ; npm run lint-scss ; npm run fix-js",
     "lint-show": "npm run lint-scss ; npm run lint-js",
@@ -20,6 +22,7 @@
     "run": [
       "lint",
       "build",
+      "build-dev",
       "add-build"
     ]
   },

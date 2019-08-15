@@ -19,7 +19,8 @@ const Format = (string) => {
 };
 
 const availableContent = {
-  "Stargate Origins Trailer (4K)": "hq__EAt4BVedkShkEJxZX7CTiFvhdg7zpwZdaS2cQua9u4bwehBCyeKeFZT5MDYwUMRDMES94Z44M1"
+  "Stargate Origins Trailer (4K)": "hq__EAt4BVedkShkEJxZX7CTiFvhdg7zpwZdaS2cQua9u4bwehBCyeKeFZT5MDYwUMRDMES94Z44M1",
+  "Big Buck Bunny (4K)": "hq__BD1BouHkFraAcDjvoyHoiKpVhf4dXzNsDT5USe8mrZ7YDhLPDoZGnoU32iZvDYiQW8vVi6X7rV"
 };
 
 class Controls extends React.Component {
@@ -139,7 +140,7 @@ class Controls extends React.Component {
               versionHash
             }, () => this.LoadVideo(this.state.protocol));
           }}
-          className="available-content secondary"
+          className="available-content secondary vertical-tabs"
           tabClassName="available-content-selection"
         />
 

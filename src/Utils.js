@@ -1,8 +1,12 @@
 import {ElvClient} from "elv-client-js";
 
-export const InitializeClient = async () => {
+export const InitializeClient = async (configUrl) => {
+  if(!configUrl) {
+    configUrl = "https://main.net955304.contentfabric.io/config";
+  }
+
   const client = await ElvClient.FromConfigurationUrl({
-    configUrl: "https://main.net955304.contentfabric.io/config",
+    configUrl,
     viewOnly: true
   });
 
