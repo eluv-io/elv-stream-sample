@@ -5,7 +5,7 @@ html {
   font-size: 16px;
 }
 
-@media screen and (max-width: 800px) {
+@media screen and (max-width: 1000px) {
   html {
     font-size: 12px;
   }
@@ -260,20 +260,24 @@ footer {
     border: 1px solid $elv-color-mediumgray;
     color: $elv-color-text-light;
     display: grid;
-    font-size: 0.8rem;
-    grid-auto-rows: 2.2rem;
-    grid-template-columns: 5rem 1fr 6rem 6rem 1fr 3fr;
+    font-size: 0.75rem;
+    grid-auto-rows: 2.1rem;
+    grid-template-columns: 4rem 1fr 6rem 8rem 2fr;
     height: 100%;
     margin-top: $elv-spacing-xxs;
     overflow-y: scroll;
     width: 100%;
 
     div {
+      @include elv-ellipsis;
       align-items: center;
       background-color: $elv-color-white;
       border-top: 1px solid $elv-color-lightgray;
       display: flex;
-      justify-content: center;
+      flex-wrap: nowrap;
+      justify-content: flex-start;
+      overflow: hidden;
+      padding-left: $elv-spacing-xs;
     }
 
     .segments-header {
@@ -285,25 +289,44 @@ footer {
       border-left: 1px solid $elv-color-lightergray;
       font-size: 0.6rem;
       justify-content: flex-start;
+      position: relative;
+
+      .duration {
+        background-color: $elv-color-lightergray;
+        height: 75%;
+        padding-right: $elv-spacing-ss;
+        position: absolute;
+        text-align: right;
+        width: 100%;
+      }
 
       .latency,
       .download {
         align-items: center;
+        color: $elv-color-white;
         display: flex;
         height: 50%;
         justify-content: center;
         overflow: hidden;
         text-align: center;
+        z-index: 10;
       }
 
       .latency {
-        background-color: $elv-color-lightergray;
+        background-color: $elv-color-darkblue;
       }
 
       .download {
         background-color: $elv-color-mediumblue;
-        color: $elv-color-white;
       }
+    }
+  }
+}
+
+@media screen and (max-width: 1000px) {
+  .controls-container {
+    .content-selection {
+      width: 100%;
     }
   }
 }

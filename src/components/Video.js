@@ -82,7 +82,7 @@ class Video extends React.Component {
 
       const segmentData = {
         id: frag.sn.toString(),
-        quality: `${resolution} (${bitrate} kbps)`,
+        quality: `${resolution} (${bitrate} Kbps)`,
         size,
         duration: frag.duration,
         latency,
@@ -196,6 +196,11 @@ class Video extends React.Component {
 
         const bufferInfo = BufferHelper.bufferInfo(this.state.video, this.state.video.currentTime, 0);
 
+        if(bufferInfo.end >= this.state.video.duration) {
+          // Buffering finished
+          return;
+        }
+
         this.setState({
           bufferData: this.state.bufferData.concat({
             x: currentTime,
@@ -210,6 +215,11 @@ class Video extends React.Component {
         const currentTime = (performance.now() - this.state.initialTime) / 1000;
         const dashMetrics = this.state.player.getDashMetrics();
         const bufferLevel = dashMetrics.getCurrentBufferLevel("video", true);
+
+        if(Math.abs(bufferLevel - (this.state.video.duration - this.state.video.currentTime)) < 1) {
+          // Buffering finished
+          return;
+        }
 
         this.setState({
           bufferData: this.state.bufferData.concat({

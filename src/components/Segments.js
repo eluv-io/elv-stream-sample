@@ -16,7 +16,7 @@ class Segments extends React.Component {
     if(this.props.segmentData.length === prevProps.segmentData.length) { return; }
 
     const maxTime = Math.max(
-      1000,
+      ...(this.props.segmentData.map(segment => segment.duration * 1000)),
       ...(this.props.segmentData.map(segment => segment.latency + segment.downloadTime))
     );
 
@@ -31,38 +31,45 @@ class Segments extends React.Component {
         <div className="segments-header">ID</div>
         <div className="segments-header">Quality</div>
         <div className="segments-header">Size</div>
-        <div className="segments-header">Duration</div>
         <div className="segments-header">Download Rate</div>
-        <div className="segments-header">Timing</div>
+        <div className="segments-header">Timing (ms)</div>
       </React.Fragment>
     );
   }
 
-  Segment(segment) {
+  Segment(segment, i) {
+    const duration = Math.round(segment.duration) * 1000;
+    const durationWidth = (duration/ this.state.timingScale) * 100;
     const latencyWidth = (segment.latency / this.state.timingScale) * 100;
     const downloadWidth = (segment.downloadTime / this.state.timingScale) * 100;
 
     return (
-      <React.Fragment key={`segment-${segment.id}`}>
+      <React.Fragment key={`segment-${i}`}>
         <div>{segment.id}</div>
         <div>{segment.quality}</div>
         <div>{`${segment.size.toFixed(2)} MB`}</div>
-        <div>{`${segment.duration.toFixed(0)}s`}</div>
-        <div>{`${segment.downloadRate.toFixed(1)} mbps`}</div>
+        <div>{`${segment.downloadRate.toFixed(1)} Mbps`}</div>
         <div className="timing">
+          <span
+            className="duration"
+            style={{width: `${durationWidth}%`}}
+            title={`Segment duration: ${duration.toFixed(0)}`}
+          >
+            { duration.toFixed(0) }
+          </span>
           <span
             className="latency"
             style={{width: `${latencyWidth}%`}}
-            title={`Latency: ${segment.latency}ms`}
+            title={`Latency: ${segment.latency.toFixed(0)}ms`}
           >
-            { segment.latency }
+            { segment.latency.toFixed(0) }
           </span>
           <span
             className="download"
             style={{width: `${downloadWidth}%`}}
-            title={`Download: ${segment.downloadTime}ms`}
+            title={`Download: ${segment.downloadTime.toFixed(0)}ms`}
           >
-            { segment.downloadTime }
+            { segment.downloadTime.toFixed(0) }
           </span>
         </div>
       </React.Fragment>
