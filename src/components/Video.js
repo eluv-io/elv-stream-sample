@@ -105,6 +105,9 @@ class Video extends React.Component {
       data: {
         env_key: "2i5480sms8vdgj0sv9bv6lpk5", // required
         player_name: "stream-sample-hls", // ex: 'My Main Player'
+        video_id: playoutUrl,
+        video_title: this.props.metadata.name
+        // player_init_time // timestamp before initializing the player or adding the video element to track page load time
         // ... and other metadata (https://docs.mux.com/docs/metadata)
       }
     });
@@ -178,6 +181,8 @@ class Video extends React.Component {
       data: {
         env_key: "2i5480sms8vdgj0sv9bv6lpk5", // required
         player_name: "stream-sample-dashjs", // ex: 'My Main Player'
+        video_id: playoutUrl,
+        video_title: this.props.metadata.name
       }
     });
 
