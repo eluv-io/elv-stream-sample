@@ -6,6 +6,7 @@ import DashJS from "dashjs";
 import URI from "urijs";
 import Graph from "./Graph";
 import Segments from "./Segments";
+import Mux from "mux-embed";
 
 class Video extends React.Component {
   constructor(props) {
@@ -44,6 +45,8 @@ class Video extends React.Component {
     const player = this.props.protocol === "hls" ?
       this.InitializeHLS(video, playoutUrl) :
       this.InitializeDash(video, playoutUrl);
+
+    this.InitializeMux(player);
 
     this.setState({
       initialTime: performance.now(),
@@ -161,6 +164,28 @@ class Video extends React.Component {
     return player;
   }
 
+  InitializeMux(player) {
+    const options = {
+      debug: false,
+      data: {
+        env_key: "2i5480sms8vdgj0sv9bv6lpk5",
+        video_id: this.props.versionHash,
+        video_title: this.props.metadata.name
+      }
+    };
+
+    if(this.props.protocol === "hls") {
+      options.hlsjs = player;
+      options.Hls = HLSPlayer;
+      options.data.player_name = "stream-sample-hls";
+    } else {
+      options.dashjs = player;
+      options.data.player_name = "stream-sample-dash";
+    }
+
+    Mux.monitor("video", options);
+  }
+
   // Discard old samples that are no longer visible
   TrimSamples() {
     // Max visible samples is 300 seconds times 4 samples per second
@@ -270,7 +295,8 @@ Video.propTypes = {
   posterUrl: PropTypes.string,
   protocol: PropTypes.string.isRequired,
   sampleWindow: PropTypes.number.isRequired,
-  samplePeriod: PropTypes.number.isRequired
+  samplePeriod: PropTypes.number.isRequired,
+  versionHash: PropTypes.string.isRequired
 };
 
 export default Video;

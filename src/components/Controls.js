@@ -221,6 +221,7 @@ class Controls extends React.Component {
     return (
       <Video
         key={`video-${this.state.protocol}-${this.state.drm}`}
+        versionHash={this.state.versionHash}
         authToken={this.state.video.authToken}
         drm={this.state.drm}
         metadata={this.state.video.metadata}

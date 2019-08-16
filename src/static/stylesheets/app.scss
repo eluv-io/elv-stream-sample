@@ -43,11 +43,11 @@ header {
 }
 
 main {
+  align-items: center;
   display: flex;
   flex-direction: column;
   height: 100%;
   justify-content: center;
-  align-items: center;
   margin-bottom: $elv-spacing-l;
   width: 100%;
 }
@@ -161,7 +161,7 @@ footer {
     color: $elv-color-text-light;
     cursor: pointer;
     padding: $elv-spacing-xs 0;
-    width: 10rem;
+    width: 12rem;
   }
 
   .controls {
@@ -296,8 +296,8 @@ footer {
         width: 6rem;
 
         &.selected {
-          color: $elv-color-text-white;
           background: $elv-color-action-primary;
+          color: $elv-color-text-white;
         }
       }
     }
@@ -307,8 +307,8 @@ footer {
       width: 100%;
 
       .-elv-tab {
-        width: 100%;
         border: 1px solid $elv-color-lightgray;
+        width: 100%;
 
         &:not(:last-child) {
           border-bottom: 0;
