@@ -46,6 +46,8 @@ class Video extends React.Component {
       this.InitializeHLS(video, playoutUrl) :
       this.InitializeDash(video, playoutUrl);
 
+    this.InitializeMux(player);
+
     this.setState({
       initialTime: performance.now(),
       player,
@@ -94,22 +96,6 @@ class Video extends React.Component {
       this.setState({
         segmentData: [segmentData, ...this.state.segmentData]
       });
-    });
-
-    Mux.monitor("video", {
-      debug: false,
-      hlsjs: player,
-      // Optionally, if Hls is not available on the window globally
-      // you need to pass Hls as well.
-      Hls: HLSPlayer,
-      data: {
-        env_key: "2i5480sms8vdgj0sv9bv6lpk5", // required
-        player_name: "stream-sample-hls", // ex: 'My Main Player'
-        video_id: playoutUrl,
-        video_title: this.props.metadata.name
-        // player_init_time // timestamp before initializing the player or adding the video element to track page load time
-        // ... and other metadata (https://docs.mux.com/docs/metadata)
-      }
     });
 
     return player;
@@ -175,18 +161,29 @@ class Video extends React.Component {
 
     player.initialize(video, playoutUrl);
 
-    Mux.monitor("video", {
+    return player;
+  }
+
+  InitializeMux(player) {
+    const options = {
       debug: false,
-      dashjs: player,
       data: {
-        env_key: "2i5480sms8vdgj0sv9bv6lpk5", // required
-        player_name: "stream-sample-dashjs", // ex: 'My Main Player'
-        video_id: playoutUrl,
+        env_key: "2i5480sms8vdgj0sv9bv6lpk5",
+        video_id: this.props.versionHash,
         video_title: this.props.metadata.name
       }
-    });
+    };
 
-    return player;
+    if(this.props.protocol === "hls") {
+      options.hlsjs = player;
+      options.Hls = HLSPlayer;
+      options.data.player_name = "stream-sample-hls";
+    } else {
+      options.dashjs = player;
+      options.data.player_name = "stream-sample-dash";
+    }
+
+    Mux.monitor("video", options);
   }
 
   // Discard old samples that are no longer visible
@@ -298,7 +295,8 @@ Video.propTypes = {
   posterUrl: PropTypes.string,
   protocol: PropTypes.string.isRequired,
   sampleWindow: PropTypes.number.isRequired,
-  samplePeriod: PropTypes.number.isRequired
+  samplePeriod: PropTypes.number.isRequired,
+  versionHash: PropTypes.string.isRequired
 };
 
 export default Video;
