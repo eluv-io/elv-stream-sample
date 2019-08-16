@@ -6,6 +6,7 @@ import DashJS from "dashjs";
 import URI from "urijs";
 import Graph from "./Graph";
 import Segments from "./Segments";
+import Mux from "mux-embed";
 
 class Video extends React.Component {
   constructor(props) {
@@ -95,6 +96,19 @@ class Video extends React.Component {
       });
     });
 
+    Mux.monitor("video", {
+      debug: false,
+      hlsjs: player,
+      // Optionally, if Hls is not available on the window globally
+      // you need to pass Hls as well.
+      Hls: HLSPlayer,
+      data: {
+        env_key: "2i5480sms8vdgj0sv9bv6lpk5", // required
+        player_name: "stream-sample-hls", // ex: 'My Main Player'
+        // ... and other metadata (https://docs.mux.com/docs/metadata)
+      }
+    });
+
     return player;
   }
 
@@ -157,6 +171,15 @@ class Video extends React.Component {
     );
 
     player.initialize(video, playoutUrl);
+
+    Mux.monitor("video", {
+      debug: false,
+      dashjs: player,
+      data: {
+        env_key: "2i5480sms8vdgj0sv9bv6lpk5", // required
+        player_name: "stream-sample-dashjs", // ex: 'My Main Player'
+      }
+    });
 
     return player;
   }
