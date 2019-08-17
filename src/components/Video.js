@@ -32,13 +32,13 @@ class Video extends React.Component {
   InitializeVideo(video) {
     if(!video) { return; }
 
-    let playoutUrl = this.props.playoutOptions.playoutUrl;
+    const playoutUrl = this.props.playoutOptions.playoutUrl;
 
     const player = this.props.protocol === "hls" ?
       this.InitializeHLS(video, playoutUrl) :
       this.InitializeDash(video, playoutUrl);
 
-    this.InitializeMux(player);
+    this.InitializeMux(player, playoutUrl);
 
     this.setState({
       initialTime: performance.now(),
@@ -162,13 +162,14 @@ class Video extends React.Component {
     return player;
   }
 
-  InitializeMux(player) {
+  InitializeMux(player, playoutUrl) {
     const options = {
       debug: false,
       data: {
         env_key: "2i5480sms8vdgj0sv9bv6lpk5",
         video_id: this.props.versionHash,
-        video_title: this.props.metadata.name
+        video_title: this.props.metadata.name,
+        video_cdn: URI(playoutUrl).hostname()
       }
     };
 
