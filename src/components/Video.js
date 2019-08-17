@@ -29,14 +29,6 @@ class Video extends React.Component {
     this.StopSampling();
   }
 
-  componentDidUpdate(prevProps) {
-    // If sample period has changed, restart interval
-    if(prevProps.samplePeriod !== this.props.samplePeriod) {
-      this.StopSampling();
-      this.StartSampling();
-    }
-  }
-
   InitializeVideo(video) {
     if(!video) { return; }
 
@@ -54,8 +46,14 @@ class Video extends React.Component {
       video
     }, this.StartSampling);
 
-    // Stop sampling when video has ended
-    video.addEventListener("ended", this.StopSampling);
+    video.addEventListener("ended", () => {
+      // Stop sampling when video has ended
+      this.StopSampling();
+
+      if(this.props.onMediaEnded) {
+        this.props.onMediaEnded();
+      }
+    });
   }
 
   InitializeHLS(video, playoutUrl) {
@@ -212,6 +210,8 @@ class Video extends React.Component {
   }
 
   StartSampling() {
+    const samplePeriod = 250;
+
     if(this.props.protocol === "hls") {
       this.metricsInterval = setInterval(() => {
         const currentTime = (performance.now() - this.state.initialTime) / 1000;
@@ -234,7 +234,7 @@ class Video extends React.Component {
         });
 
         this.TrimSamples();
-      }, this.props.samplePeriod);
+      }, samplePeriod);
     } else {
       this.metricsInterval = setInterval(() => {
         const currentTime = (performance.now() - this.state.initialTime) / 1000;
@@ -254,7 +254,7 @@ class Video extends React.Component {
         });
 
         this.TrimSamples();
-      }, this.props.samplePeriod);
+      }, samplePeriod);
     }
   }
 
@@ -295,8 +295,8 @@ Video.propTypes = {
   posterUrl: PropTypes.string,
   protocol: PropTypes.string.isRequired,
   sampleWindow: PropTypes.number.isRequired,
-  samplePeriod: PropTypes.number.isRequired,
-  versionHash: PropTypes.string.isRequired
+  versionHash: PropTypes.string.isRequired,
+  onMediaEnded: PropTypes.func
 };
 
 export default Video;

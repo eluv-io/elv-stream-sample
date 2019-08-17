@@ -18,10 +18,16 @@ const Format = (string) => {
   return string.charAt(0).toUpperCase() + string.slice(1);
 };
 
-const availableContent = {
-  "Stargate Origins Trailer (4K)": "hq__EAt4BVedkShkEJxZX7CTiFvhdg7zpwZdaS2cQua9u4bwehBCyeKeFZT5MDYwUMRDMES94Z44M1",
-  "Big Buck Bunny (4K)": "hq__BD1BouHkFraAcDjvoyHoiKpVhf4dXzNsDT5USe8mrZ7YDhLPDoZGnoU32iZvDYiQW8vVi6X7rV"
-};
+const availableContent = [
+  {
+    title: "Stargate Origins Trailer (4K)",
+    versionHash: "hq__EAt4BVedkShkEJxZX7CTiFvhdg7zpwZdaS2cQua9u4bwehBCyeKeFZT5MDYwUMRDMES94Z44M1"
+  },
+  {
+    title: "Big Buck Bunny (4K)",
+    versionHash: "hq__BD1BouHkFraAcDjvoyHoiKpVhf4dXzNsDT5USe8mrZ7YDhLPDoZGnoU32iZvDYiQW8vVi6X7rV"
+  }
+];
 
 class Controls extends React.Component {
   constructor(props) {
@@ -30,7 +36,8 @@ class Controls extends React.Component {
     this.state = {
       loading: true,
       showControls: false,
-      versionHash: Object.values(availableContent)[0],
+      currentVideoIndex: 0,
+      versionHash: availableContent[0].versionHash,
       availableDRMs: [],
       availableProtocols: ["hls", "dash"],
       protocol: "hls",
@@ -40,6 +47,7 @@ class Controls extends React.Component {
     };
 
     this.LoadVideo = this.LoadVideo.bind(this);
+    this.PlayNext = this.PlayNext.bind(this);
   }
 
   async componentDidMount() {
@@ -80,6 +88,19 @@ class Controls extends React.Component {
         loading: false
       });
     }
+  }
+
+  async PlayNext() {
+    await new Promise(resolve => setTimeout(resolve, 3000));
+
+    const nextVideoIndex = (this.state.currentVideoIndex + 1) % availableContent.length;
+
+    this.setState({
+      currentVideoIndex: nextVideoIndex,
+      versionHash: availableContent[nextVideoIndex].versionHash
+    });
+
+    await this.LoadVideo(this.state.protocol);
   }
 
   ErrorMessage() {
@@ -127,8 +148,8 @@ class Controls extends React.Component {
   }
 
   ContentSelection() {
-    const availableContentOptions = Object.keys(availableContent)
-      .map(title => [title, availableContent[title]]);
+    const availableContentOptions =
+      availableContent.map(({title, versionHash}) => [title, versionHash]);
 
     return (
       <div className="control-block content-selection">
@@ -229,7 +250,7 @@ class Controls extends React.Component {
         posterUrl={this.state.video.posterUrl}
         protocol={this.state.protocol}
         sampleWindow={this.state.graphScale}
-        samplePeriod={250}
+        onMediaEnded={this.PlayNext}
       />
     );
   }
