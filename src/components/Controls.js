@@ -39,7 +39,6 @@ class Controls extends React.Component {
       currentVideoIndex: 0,
       versionHash: availableContent[0].versionHash,
       availableDRMs: [],
-      availableProtocols: ["hls", "dash"],
       protocol: "hls",
       video: undefined,
       drm: "aes-128",
@@ -116,7 +115,7 @@ class Controls extends React.Component {
   /* Stream Options */
 
   ProtocolSelection() {
-    const options = this.state.availableProtocols.map(type => [Format(type), type]);
+    const options = this.props.availableProtocols.map(type => [Format(type), type]);
 
     return (
       <div className="selection">
@@ -270,7 +269,10 @@ class Controls extends React.Component {
 }
 
 Controls.propTypes = {
-  client: PropTypes.object.isRequired
+  client: PropTypes.object.isRequired,
+  availableProtocols: PropTypes.arrayOf(
+    PropTypes.string
+  ).isRequired
 };
 
 export default Controls;

@@ -4,7 +4,7 @@ import React from "react";
 import {render} from "react-dom";
 import {IconLink, ImageIcon, LoadingElement} from "elv-components-js";
 import Controls from "./components/Controls";
-import {InitializeClient} from "./Utils";
+import {AvailableDRMs, InitializeClient} from "./Utils";
 
 import Logo from "./static/images/Logo.png";
 import GithubIcon from "./static/icons/github.svg";
@@ -14,15 +14,22 @@ class App extends React.Component {
     super(props);
 
     this.state = {
-      client: undefined
+      client: undefined,
+      availableProtocols: []
     };
   }
 
   async componentDidMount() {
     if(this.state.client) { return; }
 
+    let availableProtocols = ["hls"];
+    if((await AvailableDRMs()).includes("widevine")) {
+      availableProtocols.push("dash");
+    }
+
     this.setState({
-      client: await InitializeClient()
+      client: await InitializeClient(),
+      availableProtocols
     });
   }
 
@@ -42,7 +49,7 @@ class App extends React.Component {
     }
 
     return (
-      <Controls client={this.state.client}/>
+      <Controls client={this.state.client} availableProtocols={this.state.availableProtocols} />
     );
   }
 
