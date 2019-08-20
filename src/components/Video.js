@@ -1,7 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
 import HLSPlayer from "../../node_modules/hls.js/dist/hls";
-import {BufferHelper} from "../../node_modules/hls.js/src/utils/buffer-helper";
 import DashJS from "dashjs";
 import URI from "urijs";
 import Graph from "./Graph";
@@ -38,7 +37,7 @@ class Video extends React.Component {
       this.InitializeHLS(video, playoutUrl) :
       this.InitializeDash(video, playoutUrl);
 
-    this.InitializeMux(player, playoutUrl);
+    this.InitializeMuxMonitoring(player, playoutUrl);
 
     this.setState({
       initialTime: performance.now(),
@@ -162,7 +161,7 @@ class Video extends React.Component {
     return player;
   }
 
-  InitializeMux(player, playoutUrl) {
+  InitializeMuxMonitoring(player, playoutUrl) {
     const options = {
       debug: false,
       data: {
@@ -213,50 +212,23 @@ class Video extends React.Component {
   StartSampling() {
     const samplePeriod = 250;
 
-    if(this.props.protocol === "hls") {
-      this.metricsInterval = setInterval(() => {
-        const currentTime = (performance.now() - this.state.initialTime) / 1000;
-        const stats = this.state.player.streamController.stats;
+    this.metricsInterval = setInterval(() => {
+      this.TrimSamples();
 
-        if(!stats) { return; }
+      // Determine buffer level relative to the current video time
+      const buffer = this.state.video.buffered;
+      const buffered = [...Array(buffer.length).keys()]
+        .reduce((total, _, i) => total + (Math.max(0, buffer.end(i) - this.state.video.currentTime)), 0);
 
-        const bufferInfo = BufferHelper.bufferInfo(this.state.video, this.state.video.currentTime, 0);
+      const currentTime = (performance.now() - this.state.initialTime) / 1000;
 
-        if(bufferInfo.end >= this.state.video.duration) {
-          // Buffering finished
-          return;
-        }
-
-        this.setState({
-          bufferData: this.state.bufferData.concat({
-            x: currentTime,
-            y: (bufferInfo.len) || 0
-          })
-        });
-
-        this.TrimSamples();
-      }, samplePeriod);
-    } else {
-      this.metricsInterval = setInterval(() => {
-        const currentTime = (performance.now() - this.state.initialTime) / 1000;
-        const dashMetrics = this.state.player.getDashMetrics();
-        const bufferLevel = dashMetrics.getCurrentBufferLevel("video", true);
-
-        if(Math.abs(bufferLevel - (this.state.video.duration - this.state.video.currentTime)) < 1) {
-          // Buffering finished
-          return;
-        }
-
-        this.setState({
-          bufferData: this.state.bufferData.concat({
-            x: currentTime,
-            y: bufferLevel,
-          })
-        });
-
-        this.TrimSamples();
-      }, samplePeriod);
-    }
+      this.setState({
+        bufferData: this.state.bufferData.concat({
+          x: currentTime,
+          y: buffered,
+        })
+      });
+    }, samplePeriod);
   }
 
   render() {

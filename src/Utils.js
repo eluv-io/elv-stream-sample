@@ -5,10 +5,7 @@ export const InitializeClient = async (configUrl) => {
     configUrl = "https://main.net955304.contentfabric.io/config";
   }
 
-  const client = await ElvClient.FromConfigurationUrl({
-    configUrl,
-    viewOnly: true
-  });
+  const client = await ElvClient.FromConfigurationUrl({configUrl});
 
   const wallet = client.GenerateWallet();
   const mnemonic = wallet.GenerateMnemonic();

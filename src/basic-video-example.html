@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Eluvio Video Sample</title>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type"/>
+
+    <script src="https://cdn.jsdelivr.net/npm/@eluvio/elv-client-js@latest/dist/ElvClient-min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
+  </head>
+  <body>
+    <div id="app" class="app">
+      <video
+        id="video"
+        controls
+      />
+    </div>
+
+    <script type="text/javascript">
+      const AvailableDRMs = async () => {
+        const availableDRMs = ["aes-128"];
+
+        if (typeof window.navigator.requestMediaKeySystemAccess !== "function") {
+          // eslint-disable-next-line no-console
+          console.log("requestMediaKeySystemAccess not available");
+
+          return availableDRMs;
+        }
+
+        try {
+          const config = [{
+            initDataTypes: ["cenc"],
+            audioCapabilities: [{
+              contentType: "audio/mp4;codecs=\"mp4a.40.2\""
+            }],
+            videoCapabilities: [{
+              contentType: "video/mp4;codecs=\"avc1.42E01E\""
+            }]
+          }];
+
+          await navigator.requestMediaKeySystemAccess("com.widevine.alpha", config);
+
+          availableDRMs.push("widevine");
+        } catch (e) {
+          console.log("No Widevine support detected");
+        }
+
+        return availableDRMs;
+      };
+
+      const PlayHLS = (video, playoutOptions) => {
+        const playoutUrl =`${playoutOptions.playoutUrl}&player_profile=hls-js`;
+        const player = new Hls();
+        player.loadSource(playoutUrl);
+        player.attachMedia(video);
+
+        // Autoplay
+        player.on(Hls.Events.MANIFEST_PARSED, () => {
+          video.play();
+        });
+      };
+
+      const PlayDash = (authToken, video, playoutOptions) => {
+        const player = dashjs.MediaPlayer().create();
+
+        if(playoutOptions.drms) {
+          const widevineUrl = playoutOptions.drms.widevine.licenseServers[0];
+
+          player.setProtectionData({
+            "com.widevine.alpha": {
+              "serverURL": widevineUrl,
+              "httpRequestHeaders": {
+                "Authorization": `Bearer ${authToken}`
+              },
+              "withCredentials": false
+            }
+          });
+        }
+
+        player.initialize(video, playoutOptions.playoutUrl, true);
+      };
+
+      const Load = async () => {
+        const versionHash = "hq__BD1BouHkFraAcDjvoyHoiKpVhf4dXzNsDT5USe8mrZ7YDhLPDoZGnoU32iZvDYiQW8vVi6X7rV";
+
+        const configUrl = "https://main.net955304.contentfabric.io/config";
+        const client = await ElvClient.FromConfigurationUrl({configUrl});
+
+        const wallet = client.GenerateWallet();
+        const mnemonic = wallet.GenerateMnemonic();
+        const signer = wallet.AddAccountFromMnemonic({mnemonic});
+
+        await client.SetSigner({signer});
+
+        const playoutOptions = await client.PlayoutOptions({
+          versionHash,
+          protocols: ["dash", "hls"],
+          drms: await AvailableDRMs()
+        });
+
+        const video = document.getElementById("video");
+
+        if(playoutOptions.dash) {
+          const authToken = await client.GenerateStateChannelToken({versionHash});
+          PlayDash(authToken, video, playoutOptions.dash);
+        } else {
+          PlayHLS(video, playoutOptions.hls);
+        }
+      };
+
+      Load()
+    </script>
+    <style>
+      html,
+      body,
+      #app {
+        display: block;
+        height: 100%;
+        width: 100%;
+        padding: 0;
+        margin: 0;
+      }
+
+      #app {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      video {
+        height: 50vh;
+        margin-bottom: 25vh;
+      }
+    </style>
+  </body>
+</html>
