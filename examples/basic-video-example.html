@@ -16,7 +16,6 @@
         controls
       />
     </div>
-
     <script type="text/javascript">
       const AvailableDRMs = async () => {
         const availableDRMs = ["aes-128"];
@@ -50,8 +49,9 @@
       };
 
       const PlayHLS = (video, playoutOptions) => {
-        const playoutUrl =`${playoutOptions.playoutUrl}&player_profile=hls-js`;
+        const playoutUrl =`${playoutOptions.hls.playoutUrl}&player_profile=hls-js`;
         const player = new Hls();
+
         player.loadSource(playoutUrl);
         player.attachMedia(video);
 
@@ -64,8 +64,9 @@
       const PlayDash = (authToken, video, playoutOptions) => {
         const player = dashjs.MediaPlayer().create();
 
-        if(playoutOptions.drms) {
-          const widevineUrl = playoutOptions.drms.widevine.licenseServers[0];
+        if(playoutOptions.dash.drms) {
+          const widevineUrl = playoutOptions.dash.drms.widevine.licenseServers
+            .find(server => server.startsWith("https"));
 
           player.setProtectionData({
             "com.widevine.alpha": {
@@ -78,13 +79,12 @@
           });
         }
 
-        player.initialize(video, playoutOptions.playoutUrl, true);
+        player.initialize(video, playoutOptions.dash.playoutUrl, true);
       };
 
       const Load = async () => {
-        const versionHash = "hq__BD1BouHkFraAcDjvoyHoiKpVhf4dXzNsDT5USe8mrZ7YDhLPDoZGnoU32iZvDYiQW8vVi6X7rV";
-
         const configUrl = "https://main.net955304.contentfabric.io/config";
+
         const client = await ElvClient.FromConfigurationUrl({configUrl});
 
         const wallet = client.GenerateWallet();
@@ -92,6 +92,8 @@
         const signer = wallet.AddAccountFromMnemonic({mnemonic});
 
         await client.SetSigner({signer});
+
+        const versionHash = "hq__BD1BouHkFraAcDjvoyHoiKpVhf4dXzNsDT5USe8mrZ7YDhLPDoZGnoU32iZvDYiQW8vVi6X7rV";
 
         const playoutOptions = await client.PlayoutOptions({
           versionHash,
@@ -103,9 +105,9 @@
 
         if(playoutOptions.dash) {
           const authToken = await client.GenerateStateChannelToken({versionHash});
-          PlayDash(authToken, video, playoutOptions.dash);
+          PlayDash(authToken, video, playoutOptions);
         } else {
-          PlayHLS(video, playoutOptions.hls);
+          PlayHLS(video, playoutOptions);
         }
       };
 
