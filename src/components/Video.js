@@ -232,9 +232,10 @@ class Video extends React.Component {
   }
 
   render() {
+    const header = this.props.header || <h1>{this.props.metadata.name}</h1>;
     return (
       <div className="video-container">
-        <h1>{this.props.metadata.name}</h1>
+        { header }
         <video
           poster={this.props.posterUrl}
           crossOrigin="anonymous"
@@ -264,6 +265,7 @@ Video.propTypes = {
   authToken: PropTypes.string,
   drm: PropTypes.string,
   metadata: PropTypes.object,
+  header: PropTypes.element.isRequired,
   playoutOptions: PropTypes.object.isRequired,
   posterUrl: PropTypes.string,
   protocol: PropTypes.string.isRequired,

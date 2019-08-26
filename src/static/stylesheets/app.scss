@@ -5,12 +5,6 @@ html {
   font-size: 16px;
 }
 
-@media screen and (max-width: 1000px) {
-  html {
-    font-size: 12px;
-  }
-}
-
 .app {
   color: $elv-color-text-dark;
   height: 100%;
@@ -18,9 +12,7 @@ html {
 
 .app-container {
   display: grid;
-  grid-template-columns: 100%;
   grid-template-rows: auto 1fr auto;
-  height: 100%;
   min-height: 100%;
 }
 
@@ -36,7 +28,7 @@ header {
   h1 {
     @include elv-no-select;
     color: $elv-color-text-light;
-    font-size: 1.3rem;
+    font-size: $elv-font-xl;
     font-weight: normal;
     margin-left: $elv-spacing-m;
   }
@@ -46,9 +38,9 @@ main {
   align-items: center;
   display: flex;
   flex-direction: column;
-  height: 100%;
   justify-content: center;
   margin-bottom: $elv-spacing-l;
+  min-height: 80%;
   width: 100%;
 }
 
@@ -64,14 +56,14 @@ footer {
   border: 1px solid $elv-color-mediumgray;
   border-radius: 3px;
   display: flex;
-  font-size: 0.9rem;
+  font-size: $elv-font-l;
   padding: $elv-spacing-xs $elv-spacing-s;
   width: auto;
 
   .github-icon {
-    height: 20px;
+    height: $elv-font-xxl;
     margin-right: $elv-spacing-xs;
-    width: 20px;
+    width: $elv-font-xxl;
   }
 
   &:hover {
@@ -81,7 +73,7 @@ footer {
 
 .error-message {
   color: $elv-color-mediumred;
-  font-size: 1.2rem;
+  font-size: $elv-font-xl;
   padding: $elv-spacing-s;
   text-align: center;
 }
@@ -90,7 +82,7 @@ footer {
   display: flex;
   flex-direction: column;
   height: 100%;
-  width: 80%;
+  width: 70rem;
 
   .control-block {
     align-items: center;
@@ -109,7 +101,7 @@ footer {
   }
 
   h4 {
-    font-size: 1rem;
+    font-size: $elv-font-l;
     margin: 0 0 $elv-spacing-s;
     text-align: center;
     width: 100%;
@@ -120,7 +112,7 @@ footer {
     flex-wrap: wrap;
     margin: $elv-spacing-s auto $elv-spacing-xs;
     padding-bottom: $elv-spacing-xxs;
-    width: 50%;
+    width: 30rem;
 
     .available-content {
       margin-bottom: $elv-spacing-s;
@@ -128,7 +120,7 @@ footer {
 
     input {
       flex-grow: 1;
-      font-size: 0.9rem;
+      font-size: $elv-font-m;
       height: 2.2rem;
       padding: $elv-spacing-xs;
     }
@@ -151,7 +143,7 @@ footer {
     }
 
     label {
-      font-size: 1rem;
+      font-size: $elv-font-l;
       width: 7rem;
     }
   }
@@ -161,7 +153,7 @@ footer {
     color: $elv-color-text-light;
     cursor: pointer;
     padding: $elv-spacing-xs 0;
-    width: 12rem;
+    width: 15rem;
   }
 
   .controls {
@@ -174,12 +166,14 @@ footer {
 }
 
 .video-container {
+  align-items: center;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  width: 100%;
 
   h1 {
-    font-size: 1.5rem;
+    font-size: $elv-font-xxl;
     font-weight: normal;
     margin: $elv-spacing-s 0;
     text-align: center;
@@ -188,16 +182,30 @@ footer {
   video {
     background-color: $elv-color-bg-black;
     cursor: pointer;
-    max-height: 50vh;
+    max-width: 100%;
     width: 100%;
+  }
+
+  .header-with-subheader {
+    margin: $elv-spacing-s 0 $elv-spacing-xs;
+
+    h1 {
+      margin: 0;
+    }
+
+    h3 {
+      font-size: $elv-font-s;
+      font-style: italic;
+    }
   }
 }
 
 .metrics-container {
   display: flex;
-  height: 300px;
+  height: 20rem;
   justify-content: space-between;
   margin: $elv-spacing-s 0 $elv-spacing-l;
+  width: 100%;
 
   .graph-container {
     flex-grow: 0;
@@ -207,7 +215,7 @@ footer {
 
   h3 {
     color: $elv-color-text-light;
-    font-size: 0.95rem;
+    font-size: $elv-font-l;
     padding-bottom: $elv-spacing-xs;
     text-align: center;
   }
@@ -221,9 +229,9 @@ footer {
     border: 1px solid $elv-color-mediumgray;
     color: $elv-color-text-light;
     display: grid;
-    font-size: 0.75rem;
+    font-size: $elv-font-m;
     grid-auto-rows: 2.1rem;
-    grid-template-columns: 4rem 1fr 6rem 8rem 2fr;
+    grid-template-columns: 3rem 1fr 6rem 8rem 2fr;
     height: 100%;
     margin-top: $elv-spacing-xxs;
     overflow-y: scroll;
@@ -248,7 +256,7 @@ footer {
 
     .timing {
       border-left: 1px solid $elv-color-lightergray;
-      font-size: 0.6rem;
+      font-size: $elv-font-xs;
       justify-content: flex-start;
       position: relative;
 
@@ -290,7 +298,7 @@ footer {
 
     &.secondary {
       .-elv-tab {
-        font-size: 0.9rem;
+        font-size: $elv-font-m;
         padding: $elv-spacing-xs;
         text-align: center;
         width: 6rem;
@@ -318,10 +326,51 @@ footer {
   }
 }
 
-@media screen and (max-width: 1000px) {
+@media screen and (max-width: 1200px) {
+  html {
+    font-size: 14px;
+  }
+
   .controls-container {
-    .content-selection {
-      width: 100%;
+    width: 50rem;
+  }
+}
+
+@media screen and (max-width: 900px) {
+  html {
+    font-size: 12px;
+  }
+
+  .controls-container {
+    width: 50rem;
+  }
+}
+
+@media screen and (max-width: 650px) {
+  html {
+    font-size: 10px;
+  }
+
+  .controls-container {
+    width: 80%;
+  }
+
+  .metrics-container {
+    flex-direction: column;
+    height: auto;
+
+    .graph-container {
+      padding-right: $elv-spacing-l;
+    }
+
+    .segments-container {
+      max-height: 30rem;
+      overflow-y: auto;
+      padding: 0;
+    }
+
+    .segments {
+      height: auto;
     }
   }
 }

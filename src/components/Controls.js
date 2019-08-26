@@ -20,12 +20,21 @@ const Format = (string) => {
 
 const availableContent = [
   {
-    title: "Stargate Origins Trailer (4K)",
-    versionHash: "hq__EAt4BVedkShkEJxZX7CTiFvhdg7zpwZdaS2cQua9u4bwehBCyeKeFZT5MDYwUMRDMES94Z44M1"
+    title: "MGM Trailer (4K)",
+    versionHash: "hq__EAt4BVedkShkEJxZX7CTiFvhdg7zpwZdaS2cQua9u4bwehBCyeKeFZT5MDYwUMRDMES94Z44M1",
+    header: (
+      <div className="header-with-subheader">
+        <h1>4K Trailer</h1>
+        <h3>Used with permission of MGM</h3>
+      </div>
+    )
   },
   {
     title: "Big Buck Bunny (4K)",
-    versionHash: "hq__BD1BouHkFraAcDjvoyHoiKpVhf4dXzNsDT5USe8mrZ7YDhLPDoZGnoU32iZvDYiQW8vVi6X7rV"
+    versionHash: "hq__BD1BouHkFraAcDjvoyHoiKpVhf4dXzNsDT5USe8mrZ7YDhLPDoZGnoU32iZvDYiQW8vVi6X7rV",
+    header: (
+      <h1>Big Buck Bunny (4K)</h1>
+    )
   }
 ];
 
@@ -38,6 +47,7 @@ class Controls extends React.Component {
       showControls: false,
       currentVideoIndex: 0,
       versionHash: availableContent[0].versionHash,
+      header: availableContent[0].header,
       availableDRMs: [],
       protocol: "hls",
       video: undefined,
@@ -69,6 +79,9 @@ class Controls extends React.Component {
         protocol
       });
 
+      const selectedOption = availableContent.find(content => content.versionHash === this.state.versionHash);
+      const header = selectedOption ? selectedOption.header : undefined;
+
       this.setState({
         loading: false,
         availableDRMs,
@@ -78,7 +91,8 @@ class Controls extends React.Component {
           metadata,
           playoutOptions,
           posterUrl,
-          authToken
+          authToken,
+          header
         }
       });
     } catch(error) {
@@ -157,7 +171,7 @@ class Controls extends React.Component {
           selected={this.state.versionHash}
           onChange={versionHash => {
             this.setState({
-              versionHash
+              versionHash,
             }, () => this.LoadVideo(this.state.protocol));
           }}
           className="available-content secondary vertical-tabs"
@@ -242,6 +256,7 @@ class Controls extends React.Component {
       <Video
         key={`video-${this.state.protocol}-${this.state.drm}`}
         versionHash={this.state.versionHash}
+        header={this.state.video.header}
         authToken={this.state.video.authToken}
         drm={this.state.drm}
         metadata={this.state.video.metadata}
