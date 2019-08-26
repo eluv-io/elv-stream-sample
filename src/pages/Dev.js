@@ -1,53 +1,41 @@
-import "./static/stylesheets/app.scss";
-import "./static/stylesheets/dev.scss";
+import "../static/stylesheets/app.scss";
 
 import React from "react";
 import {render} from "react-dom";
-import {IconLink, ImageIcon, LoadingElement} from "elv-components-js";
-import Controls from "./components/Controls";
-import {AvailableDRMs, InitializeClient} from "./Utils";
+import {inject, observer, Provider} from "mobx-react";
 
-import Logo from "./static/images/Logo.png";
-import GithubIcon from "./static/icons/github.svg";
+import {IconLink, ImageIcon, LoadingElement} from "elv-components-js";
+
+import * as Stores from "../stores";
+import Controls from "../components/Controls";
+
+import Logo from "../static/images/Logo.png";
+import GithubIcon from "../static/icons/github.svg";
 import Tabs from "elv-components-js/src/components/Tabs";
 
+@inject("root")
+@observer
 class App extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      client: undefined,
-      availableProtocols: [],
       version: 0
     };
   }
 
-  async componentDidMount() {
-    if(this.state.client) { return; }
-
-    let availableProtocols = ["hls"];
-    if((await AvailableDRMs()).includes("widevine")) {
-      availableProtocols.push("dash");
-    }
-
-    this.setState({
-      client: await InitializeClient(),
-      availableProtocols
-    });
-  }
-
   FabricUrlSelection() {
-    if(!this.state.client) { return; }
+    if(!this.props.root.client) { return; }
 
-    const options = this.state.client.HttpClient.uris.map((uri, i) => [uri, i]);
+    const options = this.props.root.client.HttpClient.uris.map((uri, i) => [uri, i]);
 
     return (
       <Tabs
         className="vertical-tabs secondary"
-        selected={this.state.client.HttpClient.uriIndex}
+        selected={this.props.root.client.HttpClient.uriIndex}
         options={options}
         onChange={i => {
-          this.state.client.HttpClient.uriIndex = i;
+          this.props.root.client.HttpClient.uriIndex = i;
           this.setState({version: this.state.version + 1});
         }}
       />
@@ -65,26 +53,22 @@ class App extends React.Component {
   }
 
   App() {
-    if(!this.state.client) {
+    if(!this.props.root.client) {
       return <LoadingElement loading={true} fullPage={true}/>;
     }
 
     return (
-      <Controls
-        key={this.state.version}
-        client={this.state.client}
-        availableProtocols={this.state.availableProtocols}
-      />
+      <Controls />
     );
   }
 
   render() {
     return (
-      <div className="app-container">
+      <div className="app-container" key={this.state.version}>
         <header>
           <IconLink href="https://eluv.io" className="logo" icon={Logo} label="Eluvio"/>
           <h1>
-            Video Test
+            Video Streaming Sample
           </h1>
         </header>
         <main>
@@ -102,6 +86,10 @@ class App extends React.Component {
 }
 
 render(
-  <App />,
+  (
+    <Provider {...Stores}>
+      <App />
+    </Provider>
+  ),
   document.getElementById("app")
 );

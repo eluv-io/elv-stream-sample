@@ -1,4 +1,4 @@
-import "./static/stylesheets/app.scss";
+import "../static/stylesheets/app.scss";
 
 import React from "react";
 import {render} from "react-dom";
@@ -6,11 +6,11 @@ import {inject, observer, Provider} from "mobx-react";
 
 import {IconLink, ImageIcon, LoadingElement} from "elv-components-js";
 
-import * as Stores from "./stores";
-import Controls from "./components/Controls";
+import * as Stores from "../stores";
+import Controls from "../components/Controls";
 
-import Logo from "./static/images/Logo.png";
-import GithubIcon from "./static/icons/github.svg";
+import Logo from "../static/images/Logo.png";
+import GithubIcon from "../static/icons/github.svg";
 
 @inject("root")
 @observer

@@ -1,6 +1,10 @@
 import React from "react";
 import PropTypes from "prop-types";
 
+import {inject, observer} from "mobx-react";
+
+@inject("metrics")
+@observer
 class Segments extends React.Component {
   constructor(props) {
     super(props);
@@ -13,11 +17,11 @@ class Segments extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    if(this.props.segmentData.length === prevProps.segmentData.length) { return; }
+    if(this.props.metrics.segmentData.length === prevProps.metrics.segmentData.length) { return; }
 
     const maxTime = Math.max(
-      ...(this.props.segmentData.map(segment => segment.duration * 1000)),
-      ...(this.props.segmentData.map(segment => segment.latency + segment.downloadTime))
+      ...(this.props.metrics.segmentData.map(segment => segment.duration * 1000)),
+      ...(this.props.metrics.segmentData.map(segment => segment.latency + segment.downloadTime))
     );
 
     this.setState({
@@ -82,7 +86,7 @@ class Segments extends React.Component {
         <h3>Segment Metrics</h3>
         <div className="segments">
           { this.Header() }
-          { this.props.segmentData.map(this.Segment)}
+          { this.props.metrics.segmentData.map(this.Segment)}
         </div>
       </div>
     );

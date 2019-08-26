@@ -1,6 +1,5 @@
 import React from "react";
-import PropTypes from "prop-types";
-import {LoadVideo} from "../Utils";
+import {inject, observer} from "mobx-react";
 import Video from "./Video";
 import {onEnterPressed} from "elv-components-js";
 import {Action, LoadingElement, Tabs} from "elv-components-js";
@@ -18,40 +17,17 @@ const Format = (string) => {
   return string.charAt(0).toUpperCase() + string.slice(1);
 };
 
-const availableContent = [
-  {
-    title: "MGM Trailer (4K)",
-    versionHash: "hq__EAt4BVedkShkEJxZX7CTiFvhdg7zpwZdaS2cQua9u4bwehBCyeKeFZT5MDYwUMRDMES94Z44M1",
-    header: (
-      <div className="header-with-subheader">
-        <h1>4K Trailer</h1>
-        <h3>Used with permission of MGM</h3>
-      </div>
-    )
-  },
-  {
-    title: "Big Buck Bunny (4K)",
-    versionHash: "hq__BD1BouHkFraAcDjvoyHoiKpVhf4dXzNsDT5USe8mrZ7YDhLPDoZGnoU32iZvDYiQW8vVi6X7rV",
-    header: (
-      <h1>Big Buck Bunny (4K)</h1>
-    )
-  }
-];
-
+@inject("root")
+@inject("video")
+@observer
 class Controls extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      loading: true,
       showControls: false,
       currentVideoIndex: 0,
-      versionHash: availableContent[0].versionHash,
-      header: availableContent[0].header,
-      availableDRMs: [],
-      protocol: "hls",
-      video: undefined,
-      drm: "aes-128",
+      versionHash: props.video.availableContent[0].versionHash,
       graphScale: 20
     };
 
@@ -60,68 +36,37 @@ class Controls extends React.Component {
   }
 
   async componentDidMount() {
-    await this.LoadVideo(this.state.protocol);
+    await this.LoadVideo(this.props.video.protocol);
   }
 
   async LoadVideo(protocol) {
     if(!this.state.versionHash) { return; }
 
-    try {
-      this.setState({
-        loading: true,
-        video: undefined,
-        error: undefined
-      });
-
-      const {metadata, playoutOptions, availableDRMs, posterUrl, authToken} = await LoadVideo({
-        client: this.props.client,
-        versionHash: this.state.versionHash,
-        protocol
-      });
-
-      const selectedOption = availableContent.find(content => content.versionHash === this.state.versionHash);
-      const header = selectedOption ? selectedOption.header : undefined;
-
-      this.setState({
-        loading: false,
-        availableDRMs,
-        protocol,
-        drm: availableDRMs[0],
-        video: {
-          metadata,
-          playoutOptions,
-          posterUrl,
-          authToken,
-          header
-        }
-      });
-    } catch(error) {
-      this.setState({
-        error,
-        loading: false
-      });
-    }
+    await this.props.video.LoadVideo({
+      versionHash: this.state.versionHash,
+      protocol: protocol
+    });
   }
 
   async PlayNext() {
     await new Promise(resolve => setTimeout(resolve, 3000));
 
-    const nextVideoIndex = (this.state.currentVideoIndex + 1) % availableContent.length;
+    const nextVideoIndex = (this.state.currentVideoIndex + 1) % this.props.video.availableContent.length;
 
     this.setState({
       currentVideoIndex: nextVideoIndex,
-      versionHash: availableContent[nextVideoIndex].versionHash
+      versionHash: this.props.video.availableContent[nextVideoIndex].versionHash
     });
 
-    await this.LoadVideo(this.state.protocol);
+    await this.LoadVideo(this.props.video.protocol);
   }
 
   ErrorMessage() {
-    if(!this.state.error) { return null; }
+    if(!this.props.video.error) { return null; }
 
     return (
       <div className="error-message">
-        {this.state.error.message}
+        {this.props.video.error}
       </div>
     );
   }
@@ -129,14 +74,14 @@ class Controls extends React.Component {
   /* Stream Options */
 
   ProtocolSelection() {
-    const options = this.props.availableProtocols.map(type => [Format(type), type]);
+    const options = this.props.root.availableProtocols.map(type => [Format(type), type]);
 
     return (
       <div className="selection">
         <label htmlFor="protocol">Protocol</label>
         <Tabs
           options={options}
-          selected={this.state.protocol}
+          selected={this.props.video.protocol}
           onChange={protocol => this.LoadVideo(protocol)}
           className="secondary"
         />
@@ -145,15 +90,15 @@ class Controls extends React.Component {
   }
 
   DrmSelection() {
-    const options = this.state.availableDRMs.map(drm => [Format(drm), drm]);
+    const options = this.props.video.availableDRMs.map(drm => [Format(drm), drm]);
 
     return (
       <div className="selection">
         <label htmlFor="drm">DRM</label>
         <Tabs
           options={options}
-          selected={this.state.drm}
-          onChange={drm => this.setState({drm})}
+          selected={this.props.video.drm}
+          onChange={drm => this.props.video.SetDRM(drm)}
           className="secondary"
         />
       </div>
@@ -162,7 +107,7 @@ class Controls extends React.Component {
 
   ContentSelection() {
     const availableContentOptions =
-      availableContent.map(({title, versionHash}) => [title, versionHash]);
+      this.props.video.availableContent.map(({title, versionHash}) => [title, versionHash]);
 
     return (
       <div className="control-block content-selection">
@@ -172,7 +117,7 @@ class Controls extends React.Component {
           onChange={versionHash => {
             this.setState({
               versionHash,
-            }, () => this.LoadVideo(this.state.protocol));
+            }, () => this.LoadVideo(this.props.video.protocol));
           }}
           className="available-content secondary vertical-tabs"
           tabClassName="available-content-selection"
@@ -183,9 +128,9 @@ class Controls extends React.Component {
           placeholder="Version Hash"
           value={this.state.versionHash}
           onChange={(event) => this.setState({versionHash: event.target.value})}
-          onKeyPress={onEnterPressed(() => this.LoadVideo(this.state.protocol))}
+          onKeyPress={onEnterPressed(() => this.LoadVideo(this.props.video.protocol))}
         />
-        <Action onClick={() => this.LoadVideo(this.state.protocol)}>
+        <Action onClick={() => this.LoadVideo(this.props.video.protocol)}>
           Load
         </Action>
       </div>
@@ -213,7 +158,7 @@ class Controls extends React.Component {
   }
 
   StreamOptions() {
-    if(this.state.loading || this.state.error) { return; }
+    if(this.props.video.loading || this.props.video.error) { return; }
 
     return (
       <div className="control-block">
@@ -228,7 +173,7 @@ class Controls extends React.Component {
   }
 
   ControlsSection() {
-    if(this.state.error) { return null; }
+    if(this.props.video.error) { return null; }
 
     const toggleButton = (
       <div
@@ -250,19 +195,11 @@ class Controls extends React.Component {
   }
 
   Video() {
-    if(this.state.loading || this.state.error) { return null; }
+    if(this.props.video.loading || this.props.video.error) { return null; }
 
     return (
       <Video
-        key={`video-${this.state.protocol}-${this.state.drm}`}
-        versionHash={this.state.versionHash}
-        header={this.state.video.header}
-        authToken={this.state.video.authToken}
-        drm={this.state.drm}
-        metadata={this.state.video.metadata}
-        playoutOptions={this.state.video.playoutOptions[this.state.protocol]}
-        posterUrl={this.state.video.posterUrl}
-        protocol={this.state.protocol}
+        key={`video-${this.props.video.protocol}-${this.props.video.drm}`}
         sampleWindow={this.state.graphScale}
         onMediaEnded={this.PlayNext}
       />
@@ -273,7 +210,7 @@ class Controls extends React.Component {
     return (
       <div className="controls-container">
         { this.ContentSelection() }
-        <LoadingElement loading={this.state.loading && !this.state.error} fullPage={true}>
+        <LoadingElement loading={this.props.video.loading && !this.props.video.error} fullPage={true}>
           { this.ErrorMessage() }
           { this.Video() }
           { this.ControlsSection() }
@@ -282,12 +219,5 @@ class Controls extends React.Component {
     );
   }
 }
-
-Controls.propTypes = {
-  client: PropTypes.object.isRequired,
-  availableProtocols: PropTypes.arrayOf(
-    PropTypes.string
-  ).isRequired
-};
 
 export default Controls;

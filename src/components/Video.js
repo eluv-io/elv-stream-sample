@@ -6,14 +6,16 @@ import URI from "urijs";
 import Graph from "./Graph";
 import Segments from "./Segments";
 import Mux from "mux-embed";
+import {inject, observer} from "mobx-react";
 
+@inject("video")
+@inject("metrics")
+@observer
 class Video extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      bufferData: [],
-      segmentData: [],
       initialTime: undefined,
       player: undefined,
       video: undefined
@@ -24,16 +26,24 @@ class Video extends React.Component {
     this.StopSampling = this.StopSampling.bind(this);
   }
 
+  componentDidMount() {
+    this.props.metrics.Reset();
+  }
+
   componentWillUnmount(){
     this.StopSampling();
+
+    if(this.state.player) {
+      this.state.player.destroy ? this.state.player.destroy() : this.state.player.reset();
+    }
   }
 
   InitializeVideo(video) {
     if(!video) { return; }
 
-    const playoutUrl = this.props.playoutOptions.playoutUrl;
+    const playoutUrl = this.props.video.playoutOptions[this.props.video.protocol].playoutUrl;
 
-    const player = this.props.protocol === "hls" ?
+    const player = this.props.video.protocol === "hls" ?
       this.InitializeHLS(video, playoutUrl) :
       this.InitializeDash(video, playoutUrl);
 
@@ -80,7 +90,7 @@ class Video extends React.Component {
       // Megabits per second
       const downloadRate = (8 * stats.total) / (downloadTime / 1000) / 1000000;
 
-      const segmentData = {
+      this.props.metrics.LogSegment({
         id: frag.sn.toString(),
         quality: `${resolution} (${bitrate} Kbps)`,
         size,
@@ -88,10 +98,6 @@ class Video extends React.Component {
         latency,
         downloadTime,
         downloadRate
-      };
-
-      this.setState({
-        segmentData: [segmentData, ...this.state.segmentData]
       });
     });
 
@@ -101,14 +107,14 @@ class Video extends React.Component {
   InitializeDash(video, playoutUrl) {
     const player = DashJS.MediaPlayer().create();
 
-    if(this.props.drm === "widevine") {
-      const widevineUrl = this.props.playoutOptions.drms.widevine.licenseServers[0];
+    if(this.props.video.drm === "widevine") {
+      const widevineUrl = this.props.video.playoutOptions[this.props.video.protocol].drms.widevine.licenseServers[0];
 
       player.setProtectionData({
         "com.widevine.alpha": {
           "serverURL": widevineUrl,
           "httpRequestHeaders": {
-            "Authorization": `Bearer ${this.props.authToken}`
+            "Authorization": `Bearer ${this.props.video.authToken}`
           },
           "withCredentials": false
         }
@@ -140,7 +146,7 @@ class Video extends React.Component {
         // Megabits per second
         const downloadRate = (8 * response.byteLength) / (downloadTime / 1000) / 1000000;
 
-        const segmentData = {
+        this.props.metrics.LogSegment({
           id: request.index.toString(),
           quality: `${resolution} (${bitrate} kbps)`,
           size,
@@ -148,10 +154,6 @@ class Video extends React.Component {
           latency,
           downloadTime,
           downloadRate
-        };
-
-        this.setState({
-          segmentData: [segmentData, ...this.state.segmentData]
         });
       }
     );
@@ -166,13 +168,13 @@ class Video extends React.Component {
       debug: false,
       data: {
         env_key: "2i5480sms8vdgj0sv9bv6lpk5",
-        video_id: this.props.versionHash,
-        video_title: this.props.metadata.name,
+        video_id: this.props.video.versionHash,
+        video_title: this.props.video.metadata.name,
         video_cdn: URI(playoutUrl).hostname()
       }
     };
 
-    if(this.props.protocol === "hls") {
+    if(this.props.video.protocol === "hls") {
       options.hlsjs = player;
       options.Hls = HLSPlayer;
       options.data.player_name = "stream-sample-hls";
@@ -184,26 +186,6 @@ class Video extends React.Component {
     Mux.monitor("video", options);
   }
 
-  // Discard old samples that are no longer visible
-  TrimSamples() {
-    // Max visible samples is 300 seconds times 4 samples per second
-    const maxSamples = 300 * 4;
-
-    // Trim after threshold is reached to avoid trimming after every sample
-    const trimThreshold = maxSamples * 1.1;
-
-    // Earliest visible time is 300 seconds ago
-    const minVisibleTime =  ((performance.now() - this.state.initialTime) / 1000) - 300;
-
-    const trim = data => data.slice(-maxSamples).filter(({x}) => x > minVisibleTime);
-
-    if(this.state.bufferData.length > trimThreshold) {
-      this.setState({
-        bufferData: trim(this.state.bufferData)
-      });
-    }
-  }
-
   StopSampling() {
     clearInterval(this.metricsInterval);
     this.metricsInterval = undefined;
@@ -213,7 +195,7 @@ class Video extends React.Component {
     const samplePeriod = 250;
 
     this.metricsInterval = setInterval(() => {
-      this.TrimSamples();
+      //this.TrimSamples();
 
       // Determine buffer level relative to the current video time
       const buffer = this.state.video.buffered;
@@ -222,22 +204,36 @@ class Video extends React.Component {
 
       const currentTime = (performance.now() - this.state.initialTime) / 1000;
 
-      this.setState({
-        bufferData: this.state.bufferData.concat({
-          x: currentTime,
-          y: buffered,
-        })
-      });
+      this.props.metrics.LogBuffer({currentTime, buffered});
     }, samplePeriod);
   }
 
+  Header() {
+    const selectedOption = this.props.video.availableContent
+      .find(content => content.versionHash === this.props.versionHash);
+
+    if(selectedOption) {
+      if(selectedOption.subHeader) {
+        return (
+          <div className="header-with-subheader">
+            <h1>{selectedOption.header}</h1>
+            <h3>{selectedOption.subHeader}</h3>
+          </div>
+        );
+      } else {
+        return <h1>{selectedOption.header}</h1>;
+      }
+    } else {
+      return <h1>{this.props.video.metadata.name}</h1>;
+    }
+  }
+
   render() {
-    const header = this.props.header || <h1>{this.props.metadata.name}</h1>;
     return (
       <div className="video-container">
-        { header }
+        { this.Header() }
         <video
-          poster={this.props.posterUrl}
+          poster={this.props.video.posterUrl}
           crossOrigin="anonymous"
           ref={this.InitializeVideo}
           muted={false}
@@ -248,7 +244,7 @@ class Video extends React.Component {
         <div className="metrics-container">
           <Graph
             name="Buffer Level (s)"
-            data={this.state.bufferData}
+            data={this.props.metrics.bufferData}
             color={"#00589d"}
             windowSize={this.props.sampleWindow}
           />
@@ -262,15 +258,7 @@ class Video extends React.Component {
 }
 
 Video.propTypes = {
-  authToken: PropTypes.string,
-  drm: PropTypes.string,
-  metadata: PropTypes.object,
-  header: PropTypes.element.isRequired,
-  playoutOptions: PropTypes.object.isRequired,
-  posterUrl: PropTypes.string,
-  protocol: PropTypes.string.isRequired,
   sampleWindow: PropTypes.number.isRequired,
-  versionHash: PropTypes.string.isRequired,
   onMediaEnded: PropTypes.func
 };
 
