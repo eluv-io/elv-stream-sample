@@ -3,6 +3,7 @@ import {inject, observer} from "mobx-react";
 import Video from "./Video";
 import {onEnterPressed} from "elv-components-js";
 import {Action, LoadingElement, Tabs} from "elv-components-js";
+import RecordingControls from "./RecordingControls";
 import Metrics from "./Metrics";
 
 // Appropriately capitalize options
@@ -214,6 +215,7 @@ class Controls extends React.Component {
           key={`video-${this.props.video.protocol}-${this.props.video.drm}`}
           onMediaEnded={this.PlayNext}
         />
+        <RecordingControls />
         { this.Metrics() }
       </React.Fragment>
     );

@@ -1,5 +1,6 @@
 import {observable, action, flow, toJS} from "mobx";
 import HLSPlayer from "../../node_modules/hls.js/dist/hls";
+import UrlJoin from "url-join";
 
 class VideoStore {
   @observable availableContent = [
@@ -21,6 +22,8 @@ class VideoStore {
 
   @observable hlsjsSupported = HLSPlayer.isSupported();
 
+
+  @observable videoType = "normal";
   @observable versionHash;
   @observable posterUrl;
   @observable metadata = {};
@@ -35,6 +38,11 @@ class VideoStore {
   }
 
   @action.bound
+  SetAvailableContent(content) {
+    this.availableContent = content;
+  }
+
+  @action.bound
   LoadVideo = flow(function * ({versionHash, protocol}) {
     this.loading = true;
     this.error = undefined;
@@ -44,22 +52,25 @@ class VideoStore {
     try {
       const { objectId } = client.utils.DecodeVersionHash(versionHash);
 
+      this.metadata = yield client.ContentObjectMetadata({versionHash});
       this.versionHash = versionHash;
       this.protocol = protocol;
+
       this.metadata = yield client.ContentObjectMetadata({versionHash});
       this.playoutOptions = yield client.PlayoutOptions({
         versionHash,
         protocols: toJS(this.rootStore.availableProtocols),
         drms: toJS(this.rootStore.availableDRMs)
       });
-      this.availableDRMs = Object.keys(this.playoutOptions[protocol].drms);
-      this.posterUrl = yield client.Rep({
-        versionHash,
-        rep: "player_background",
-        channelAuth: true
-      });
       this.authToken = yield client.GenerateStateChannelToken({objectId});
-      this.drm = this.availableDRMs[0];
+
+      if(this.metadata.offerings) {
+        yield this.LoadNormalVideo({objectId, versionHash, protocol});
+      } else if(metadata.stream_id) {
+        yield this.LoadRecording({objectId, versionHash});
+      } else {
+        yield this.LoadLiveVideo({objectId, versionHash});
+      }
     } catch(error) {
       // eslint-disable-next-line no-console
       console.error("Failed to load content:");
@@ -70,6 +81,69 @@ class VideoStore {
     }
 
     this.loading = false;
+  });
+
+
+  @action.bound
+  LoadNormalVideo = flow(function * ({objectId, versionHash, protocol}) {
+    this.videoType = "normal";
+    this.playoutOptions = yield this.rootStore.client.PlayoutOptions({
+      versionHash,
+      protocols: toJS(this.rootStore.availableProtocols),
+      drms: toJS(this.rootStore.availableDRMs)
+    });
+
+    this.authToken = yield this.rootStore.client.GenerateStateChannelToken({objectId});
+
+    this.posterUrl = yield this.rootStore.client.Rep({
+      versionHash,
+      rep: "player_background",
+      channelAuth: true
+    });
+
+    this.availableDRMs = Object.keys(this.playoutOptions[protocol].drms);
+  });
+
+  @action.bound
+  LoadLiveVideo = flow(function * ({objectId, versionHash}) {
+    this.videoType = "live";
+    const libraryId = yield this.rootStore.client.ContentObjectLibraryId({objectId});
+
+    this.playoutOptions = {
+      hls: {
+        playoutUrl: yield this.rootStore.client.Rep({
+          libraryId,
+          objectId,
+          versionHash,
+          rep: UrlJoin("live", "default", "hls-clear", "playlist.m3u8"),
+          noAuth: true
+        }),
+        drms: {}
+      }
+    };
+
+    this.availableDRMs = ["clear"];
+  });
+
+  @action.bound
+  LoadRecording = flow(function * ({objectId, versionHash}) {
+    this.videoType = "recording";
+    const libraryId = yield this.rootStore.client.ContentObjectLibraryId({objectId});
+
+    this.playoutOptions = {
+      hls: {
+        playoutUrl: yield this.rootStore.client.Rep({
+          libraryId,
+          objectId,
+          versionHash,
+          rep: UrlJoin("live", "default", "hls-clear", "playlist.m3u8"),
+          noAuth: true
+        }),
+        drms: {}
+      }
+    };
+
+    this.availableDRMs = ["clear"];
   });
 
   @action.bound

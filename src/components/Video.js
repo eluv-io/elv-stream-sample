@@ -73,7 +73,10 @@ class Video extends React.Component {
   }
 
   InitializeHLS(video, playoutUrl) {
-    const player = new HLSPlayer();
+    const player = new HLSPlayer({
+      nudgeOffset: 0.2,
+      nudgeMaxRetry: 30,
+    });
 
     player.loadSource(playoutUrl);
     player.attachMedia(video);
