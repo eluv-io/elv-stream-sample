@@ -56,8 +56,9 @@ footer {
   border: 1px solid $elv-color-mediumgray;
   border-radius: 3px;
   display: flex;
-  font-size: $elv-font-l;
-  padding: $elv-spacing-xs $elv-spacing-s;
+  font-size: $elv-font-m;
+  margin-right: $elv-spacing-xs;
+  padding: $elv-spacing-xxs $elv-spacing-xs;
   width: auto;
 
   .github-icon {

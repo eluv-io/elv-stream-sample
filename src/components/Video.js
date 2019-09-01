@@ -219,7 +219,7 @@ class Video extends React.Component {
 
   Header() {
     const selectedOption = this.props.video.availableContent
-      .find(content => content.versionHash === this.props.versionHash);
+      .find(content => content.versionHash === this.props.video.versionHash);
 
     if(selectedOption) {
       if(selectedOption.subHeader) {

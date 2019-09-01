@@ -44,6 +44,7 @@ class VideoStore {
     try {
       const { objectId } = client.utils.DecodeVersionHash(versionHash);
 
+      this.versionHash = versionHash;
       this.protocol = protocol;
       this.metadata = yield client.ContentObjectMetadata({versionHash});
       this.playoutOptions = yield client.PlayoutOptions({
