@@ -1,4 +1,4 @@
-import {observable, action, flow} from "mobx";
+import {observable, action, flow, toJS} from "mobx";
 
 class VideoStore {
   @observable availableContent = [
@@ -41,31 +41,21 @@ class VideoStore {
     try {
       const { objectId } = client.utils.DecodeVersionHash(versionHash);
 
-      const metadata = yield client.ContentObjectMetadata({versionHash});
-
-      const playoutOptions = yield client.PlayoutOptions({
+      this.protocol = protocol;
+      this.metadata = yield client.ContentObjectMetadata({versionHash});
+      this.playoutOptions = yield client.PlayoutOptions({
         versionHash,
-        protocols: [protocol],
+        protocols: toJS(this.rootStore.availableProtocols),
         drms: yield this.rootStore.AvailableDRMs()
       });
-
-      const availableDRMs = Object.keys(playoutOptions[protocol].drms);
-
-      const posterUrl = yield client.Rep({
+      this.availableDRMs = Object.keys(this.playoutOptions[protocol].drms);
+      this.posterUrl = yield client.Rep({
         versionHash,
         rep: "player_background",
         channelAuth: true
       });
-
-      const authToken = yield client.GenerateStateChannelToken({objectId});
-
-      this.metadata = metadata;
-      this.playoutOptions = playoutOptions;
-      this.availableDRMs = availableDRMs;
-      this.posterUrl = posterUrl;
-      this.authToken = authToken;
-      this.protocol = protocol;
-      this.drm = availableDRMs[0];
+      this.authToken = yield client.GenerateStateChannelToken({objectId});
+      this.drm = this.availableDRMs[0];
     } catch(error) {
       // eslint-disable-next-line no-console
       console.error("Failed to load content:");

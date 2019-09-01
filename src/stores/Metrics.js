@@ -3,6 +3,7 @@ import {observable, action} from "mobx";
 class MetricsStore {
   @observable bufferData = [];
   @observable segmentData = [];
+  @observable sampleWindow = 20;
   @observable initialTime;
 
   constructor(rootStore) {
@@ -16,10 +17,15 @@ class MetricsStore {
   }
 
   @action.bound
+  SetSampleWindow(sampleWindow) {
+    this.sampleWindow = sampleWindow;
+  }
+
+  @action.bound
   LogSegment({id, quality, size, duration, latency, downloadTime, downloadRate}) {
     this.segmentData = [
-      ...this.segmentData,
-      { id, quality, size, duration, latency, downloadTime, downloadRate }
+      { id, quality, size, duration, latency, downloadTime, downloadRate },
+      ...this.segmentData
     ];
   }
 

@@ -3,6 +3,7 @@ import {inject, observer} from "mobx-react";
 import Video from "./Video";
 import {onEnterPressed} from "elv-components-js";
 import {Action, LoadingElement, Tabs} from "elv-components-js";
+import Metrics from "./Metrics";
 
 // Appropriately capitalize options
 const Format = (string) => {
@@ -19,6 +20,7 @@ const Format = (string) => {
 
 @inject("root")
 @inject("video")
+@inject("metrics")
 @observer
 class Controls extends React.Component {
   constructor(props) {
@@ -27,8 +29,7 @@ class Controls extends React.Component {
     this.state = {
       showControls: false,
       currentVideoIndex: 0,
-      versionHash: props.video.availableContent[0].versionHash,
-      graphScale: 20
+      versionHash: props.video.availableContent[0].versionHash
     };
 
     this.LoadVideo = this.LoadVideo.bind(this);
@@ -74,7 +75,7 @@ class Controls extends React.Component {
   /* Stream Options */
 
   ProtocolSelection() {
-    const options = this.props.root.availableProtocols.map(type => [Format(type), type]);
+    const options = Object.keys(this.props.video.playoutOptions).map(type => [Format(type), type]);
 
     return (
       <div className="selection">
@@ -149,8 +150,8 @@ class Controls extends React.Component {
         <label htmlFor="protocol">Graph Scale</label>
         <Tabs
           options={options}
-          selected={this.state.graphScale}
-          onChange={value => this.setState({graphScale: value})}
+          selected={this.props.metrics.sampleWindow}
+          onChange={value => this.props.metrics.SetSampleWindow(value)}
           className="secondary"
         />
       </div>
@@ -198,11 +199,13 @@ class Controls extends React.Component {
     if(this.props.video.loading || this.props.video.error) { return null; }
 
     return (
-      <Video
-        key={`video-${this.props.video.protocol}-${this.props.video.drm}`}
-        sampleWindow={this.state.graphScale}
-        onMediaEnded={this.PlayNext}
-      />
+      <React.Fragment>
+        <Video
+          key={`video-${this.props.video.protocol}-${this.props.video.drm}`}
+          onMediaEnded={this.PlayNext}
+        />
+        <Metrics />
+      </React.Fragment>
     );
   }
 

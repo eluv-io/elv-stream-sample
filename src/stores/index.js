@@ -67,7 +67,7 @@ class RootStore {
 
 
       client = yield ElvClient.FromConfigurationUrl({
-        configUrl: "https://main.net955304.contentfabric.io/config"
+        configUrl: EluvioConfiguration["config-url"]
       });
 
       const wallet = client.GenerateWallet();

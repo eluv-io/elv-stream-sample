@@ -3,8 +3,6 @@ import PropTypes from "prop-types";
 import HLSPlayer from "../../node_modules/hls.js/dist/hls";
 import DashJS from "dashjs";
 import URI from "urijs";
-import Graph from "./Graph";
-import Segments from "./Segments";
 import Mux from "mux-embed";
 import {inject, observer} from "mobx-react";
 
@@ -241,24 +239,12 @@ class Video extends React.Component {
           controls={true}
           preload="auto"
         />
-        <div className="metrics-container">
-          <Graph
-            name="Buffer Level (s)"
-            data={this.props.metrics.bufferData}
-            color={"#00589d"}
-            windowSize={this.props.sampleWindow}
-          />
-          <Segments
-            segmentData={this.state.segmentData}
-          />
-        </div>
       </div>
     );
   }
 }
 
 Video.propTypes = {
-  sampleWindow: PropTypes.number.isRequired,
   onMediaEnded: PropTypes.func
 };
 
