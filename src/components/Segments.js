@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 
 import {inject, observer} from "mobx-react";
+import {reaction} from "mobx";
 
 @inject("metrics")
 @observer
@@ -10,23 +11,24 @@ class Segments extends React.Component {
     super(props);
 
     this.state = {
-      timingScale: 1000
+      timingScale: 2000,
+      // Each time a segment is added, recalculate the maximum segment download time
+      DisposeMaxSegmentLengthReaction: reaction(
+        () => this.props.metrics.segmentData.length,
+        () => {
+          const maxTime = Math.max(
+            ...(this.props.metrics.segmentData.map(segment => segment.duration * 1000)),
+            ...(this.props.metrics.segmentData.map(segment => segment.latency + segment.downloadTime))
+          );
+
+          this.setState({
+            timingScale: maxTime
+          });
+        }
+      )
     };
 
     this.Segment = this.Segment.bind(this);
-  }
-
-  componentDidUpdate(prevProps) {
-    if(this.props.metrics.segmentData.length === prevProps.metrics.segmentData.length) { return; }
-
-    const maxTime = Math.max(
-      ...(this.props.metrics.segmentData.map(segment => segment.duration * 1000)),
-      ...(this.props.metrics.segmentData.map(segment => segment.latency + segment.downloadTime))
-    );
-
-    this.setState({
-      timingScale: maxTime
-    });
   }
 
   Header() {

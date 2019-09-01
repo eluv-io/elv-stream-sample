@@ -1,4 +1,5 @@
 import {observable, action, flow, toJS} from "mobx";
+import HLSPlayer from "../../node_modules/hls.js/dist/hls";
 
 class VideoStore {
   @observable availableContent = [
@@ -17,6 +18,8 @@ class VideoStore {
 
   @observable loading = true;
   @observable error;
+
+  @observable hlsjsSupported = HLSPlayer.isSupported();
 
   @observable versionHash;
   @observable posterUrl;

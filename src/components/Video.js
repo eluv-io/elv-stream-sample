@@ -41,11 +41,20 @@ class Video extends React.Component {
 
     const playoutUrl = this.props.video.playoutOptions[this.props.video.protocol].playoutUrl;
 
+    // Media extensions API not supported - set up native HLS playback and skip monitoring
+    if(!this.props.video.hlsjsSupported) {
+      video.src = playoutUrl;
+      video.play();
+      this.InitializeMuxMonitoring(video, undefined, playoutUrl);
+
+      return;
+    }
+
     const player = this.props.video.protocol === "hls" ?
       this.InitializeHLS(video, playoutUrl) :
       this.InitializeDash(video, playoutUrl);
 
-    this.InitializeMuxMonitoring(player, playoutUrl);
+    this.InitializeMuxMonitoring(video, player, playoutUrl);
 
     this.setState({
       initialTime: performance.now(),
@@ -161,7 +170,7 @@ class Video extends React.Component {
     return player;
   }
 
-  InitializeMuxMonitoring(player, playoutUrl) {
+  InitializeMuxMonitoring(video, player, playoutUrl) {
     const options = {
       debug: false,
       data: {
@@ -172,16 +181,18 @@ class Video extends React.Component {
       }
     };
 
-    if(this.props.video.protocol === "hls") {
-      options.hlsjs = player;
-      options.Hls = HLSPlayer;
-      options.data.player_name = "stream-sample-hls";
-    } else {
-      options.dashjs = player;
-      options.data.player_name = "stream-sample-dash";
+    if(player) {
+      if (this.props.video.protocol === "hls") {
+        options.hlsjs = player;
+        options.Hls = HLSPlayer;
+        options.data.player_name = "stream-sample-hls";
+      } else if (this.props.video.protocol === "dash") {
+        options.dashjs = player;
+        options.data.player_name = "stream-sample-dash";
+      }
     }
 
-    Mux.monitor("video", options);
+    Mux.monitor(video, options);
   }
 
   StopSampling() {
@@ -234,10 +245,9 @@ class Video extends React.Component {
           poster={this.props.video.posterUrl}
           crossOrigin="anonymous"
           ref={this.InitializeVideo}
-          muted={false}
-          autoPlay={true}
-          controls={true}
-          preload="auto"
+          autoPlay
+          playsInline
+          controls
         />
       </div>
     );

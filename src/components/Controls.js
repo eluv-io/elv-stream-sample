@@ -195,6 +195,12 @@ class Controls extends React.Component {
     );
   }
 
+  Metrics() {
+    if(!this.props.video.hlsjsSupported) { return null; }
+
+    return <Metrics />;
+  }
+
   Video() {
     if(this.props.video.loading || this.props.video.error) { return null; }
 
@@ -204,7 +210,7 @@ class Controls extends React.Component {
           key={`video-${this.props.video.protocol}-${this.props.video.drm}`}
           onMediaEnded={this.PlayNext}
         />
-        <Metrics />
+        { this.Metrics() }
       </React.Fragment>
     );
   }
@@ -213,7 +219,7 @@ class Controls extends React.Component {
     return (
       <div className="controls-container">
         { this.ContentSelection() }
-        <LoadingElement loading={this.props.video.loading && !this.props.video.error} fullPage={true}>
+        <LoadingElement loading={this.props.video.loading && !this.props.video.error} fullPage>
           { this.ErrorMessage() }
           { this.Video() }
           { this.ControlsSection() }
