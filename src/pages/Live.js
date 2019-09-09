@@ -19,13 +19,7 @@ class App extends React.Component {
   constructor(props) {
     super(props);
 
-    props.video.SetAvailableContent([
-      {
-        title: "Sky News Live Stream",
-        versionHash: "hq__A7k6WSik267szY7rdYRbLfhudH2DJn38WCDDd8FAzmcHdMM4LmWAMDqzAZuPrDJpPzt2gxbkAr",
-        header: "Sky News Live Stream"
-      }
-    ]);
+    props.video.SetAvailableContent([]);
   }
 
   SourceLink() {

@@ -29,10 +29,14 @@ class Controls extends React.Component {
 
     const urlParams = new URLSearchParams(window.location.search);
 
+    const initialVersionHash =
+      urlParams.get("versionHash") ||
+        props.video.availableContent.length > 0 ? props.video.availableContent[0].versionHash : "";
+
     this.state = {
       showControls: false,
       currentVideoIndex: 0,
-      versionHash: urlParams.get("versionHash") || props.video.availableContent[0].versionHash
+      versionHash: initialVersionHash
     };
 
     this.LoadVideo = this.LoadVideo.bind(this);
@@ -221,15 +225,25 @@ class Controls extends React.Component {
     );
   }
 
+  Content() {
+    if(!this.props.video.versionHash) {
+      return null;
+    }
+
+    return (
+      <LoadingElement loading={this.props.video.loading && !this.props.video.error} fullPage>
+        { this.ErrorMessage() }
+        { this.Video() }
+        { this.ControlsSection() }
+      </LoadingElement>
+    );
+  }
+
   render() {
     return (
       <div className="controls-container">
         { this.ContentSelection() }
-        <LoadingElement loading={this.props.video.loading && !this.props.video.error} fullPage>
-          { this.ErrorMessage() }
-          { this.Video() }
-          { this.ControlsSection() }
-        </LoadingElement>
+        { this.Content() }
       </div>
     );
   }

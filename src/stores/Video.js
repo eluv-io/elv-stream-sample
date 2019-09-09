@@ -50,26 +50,16 @@ class VideoStore {
     const client = this.rootStore.client;
 
     try {
-      const { objectId } = client.utils.DecodeVersionHash(versionHash);
-
       this.metadata = yield client.ContentObjectMetadata({versionHash});
       this.versionHash = versionHash;
       this.protocol = protocol;
 
-      this.metadata = yield client.ContentObjectMetadata({versionHash});
-      this.playoutOptions = yield client.PlayoutOptions({
-        versionHash,
-        protocols: toJS(this.rootStore.availableProtocols),
-        drms: toJS(this.rootStore.availableDRMs)
-      });
-      this.authToken = yield client.GenerateStateChannelToken({objectId});
-
       if(this.metadata.offerings) {
-        yield this.LoadNormalVideo({objectId, versionHash, protocol});
-      } else if(metadata.stream_id) {
-        yield this.LoadRecording({objectId, versionHash});
+        yield this.LoadNormalVideo({versionHash, protocol});
+      } else if(this.metadata.stream_id) {
+        yield this.LoadRecording({versionHash});
       } else {
-        yield this.LoadLiveVideo({objectId, versionHash});
+        yield this.LoadLiveVideo({versionHash});
       }
     } catch(error) {
       // eslint-disable-next-line no-console
@@ -85,7 +75,7 @@ class VideoStore {
 
 
   @action.bound
-  LoadNormalVideo = flow(function * ({objectId, versionHash, protocol}) {
+  LoadNormalVideo = flow(function * ({versionHash, protocol}) {
     this.videoType = "normal";
     this.playoutOptions = yield this.rootStore.client.PlayoutOptions({
       versionHash,
@@ -93,7 +83,7 @@ class VideoStore {
       drms: toJS(this.rootStore.availableDRMs)
     });
 
-    this.authToken = yield this.rootStore.client.GenerateStateChannelToken({objectId});
+    this.authToken = yield this.rootStore.client.GenerateStateChannelToken({versionHash});
 
     this.posterUrl = yield this.rootStore.client.Rep({
       versionHash,
@@ -105,15 +95,12 @@ class VideoStore {
   });
 
   @action.bound
-  LoadLiveVideo = flow(function * ({objectId, versionHash}) {
+  LoadLiveVideo = flow(function * ({versionHash}) {
     this.videoType = "live";
-    const libraryId = yield this.rootStore.client.ContentObjectLibraryId({objectId});
 
     this.playoutOptions = {
       hls: {
         playoutUrl: yield this.rootStore.client.Rep({
-          libraryId,
-          objectId,
           versionHash,
           rep: UrlJoin("live", "default", "hls-clear", "playlist.m3u8"),
           noAuth: true
@@ -126,15 +113,12 @@ class VideoStore {
   });
 
   @action.bound
-  LoadRecording = flow(function * ({objectId, versionHash}) {
+  LoadRecording = flow(function * ({versionHash}) {
     this.videoType = "recording";
-    const libraryId = yield this.rootStore.client.ContentObjectLibraryId({objectId});
 
     this.playoutOptions = {
       hls: {
         playoutUrl: yield this.rootStore.client.Rep({
-          libraryId,
-          objectId,
           versionHash,
           rep: UrlJoin("live", "default", "hls-clear", "playlist.m3u8"),
           noAuth: true
