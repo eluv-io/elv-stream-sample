@@ -73,8 +73,6 @@ class Video extends React.Component {
   }
 
   InitializeHLS(video, playoutUrl) {
-    playoutUrl = URI(playoutUrl).addSearch("player_profile", "hls-js").toString();
-
     const player = new HLSPlayer();
 
     player.loadSource(playoutUrl);

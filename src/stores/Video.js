@@ -50,7 +50,7 @@ class VideoStore {
       this.playoutOptions = yield client.PlayoutOptions({
         versionHash,
         protocols: toJS(this.rootStore.availableProtocols),
-        drms: yield this.rootStore.AvailableDRMs()
+        drms: toJS(this.rootStore.availableDRMs)
       });
       this.availableDRMs = Object.keys(this.playoutOptions[protocol].drms);
       this.posterUrl = yield client.Rep({

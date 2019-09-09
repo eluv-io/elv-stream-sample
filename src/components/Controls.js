@@ -26,10 +26,12 @@ class Controls extends React.Component {
   constructor(props) {
     super(props);
 
+    const urlParams = new URLSearchParams(window.location.search);
+
     this.state = {
       showControls: false,
       currentVideoIndex: 0,
-      versionHash: props.video.availableContent[0].versionHash
+      versionHash: urlParams.get("versionHash") || props.video.availableContent[0].versionHash
     };
 
     this.LoadVideo = this.LoadVideo.bind(this);
@@ -107,6 +109,8 @@ class Controls extends React.Component {
   }
 
   ContentSelection() {
+    if(this.props.noSelection) { return; }
+
     const availableContentOptions =
       this.props.video.availableContent.map(({title, versionHash}) => [title, versionHash]);
 
