@@ -46,7 +46,6 @@ class RootStore {
 
       client.SetSigner({signer});
     } else {
-
       // Contained in IFrame
       client = new FrameClient({
         target: window.parent,
@@ -71,7 +70,7 @@ class RootStore {
     this.availableProtocols = availableProtocols;
     this.balance = balance;
 
-    this.recordingsStore.InitializeRecordingsLibrary();
+    //this.recordingsStore.InitializeRecordingsLibrary();
   })
 }
 

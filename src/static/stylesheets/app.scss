@@ -2,18 +2,18 @@
 @import "~elv-components-js/src/stylesheets/styles";
 
 html {
+  color: $elv-color-text-dark;
   font-size: 16px;
 }
 
-.app {
-  color: $elv-color-text-dark;
-  height: 100%;
-}
-
-.app-container {
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-  min-height: 100%;
+body,
+.app,
+.app-container,
+main,
+.controls-container {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
 }
 
 header {
@@ -82,8 +82,7 @@ footer {
 .controls-container {
   display: flex;
   flex-direction: column;
-  height: 100%;
-  width: 70rem;
+  width: 75rem;
 
   .control-block {
     align-items: center;
@@ -99,6 +98,14 @@ footer {
     & > * {
       margin-bottom: $elv-spacing-s;
     }
+
+    input {
+      font-size: $elv-font-m;
+      height: 2.2rem;
+      margin: $elv-spacing-xs;
+      padding: $elv-spacing-xs;
+      width: 100%;
+    }
   }
 
   h4 {
@@ -106,31 +113,6 @@ footer {
     margin: 0 0 $elv-spacing-s;
     text-align: center;
     width: 100%;
-  }
-
-  .content-selection {
-    flex-direction: row;
-    flex-wrap: wrap;
-    margin: $elv-spacing-s auto $elv-spacing-xs;
-    padding-bottom: $elv-spacing-xxs;
-    width: 30rem;
-
-    .available-content {
-      margin-bottom: $elv-spacing-s;
-    }
-
-    input {
-      flex-grow: 1;
-      font-size: $elv-font-m;
-      height: 2.2rem;
-      padding: $elv-spacing-xs;
-    }
-
-    button {
-      font-size: 0.9rem;
-      height: 2.2rem;
-      margin-left: $elv-spacing-xs;
-    }
   }
 
   .selection {
@@ -159,21 +141,20 @@ footer {
   }
 
   .controls {
+    display: flex;
     margin-top: $elv-spacing-s;
 
     &.hidden {
       display: none;
     }
+
+    &.centered {
+      justify-content: center;
+    }
   }
 }
 
 .video-container {
-  align-items: center;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  width: 100%;
-
   h1 {
     font-size: $elv-font-xxl;
     font-weight: normal;
@@ -184,6 +165,8 @@ footer {
   video {
     background-color: $elv-color-bg-black;
     cursor: pointer;
+    height: 45vh;
+    max-height: 45vh;
     max-width: 100%;
     width: 100%;
   }
@@ -204,15 +187,20 @@ footer {
 
 .metrics-container {
   display: flex;
-  height: 20rem;
+  flex: 1 1 auto;
   justify-content: space-between;
-  margin: $elv-spacing-s 0 0;
+  margin: $elv-spacing-m 0;
+  max-height: 25vh;
   width: 100%;
 
   .graph-container {
     flex-grow: 0;
     margin: 0;
     padding: 0;
+
+    svg {
+      height: 25vh !important; // sass-lint:disable-line no-important
+    }
   }
 
   h3 {
@@ -236,6 +224,7 @@ footer {
     grid-template-columns: 3rem 1fr 6rem 8rem 2fr;
     height: 100%;
     margin-top: $elv-spacing-xxs;
+    max-height: 100%;
     overflow-y: scroll;
     width: 100%;
 
@@ -439,7 +428,7 @@ footer {
   }
 
   .controls-container {
-    width: 50rem;
+    width: 55rem;
   }
 }
 
@@ -449,7 +438,7 @@ footer {
   }
 
   .controls-container {
-    width: 50rem;
+    width: 55rem;
   }
 }
 

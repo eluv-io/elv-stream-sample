@@ -193,7 +193,14 @@ class Video extends React.Component {
       }
     }
 
-    Mux.monitor(video, options);
+    try {
+      Mux.monitor(video, options);
+    } catch(error) {
+      // eslint-disable-next-line no-console
+      console.error("Failed to initialize mux monitoring:");
+      // eslint-disable-next-line no-console
+      console.error(error);
+    }
   }
 
   StopSampling() {

@@ -31,7 +31,7 @@ class Controls extends React.Component {
 
     const initialVersionHash =
       urlParams.get("versionHash") ||
-        props.video.availableContent.length > 0 ? props.video.availableContent[0].versionHash : "";
+      (props.video.availableContent.length > 0 ? props.video.availableContent[0].versionHash : "");
 
     this.state = {
       showControls: false,
@@ -43,12 +43,22 @@ class Controls extends React.Component {
     this.PlayNext = this.PlayNext.bind(this);
   }
 
+  ShowControls() {
+    if(this.props.video.loading) {
+      return false;
+    }
+
+    return this.props.video.error || this.state.showControls || !this.props.video.versionHash;
+  }
+
   async componentDidMount() {
     await this.LoadVideo(this.props.video.protocol);
   }
 
   async LoadVideo(protocol) {
     if(!this.state.versionHash) { return; }
+
+    this.setState({showControls: false});
 
     await this.props.video.LoadVideo({
       versionHash: this.state.versionHash,
@@ -120,7 +130,7 @@ class Controls extends React.Component {
       this.props.video.availableContent.map(({title, versionHash}) => [title, versionHash]);
 
     return (
-      <div className="control-block content-selection">
+      <div className="control-block">
         <Tabs
           options={availableContentOptions}
           selected={this.state.versionHash}
@@ -141,7 +151,7 @@ class Controls extends React.Component {
           onKeyPress={onEnterPressed(() => this.LoadVideo(this.props.video.protocol))}
         />
         <Action onClick={() => this.LoadVideo(this.props.video.protocol)}>
-          Load
+          Load Content
         </Action>
       </div>
     );
@@ -183,21 +193,25 @@ class Controls extends React.Component {
   }
 
   ControlsSection() {
-    if(this.props.video.error) { return null; }
+    let toggleButton;
+    if(!this.props.video.loading && !this.props.video.error) {
+      toggleButton = (
+        <div
+          onClick={() => this.setState({showControls: !this.state.showControls})}
+          className="toggle-controls"
+        >
+          {this.ShowControls() ? "▲ Hide Controls" : "▼ Show Controls"}
+        </div>
+      );
+    }
 
-    const toggleButton = (
-      <div
-        onClick={() => this.setState({showControls: !this.state.showControls})}
-        className="toggle-controls"
-      >
-        {this.state.showControls ? "▲ Hide Controls" : "▼ Show Controls"}
-      </div>
-    );
+    const notLoaded = !!this.props.video.error || !this.props.video.versionHash;
 
     return (
       <React.Fragment>
         { toggleButton }
-        <div className={`controls ${this.state.showControls ? "" : "hidden"}`}>
+        <div className={`controls ${this.ShowControls() ? "" : "hidden"} ${notLoaded ? "centered" : ""}`}>
+          { this.ContentSelection() }
           { this.StreamOptions() }
         </div>
       </React.Fragment>
@@ -232,9 +246,7 @@ class Controls extends React.Component {
 
     return (
       <LoadingElement loading={this.props.video.loading && !this.props.video.error} fullPage>
-        { this.ErrorMessage() }
         { this.Video() }
-        { this.ControlsSection() }
       </LoadingElement>
     );
   }
@@ -242,8 +254,9 @@ class Controls extends React.Component {
   render() {
     return (
       <div className="controls-container">
-        { this.ContentSelection() }
+        { this.ErrorMessage() }
         { this.Content() }
+        { this.ControlsSection() }
       </div>
     );
   }

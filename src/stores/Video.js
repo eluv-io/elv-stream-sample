@@ -1,6 +1,5 @@
 import {observable, action, flow, toJS} from "mobx";
 import HLSPlayer from "../../node_modules/hls.js/dist/hls";
-import UrlJoin from "url-join";
 
 class VideoStore {
   @observable availableContent = [
@@ -21,7 +20,6 @@ class VideoStore {
   @observable error;
 
   @observable hlsjsSupported = HLSPlayer.isSupported();
-
 
   @observable videoType = "normal";
   @observable versionHash;
@@ -55,12 +53,14 @@ class VideoStore {
       this.protocol = protocol;
 
       if(this.metadata.offerings) {
-        yield this.LoadNormalVideo({versionHash, protocol});
+        this.videoType = "normal";
       } else if(this.metadata.stream_id) {
-        yield this.LoadRecording({versionHash});
+        this.videoType = "recording";
       } else {
-        yield this.LoadLiveVideo({versionHash});
+        this.videoType = "live";
       }
+
+      yield this.LoadVideoPlayout({versionHash, protocol});
     } catch(error) {
       // eslint-disable-next-line no-console
       console.error("Failed to load content:");
@@ -75,13 +75,21 @@ class VideoStore {
 
 
   @action.bound
-  LoadNormalVideo = flow(function * ({versionHash, protocol}) {
+  LoadVideoPlayout = flow(function * ({versionHash, protocol}) {
     this.videoType = "normal";
     this.playoutOptions = yield this.rootStore.client.PlayoutOptions({
       versionHash,
       protocols: toJS(this.rootStore.availableProtocols),
       drms: toJS(this.rootStore.availableDRMs)
     });
+
+    // No DRM based playback available - try clear
+    if(Object.keys(this.playoutOptions).length === 0) {
+      this.playoutOptions = yield this.rootStore.client.PlayoutOptions({
+        versionHash,
+        protocols: toJS(this.rootStore.availableProtocols)
+      });
+    }
 
     this.authToken = yield this.rootStore.client.GenerateStateChannelToken({versionHash});
 
@@ -91,43 +99,7 @@ class VideoStore {
       channelAuth: true
     });
 
-    this.availableDRMs = Object.keys(this.playoutOptions[protocol].drms);
-  });
-
-  @action.bound
-  LoadLiveVideo = flow(function * ({versionHash}) {
-    this.videoType = "live";
-
-    this.playoutOptions = {
-      hls: {
-        playoutUrl: yield this.rootStore.client.Rep({
-          versionHash,
-          rep: UrlJoin("live", "default", "hls-clear", "playlist.m3u8"),
-          noAuth: true
-        }),
-        drms: {}
-      }
-    };
-
-    this.availableDRMs = ["clear"];
-  });
-
-  @action.bound
-  LoadRecording = flow(function * ({versionHash}) {
-    this.videoType = "recording";
-
-    this.playoutOptions = {
-      hls: {
-        playoutUrl: yield this.rootStore.client.Rep({
-          versionHash,
-          rep: UrlJoin("live", "default", "hls-clear", "playlist.m3u8"),
-          noAuth: true
-        }),
-        drms: {}
-      }
-    };
-
-    this.availableDRMs = ["clear"];
+    this.availableDRMs = Object.keys(this.playoutOptions[protocol].drms || {});
   });
 
   @action.bound

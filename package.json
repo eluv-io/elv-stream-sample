@@ -28,7 +28,6 @@
       "build",
       "build-dev",
       "build-display-app",
-      "build-live",
       "add-build"
     ]
   },
