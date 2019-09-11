@@ -21,6 +21,7 @@ class VideoStore {
 
   @observable hlsjsSupported = HLSPlayer.isSupported();
 
+  @observable videoType = "normal";
   @observable versionHash;
   @observable posterUrl;
   @observable metadata = {};
@@ -35,6 +36,11 @@ class VideoStore {
   }
 
   @action.bound
+  SetAvailableContent(content) {
+    this.availableContent = content;
+  }
+
+  @action.bound
   LoadVideo = flow(function * ({versionHash, protocol}) {
     this.loading = true;
     this.error = undefined;
@@ -42,24 +48,19 @@ class VideoStore {
     const client = this.rootStore.client;
 
     try {
-      const { objectId } = client.utils.DecodeVersionHash(versionHash);
-
+      this.metadata = yield client.ContentObjectMetadata({versionHash});
       this.versionHash = versionHash;
       this.protocol = protocol;
-      this.metadata = yield client.ContentObjectMetadata({versionHash});
-      this.playoutOptions = yield client.PlayoutOptions({
-        versionHash,
-        protocols: toJS(this.rootStore.availableProtocols),
-        drms: toJS(this.rootStore.availableDRMs)
-      });
-      this.availableDRMs = Object.keys(this.playoutOptions[protocol].drms);
-      this.posterUrl = yield client.Rep({
-        versionHash,
-        rep: "player_background",
-        channelAuth: true
-      });
-      this.authToken = yield client.GenerateStateChannelToken({objectId});
-      this.drm = this.availableDRMs[0];
+
+      if(this.metadata.offerings) {
+        this.videoType = "normal";
+      } else if(this.metadata.stream_id) {
+        this.videoType = "recording";
+      } else {
+        this.videoType = "live";
+      }
+
+      yield this.LoadVideoPlayout({versionHash, protocol});
     } catch(error) {
       // eslint-disable-next-line no-console
       console.error("Failed to load content:");
@@ -70,6 +71,35 @@ class VideoStore {
     }
 
     this.loading = false;
+  });
+
+
+  @action.bound
+  LoadVideoPlayout = flow(function * ({versionHash, protocol}) {
+    this.videoType = "normal";
+    this.playoutOptions = yield this.rootStore.client.PlayoutOptions({
+      versionHash,
+      protocols: toJS(this.rootStore.availableProtocols),
+      drms: toJS(this.rootStore.availableDRMs)
+    });
+
+    // No DRM based playback available - try clear
+    if(Object.keys(this.playoutOptions).length === 0) {
+      this.playoutOptions = yield this.rootStore.client.PlayoutOptions({
+        versionHash,
+        protocols: toJS(this.rootStore.availableProtocols)
+      });
+    }
+
+    this.authToken = yield this.rootStore.client.GenerateStateChannelToken({versionHash});
+
+    this.posterUrl = yield this.rootStore.client.Rep({
+      versionHash,
+      rep: "player_background",
+      channelAuth: true
+    });
+
+    this.availableDRMs = Object.keys(this.playoutOptions[protocol].drms || {});
   });
 
   @action.bound

@@ -13,10 +13,13 @@ import Logo from "../static/images/Logo.png";
 import GithubIcon from "../static/icons/github.svg";
 
 @inject("root")
+@inject("video")
 @observer
 class App extends React.Component {
   constructor(props) {
     super(props);
+
+    props.video.SetAvailableContent([]);
   }
 
   SourceLink() {
@@ -45,7 +48,7 @@ class App extends React.Component {
         <header>
           <IconLink href="https://eluv.io" className="logo" icon={Logo} label="Eluvio"/>
           <h1>
-            Video Streaming Sample
+            Live Video Streaming Sample
           </h1>
         </header>
         <main>
