@@ -34,7 +34,7 @@ class Controls extends React.Component {
       (props.video.availableContent.length > 0 ? props.video.availableContent[0].versionHash : "");
 
     this.state = {
-      showControls: false,
+      showControls: true,
       currentVideoIndex: 0,
       versionHash: initialVersionHash
     };
@@ -58,7 +58,7 @@ class Controls extends React.Component {
   async LoadVideo(protocol) {
     if(!this.state.versionHash) { return; }
 
-    this.setState({showControls: false});
+    this.setState({showControls: true});
 
     await this.props.video.LoadVideo({
       versionHash: this.state.versionHash,

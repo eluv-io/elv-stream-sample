@@ -2,19 +2,7 @@ import {observable, action, flow, toJS} from "mobx";
 import HLSPlayer from "../../node_modules/hls.js/dist/hls";
 
 class VideoStore {
-  @observable availableContent = [
-    {
-      title: "MGM Trailer (4K)",
-      versionHash: "hq__EAt4BVedkShkEJxZX7CTiFvhdg7zpwZdaS2cQua9u4bwehBCyeKeFZT5MDYwUMRDMES94Z44M1",
-      header: "4K Trailer",
-      subHeader: "Used with permission of MGM"
-    },
-    {
-      title: "Big Buck Bunny (4K)",
-      versionHash: "hq__BD1BouHkFraAcDjvoyHoiKpVhf4dXzNsDT5USe8mrZ7YDhLPDoZGnoU32iZvDYiQW8vVi6X7rV",
-      header: "Big Buck Bunny (4K)"
-    }
-  ];
+  @observable availableContent = EluvioConfiguration.availableContent || [];
 
   @observable loading = true;
   @observable error;

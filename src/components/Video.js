@@ -44,7 +44,6 @@ class Video extends React.Component {
     // Media extensions API not supported - set up native HLS playback and skip monitoring
     if(!this.props.video.hlsjsSupported) {
       video.src = playoutUrl;
-      video.play();
       this.InitializeMuxMonitoring(video, undefined, playoutUrl);
 
       return;
@@ -253,7 +252,6 @@ class Video extends React.Component {
           poster={this.props.video.posterUrl}
           crossOrigin="anonymous"
           ref={this.InitializeVideo}
-          autoPlay
           playsInline
           controls
         />
