@@ -14,6 +14,7 @@ import GithubIcon from "../static/icons/github.svg";
 import Tabs from "elv-components-js/src/components/Tabs";
 
 @inject("root")
+@inject("video")
 @observer
 class App extends React.Component {
   constructor(props) {
@@ -24,21 +25,76 @@ class App extends React.Component {
     };
   }
 
-  FabricUrlSelection() {
-    if(!this.props.root.client) { return; }
-
-    const options = this.props.root.client.HttpClient.uris.map((uri, i) => [uri, i]);
+  RegionSelection() {
+    const regions = [
+      ["auto", ""],
+      ["na-west-north", "na-west-north"],
+      ["na-west-south", "na-west-south"],
+      ["na-east", "na-east"],
+      ["eu-west", "eu-west"]
+    ];
 
     return (
-      <Tabs
-        className="vertical-tabs secondary"
-        selected={this.props.root.client.HttpClient.uriIndex}
-        options={options}
-        onChange={i => {
-          this.props.root.client.HttpClient.uriIndex = i;
-          this.setState({version: this.state.version + 1});
-        }}
-      />
+      <React.Fragment>
+        <h3>Region</h3>
+        <Tabs
+          className="vertical-tabs secondary region-selection"
+          selected={this.props.root.region}
+          options={regions}
+          onChange={region => {
+            this.props.root.InitializeClient(region);
+          }}
+        />
+      </React.Fragment>
+    );
+  }
+
+  NodeInfo() {
+    return (
+      <React.Fragment>
+        <h3>Fabric Nodes</h3>
+        { this.props.root.nodes.fabricURIs.map(uri =>
+          <div key={`fabric-uri-${uri}`} className="node-uri">{uri}</div>
+        )}
+        <h3>Blockchain Nodes</h3>
+        { this.props.root.nodes.ethereumURIs.map(uri =>
+          <div key={`blockchain-uri-${uri}`} className="node-uri">{uri}</div>
+        )}
+      </React.Fragment>
+    );
+  }
+
+  PlayoutInfo() {
+    if(!this.props.video.playoutOptions) { return; }
+
+    return (
+      <React.Fragment>
+        <h3>Playout URLs</h3>
+        {Object.keys(this.props.video.playoutOptions).map(protocol => {
+          return (
+            <React.Fragment>
+              <h4>{protocol}</h4>
+              <div className="node-uri">{this.props.video.playoutOptions[protocol].playoutUrl}</div>
+            </React.Fragment>
+          );
+        })}
+      </React.Fragment>
+    );
+  }
+
+  AdvancedOptions() {
+    if(!this.props.root.client) { return; }
+
+    return (
+      <div className="advanced-options node-info controls-container">
+        <div className="controls">
+          <div className="control-block">
+            { this.RegionSelection() }
+            { this.NodeInfo() }
+            { this.PlayoutInfo() }
+          </div>
+        </div>
+      </div>
     );
   }
 
@@ -58,7 +114,9 @@ class App extends React.Component {
     }
 
     return (
-      <Controls />
+      <React.Fragment>
+        <Controls />
+      </React.Fragment>
     );
   }
 
@@ -72,9 +130,9 @@ class App extends React.Component {
           </h1>
         </header>
         <main>
-          { this.App() }
-          <div className="advanced-options">
-            { this.FabricUrlSelection() }
+          <div className="two-column">
+            { this.App() }
+            { this.AdvancedOptions() }
           </div>
         </main>
         <footer>

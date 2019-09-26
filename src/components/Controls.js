@@ -44,7 +44,7 @@ class Controls extends React.Component {
   }
 
   ShowControls() {
-    if(this.props.video.loading) {
+    if(this.props.video.versionHash && this.props.video.loading) {
       return false;
     }
 

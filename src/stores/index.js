@@ -12,6 +12,8 @@ configure({
 
 class RootStore {
   @observable client;
+  @observable region;
+  @observable nodes;
   @observable balance = 0;
   @observable availableProtocols = ["hls"];
   @observable availableDRMs = ["aes-128"];
@@ -25,7 +27,9 @@ class RootStore {
   }
 
   @action.bound
-  InitializeClient = flow(function * () {
+  InitializeClient = flow(function * (region="") {
+    this.client = undefined;
+
     let client;
 
     // Initialize ElvClient or FrameClient
@@ -37,7 +41,8 @@ class RootStore {
       )).ElvClient;
 
       client = yield ElvClient.FromConfigurationUrl({
-        configUrl: EluvioConfiguration["config-url"]
+        configUrl: EluvioConfiguration["config-url"],
+        region
       });
 
       const wallet = client.GenerateWallet();
@@ -51,7 +56,13 @@ class RootStore {
         target: window.parent,
         timeout: 30
       });
+
+      if(region) {
+        yield client.UseRegion({region});
+      }
     }
+
+    this.nodes = yield client.Nodes();
 
     this.availableDRMs = yield client.AvailableDRMs();
 
@@ -67,10 +78,9 @@ class RootStore {
     }
 
     this.client = client;
+    this.region = region;
     this.availableProtocols = availableProtocols;
     this.balance = balance;
-
-    //this.recordingsStore.InitializeRecordingsLibrary();
   })
 }
 

@@ -60,10 +60,12 @@ Note that the more the account is used for, the more valuable the account become
 ```javascript
 const versionHash = "hq__BD1BouHkFraAcDjvoyHoiKpVhf4dXzNsDT5USe8mrZ7YDhLPDoZGnoU32iZvDYiQW8vVi6X7rV";
         
+const availableDRMs = await client.AvailableDRMs()
+
 const playoutOptions = await client.PlayoutOptions({
   versionHash,
   protocols: ["dash", "hls"],
-  drms: await AvailableDRMs()
+  drms: availableDRMs 
 });
 ```
 
@@ -71,16 +73,13 @@ Now that the client is set up, we can use it to query the Fabric for information
 
 In this method, we specify which protocols we may want to play (Dash and HLS) as well as what DRM we support, and the fabric will respond with all the information we need to play the content in those configurations, depending on what the configuration the content itself supports. 
 
-DRM support is determined in the following method:
+DRM support is determined by the client in the AvailableDRMs method with the following logic:
 
 ```javascript
 const AvailableDRMs = async () => {
   const availableDRMs = ["aes-128"];
 
   if(typeof window.navigator.requestMediaKeySystemAccess !== "function") {
-    // eslint-disable-next-line no-console
-    console.log("requestMediaKeySystemAccess not available");
-
     return availableDRMs;
   }
 
