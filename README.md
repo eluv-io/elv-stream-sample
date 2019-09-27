@@ -34,7 +34,7 @@ In this example, we are using [dash.js](https://github.com/Dash-Industry-Forum/d
 Here we are importing the minified Eluvio JavaScript client from GitHub using jsDelivr. The client is also available on [NPM](https://www.npmjs.com/package/@eluvio/elv-client-js). For more information, check the [client documentation](https://github.com/eluv-io/elv-client-js).
 
 ```javascript
-const configUrl = "https://main.net955304.contentfabric.io/config";
+const configUrl = "https://demo.net955210.contentfabric.io/config";
 const client = await ElvClient.FromConfigurationUrl({configUrl});
 
 const wallet = client.GenerateWallet();
@@ -58,9 +58,9 @@ Note that the more the account is used for, the more valuable the account become
 #### Step 2 - Access the content
 
 ```javascript
-const versionHash = "hq__BD1BouHkFraAcDjvoyHoiKpVhf4dXzNsDT5USe8mrZ7YDhLPDoZGnoU32iZvDYiQW8vVi6X7rV";
+const versionHash = "hq__B1WL1oJa9MCiRpWXBmaoHtAwQdgNGKU36vazGDjjg9e8xS7uQADLct8j5NByXG3qnNAVQ7DcTh";
         
-const availableDRMs = await client.AvailableDRMs()
+const availableDRMs = await client.AvailableDRMs();
 
 const playoutOptions = await client.PlayoutOptions({
   versionHash,

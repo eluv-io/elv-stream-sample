@@ -52,7 +52,7 @@
       };
 
       const Load = async () => {
-        const configUrl = "https://main.net955210.contentfabric.io/config";
+        const configUrl = "https://demo.net955210.contentfabric.io/config";
 
         const client = await ElvClient.FromConfigurationUrl({configUrl});
 
@@ -62,7 +62,7 @@
 
         await client.SetSigner({signer});
 
-        const versionHash = "hq__4SXcwQoS1EGzcR6DCsn2n3jtDkt3vmATfcEsxrKMViR4iYaCwX7oVsdoYad62EVr4GxCGkksEv";
+        const versionHash = "hq__B1WL1oJa9MCiRpWXBmaoHtAwQdgNGKU36vazGDjjg9e8xS7uQADLct8j5NByXG3qnNAVQ7DcTh";
 
         const availableDRMs = await client.AvailableDRMs();
 
