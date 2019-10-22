@@ -58,9 +58,19 @@ Note that the more the account is used for, the more valuable the account become
 #### Step 2 - Access the content
 
 ```javascript
-const versionHash = "hq__B1WL1oJa9MCiRpWXBmaoHtAwQdgNGKU36vazGDjjg9e8xS7uQADLct8j5NByXG3qnNAVQ7DcTh";
-        
 const availableDRMs = await client.AvailableDRMs();
+
+// Play the latest version of the content
+const objectId = "iq__3MRbyPWE1EwEnPb2uNgVPHgF57Qj";
+
+const playoutOptions = await client.PlayoutOptions({
+  objectId,
+  protocols: ["dash", "hls"],
+  drms: availableDRMs 
+});
+
+// Play a specific version of the content
+const versionHash = "hq__B1WL1oJa9MCiRpWXBmaoHtAwQdgNGKU36vazGDjjg9e8xS7uQADLct8j5NByXG3qnNAVQ7DcTh";
 
 const playoutOptions = await client.PlayoutOptions({
   versionHash,
@@ -69,7 +79,7 @@ const playoutOptions = await client.PlayoutOptions({
 });
 ```
 
-Now that the client is set up, we can use it to query the Fabric for information on how to play out content. Our content is represented by a version hash. For more information about how content on the Fabric is identified, see the [client documentation](https://github.com/eluv-io/elv-client-js).
+Now that the client is set up, we can use it to query the Fabric for information on how to play out content. Our content is represented by either an object ID (referring to content) or a version hash (referring to a specific version of content). For more information about how content on the Fabric is identified, see the [client documentation](https://github.com/eluv-io/elv-client-js).
 
 In this method, we specify which protocols we may want to play (Dash and HLS) as well as what DRM we support, and the fabric will respond with all the information we need to play the content in those configurations, depending on what the configuration the content itself supports. 
 
