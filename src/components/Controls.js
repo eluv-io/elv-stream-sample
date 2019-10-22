@@ -3,7 +3,6 @@ import {inject, observer} from "mobx-react";
 import Video from "./Video";
 import {onEnterPressed} from "elv-components-js";
 import {Action, LoadingElement, Tabs} from "elv-components-js";
-import RecordingControls from "./RecordingControls";
 import Metrics from "./Metrics";
 
 // Appropriately capitalize options
@@ -29,14 +28,15 @@ class Controls extends React.Component {
 
     const urlParams = new URLSearchParams(window.location.search);
 
-    const initialVersionHash =
+    const initialContentId =
+      urlParams.get("objectId") ||
       urlParams.get("versionHash") ||
       (props.video.availableContent.length > 0 ? props.video.availableContent[0].versionHash : "");
 
     this.state = {
       showControls: true,
       currentVideoIndex: 0,
-      versionHash: initialVersionHash
+      contentId: initialContentId
     };
 
     this.LoadVideo = this.LoadVideo.bind(this);
@@ -44,11 +44,11 @@ class Controls extends React.Component {
   }
 
   ShowControls() {
-    if(this.props.video.versionHash && this.props.video.loading) {
+    if(this.props.video.contentId && this.props.video.loading) {
       return false;
     }
 
-    return this.props.video.error || this.state.showControls || !this.props.video.versionHash;
+    return this.props.video.error || this.state.showControls || !this.props.video.contentId;
   }
 
   async componentDidMount() {
@@ -56,12 +56,12 @@ class Controls extends React.Component {
   }
 
   async LoadVideo(protocol) {
-    if(!this.state.versionHash) { return; }
+    if(!this.state.contentId) { return; }
 
     this.setState({showControls: true});
 
     await this.props.video.LoadVideo({
-      versionHash: this.state.versionHash,
+      contentId: this.state.contentId,
       protocol: protocol
     });
   }
@@ -110,6 +110,8 @@ class Controls extends React.Component {
   DrmSelection() {
     const options = this.props.video.availableDRMs.map(drm => [Format(drm), drm]);
 
+    if(options.length === 0) { return; }
+
     return (
       <div className="selection">
         <label htmlFor="drm">DRM</label>
@@ -133,10 +135,10 @@ class Controls extends React.Component {
       <div className="control-block">
         <Tabs
           options={availableContentOptions}
-          selected={this.state.versionHash}
+          selected={this.state.contentId}
           onChange={versionHash => {
             this.setState({
-              versionHash,
+              contentId: versionHash,
             }, () => this.LoadVideo(this.props.video.protocol));
           }}
           className="available-content secondary vertical-tabs"
@@ -145,9 +147,9 @@ class Controls extends React.Component {
 
         <input
           type="text"
-          placeholder="Version Hash"
-          value={this.state.versionHash}
-          onChange={(event) => this.setState({versionHash: event.target.value})}
+          placeholder="Object ID or Version Hash"
+          value={this.state.contentId}
+          onChange={(event) => this.setState({contentId: event.target.value})}
           onKeyPress={onEnterPressed(() => this.LoadVideo(this.props.video.protocol))}
         />
         <Action onClick={() => this.LoadVideo(this.props.video.protocol)}>
@@ -205,7 +207,7 @@ class Controls extends React.Component {
       );
     }
 
-    const notLoaded = !!this.props.video.error || !this.props.video.versionHash;
+    const notLoaded = !!this.props.video.error || !this.props.video.contentId;
 
     return (
       <React.Fragment>
@@ -233,14 +235,13 @@ class Controls extends React.Component {
           key={`video-${this.props.video.protocol}-${this.props.video.drm}`}
           onMediaEnded={this.PlayNext}
         />
-        <RecordingControls />
         { this.Metrics() }
       </React.Fragment>
     );
   }
 
   Content() {
-    if(!this.props.video.versionHash) {
+    if(!this.props.video.contentId) {
       return null;
     }
 

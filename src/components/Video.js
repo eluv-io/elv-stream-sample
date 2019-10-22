@@ -175,7 +175,7 @@ class Video extends React.Component {
       debug: false,
       data: {
         env_key: "2i5480sms8vdgj0sv9bv6lpk5",
-        video_id: this.props.video.versionHash,
+        video_id: this.props.video.contentId,
         video_title: this.props.video.metadata.name,
         video_cdn: URI(playoutUrl).hostname()
       }
@@ -226,7 +226,7 @@ class Video extends React.Component {
 
   Header() {
     const selectedOption = this.props.video.availableContent
-      .find(content => content.versionHash === this.props.video.versionHash);
+      .find(content => content.versionHash === this.props.video.contentId);
 
     if(selectedOption) {
       if(selectedOption.subHeader) {

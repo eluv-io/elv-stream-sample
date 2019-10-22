@@ -3,7 +3,6 @@ import {configure, observable, action, flow} from "mobx";
 import {FrameClient} from "elv-client-js/src/FrameClient";
 import VideoStore from "./Video";
 import MetricsStore from "./Metrics";
-import RecordingsStore from "./Recordings";
 
 // Force strict mode so mutations are only allowed within actions.
 configure({
@@ -21,7 +20,6 @@ class RootStore {
   constructor() {
     this.videoStore = new VideoStore(this);
     this.metricsStore = new MetricsStore(this);
-    this.recordingsStore = new RecordingsStore(this);
 
     this.InitializeClient();
   }
@@ -87,9 +85,7 @@ class RootStore {
 const rootStore = new RootStore();
 const videoStore = rootStore.videoStore;
 const metricsStore = rootStore.metricsStore;
-const recordingsStore = rootStore.recordingsStore;
 
 export const root = rootStore;
 export const video = videoStore;
 export const metrics = metricsStore;
-export const recordings = recordingsStore;

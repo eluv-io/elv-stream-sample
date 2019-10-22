@@ -10,7 +10,7 @@ class VideoStore {
   @observable hlsjsSupported = HLSPlayer.isSupported();
 
   @observable videoType = "normal";
-  @observable versionHash;
+  @observable contentId;
   @observable posterUrl;
   @observable metadata = {};
   @observable availableDRMs = [];
@@ -29,26 +29,34 @@ class VideoStore {
   }
 
   @action.bound
-  LoadVideo = flow(function * ({versionHash, protocol}) {
+  LoadVideo = flow(function * ({contentId, protocol}) {
     this.loading = true;
     this.error = undefined;
 
     const client = this.rootStore.client;
 
     try {
-      this.metadata = yield client.ContentObjectMetadata({versionHash});
-      this.versionHash = versionHash;
+      let libraryId, objectId, versionHash;
+      if(contentId.startsWith("iq__")) {
+        objectId = contentId;
+        libraryId = yield client.ContentObjectLibraryId({objectId});
+      } else if(contentId.startsWith("hq")) {
+        versionHash = contentId;
+      } else {
+        throw Error(`Invalid content ID: ${contentId}`);
+      }
+
+      this.metadata = yield client.ContentObjectMetadata({libraryId, objectId, versionHash});
+      this.contentId = contentId;
       this.protocol = protocol;
 
       if(this.metadata.offerings) {
         this.videoType = "normal";
-      } else if(this.metadata.stream_id) {
-        this.videoType = "recording";
       } else {
         this.videoType = "live";
       }
 
-      yield this.LoadVideoPlayout({versionHash, protocol});
+      yield this.LoadVideoPlayout({objectId, versionHash, protocol});
     } catch(error) {
       // eslint-disable-next-line no-console
       console.error("Failed to load content:");
@@ -61,11 +69,11 @@ class VideoStore {
     this.loading = false;
   });
 
-
   @action.bound
-  LoadVideoPlayout = flow(function * ({versionHash, protocol}) {
+  LoadVideoPlayout = flow(function * ({objectId, versionHash, protocol}) {
     this.videoType = "normal";
     this.playoutOptions = yield this.rootStore.client.PlayoutOptions({
+      objectId,
       versionHash,
       protocols: toJS(this.rootStore.availableProtocols),
       drms: toJS(this.rootStore.availableDRMs)
@@ -74,20 +82,27 @@ class VideoStore {
     // No DRM based playback available - try clear
     if(Object.keys(this.playoutOptions).length === 0) {
       this.playoutOptions = yield this.rootStore.client.PlayoutOptions({
+        objectId,
         versionHash,
         protocols: toJS(this.rootStore.availableProtocols)
       });
     }
 
-    this.authToken = yield this.rootStore.client.GenerateStateChannelToken({versionHash});
+    this.authToken = yield this.rootStore.client.GenerateStateChannelToken({objectId, versionHash});
 
     this.posterUrl = yield this.rootStore.client.Rep({
+      objectId,
       versionHash,
       rep: "player_background",
       channelAuth: true
     });
 
-    this.availableDRMs = Object.keys(this.playoutOptions[protocol].drms || {});
+    if(!this.playoutOptions[protocol]) {
+      this.protocol = Object.keys(this.playoutOptions)[0];
+      this.availableDRMs = Object.keys(this.playoutOptions[this.protocol].drms || {});
+    } else {
+      this.availableDRMs = Object.keys(this.playoutOptions[protocol].drms || {});
+    }
   });
 
   @action.bound
