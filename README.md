@@ -83,7 +83,7 @@ Now that the client is set up, we can use it to query the Fabric for information
 
 In this method, we specify which protocols we may want to play (Dash and HLS) as well as what DRM we support, and the fabric will respond with all the information we need to play the content in those configurations, depending on what the configuration the content itself supports. 
 
-DRM support is determined by the client in the AvailableDRMs method with the following logic:
+DRM support is determined by the client in the `AvailableDRMs` method with the following logic:
 
 ```javascript
 const AvailableDRMs = async () => {
@@ -119,7 +119,7 @@ This code simply uses the [Navigator.requestMediaKeySystemAccess API](https://de
 
 Widevine is generally supported in Firefox and Chromium-based browsers. With hls.js, HLS with AES-128 encryption is supported by all major browsers, so there is no need to check for any support. 
 
-Here is an example response from the PlayoutOptions method - requesting both HLS and Dash, and supporting both AES-128 and Widevine:
+Here is an example response from the `PlayoutOptions` method - requesting both HLS and Dash, and supporting both AES-128 and Widevine:
 
 ```json
 {
@@ -146,6 +146,9 @@ Here is an example response from the PlayoutOptions method - requesting both HLS
 This particular content has both clear and protected options for both HLS and dash. As you can see, each protocol has a playout URL corresponding to the manifest/playlist, which includes an authorization token that allows the user to access it, as well as information about the DRM required to play the content.
 
 Note that support for protocols and DRM schemes can vary between content. It's a good idea for your application to be able to play multiple formats with and without DRM.
+
+**NOTE**: If any DRM options are specified, clear playout options will *not* be returned. If you want to play content without DRM, you must exclude the `drms` argument from the `PlayoutOptions` method; 
+
 
 
 #### Step 3 - Play the content
