@@ -79,15 +79,6 @@ class VideoStore {
       drms: toJS(this.rootStore.availableDRMs)
     });
 
-    // No DRM based playback available - try clear
-    if(Object.keys(this.playoutOptions).length === 0) {
-      this.playoutOptions = yield this.rootStore.client.PlayoutOptions({
-        objectId,
-        versionHash,
-        protocols: toJS(this.rootStore.availableProtocols)
-      });
-    }
-
     this.authToken = yield this.rootStore.client.GenerateStateChannelToken({objectId, versionHash});
 
     this.posterUrl = yield this.rootStore.client.Rep({
@@ -99,9 +90,14 @@ class VideoStore {
 
     if(!this.playoutOptions[protocol]) {
       this.protocol = Object.keys(this.playoutOptions)[0];
-      this.availableDRMs = Object.keys(this.playoutOptions[this.protocol].drms || {});
-    } else {
-      this.availableDRMs = Object.keys(this.playoutOptions[protocol].drms || {});
+    }
+
+    this.availableDRMs = Object.keys(this.playoutOptions[protocol].playoutMethods)
+      .filter(drm => this.rootStore.availableDRMs.includes(drm))
+      .sort((a, b) => a.toLowerCase() === "clear" ? 1 : a > b);
+
+    if(!this.playoutOptions[protocol].playoutMethods[this.drm]) {
+      this.drm = this.availableDRMs[0];
     }
   });
 

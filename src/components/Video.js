@@ -39,21 +39,21 @@ class Video extends React.Component {
   InitializeVideo(video) {
     if(!video) { return; }
 
-    const playoutUrl = this.props.video.playoutOptions[this.props.video.protocol].playoutUrl;
+    const playoutOptions = this.props.video.playoutOptions[this.props.video.protocol].playoutMethods[this.props.video.drm];
 
     // Media extensions API not supported - set up native HLS playback and skip monitoring
     if(!this.props.video.hlsjsSupported) {
-      video.src = playoutUrl;
-      this.InitializeMuxMonitoring(video, undefined, playoutUrl);
+      video.src = playoutOptions.playoutUrl;
+      this.InitializeMuxMonitoring(video, undefined, playoutOptions.playoutUrl);
 
       return;
     }
 
     const player = this.props.video.protocol === "hls" ?
-      this.InitializeHLS(video, playoutUrl) :
-      this.InitializeDash(video, playoutUrl);
+      this.InitializeHLS(video, playoutOptions.playoutUrl) :
+      this.InitializeDash(video, playoutOptions.playoutUrl, playoutOptions.drms.widevine);
 
-    this.InitializeMuxMonitoring(video, player, playoutUrl);
+    this.InitializeMuxMonitoring(video, player, playoutOptions.playoutUrl);
 
     this.setState({
       initialTime: performance.now(),
@@ -111,11 +111,11 @@ class Video extends React.Component {
     return player;
   }
 
-  InitializeDash(video, playoutUrl) {
+  InitializeDash(video, playoutUrl, widevineOptions) {
     const player = DashJS.MediaPlayer().create();
 
     if(this.props.video.drm === "widevine") {
-      const widevineUrl = this.props.video.playoutOptions[this.props.video.protocol].drms.widevine.licenseServers[0];
+      const widevineUrl = widevineOptions.licenseServers[0];
 
       player.setProtectionData({
         "com.widevine.alpha": {

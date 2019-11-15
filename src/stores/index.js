@@ -15,7 +15,7 @@ class RootStore {
   @observable nodes;
   @observable balance = 0;
   @observable availableProtocols = ["hls"];
-  @observable availableDRMs = ["aes-128"];
+  @observable availableDRMs = ["clear", "aes-128"];
 
   constructor() {
     this.videoStore = new VideoStore(this);
@@ -62,7 +62,7 @@ class RootStore {
 
     this.nodes = yield client.Nodes();
 
-    this.availableDRMs = yield client.AvailableDRMs();
+    this.availableDRMs = [...(yield client.AvailableDRMs()), "clear"];
 
     const balance = parseFloat(
       yield client.GetBalance({

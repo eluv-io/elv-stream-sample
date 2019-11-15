@@ -1,5 +1,5 @@
 const EluvioConfiguration = {
-  "config-url": "https://demo.net955210.contentfabric.io/config",
+  "config-url": "https://main.net955210.contentfabric.io/config",
   "version": "local",
   "availableContent": [
     {
