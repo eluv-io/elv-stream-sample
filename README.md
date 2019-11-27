@@ -77,9 +77,19 @@ const playoutOptions = await client.PlayoutOptions({
   protocols: ["dash", "hls"],
   drms: availableDRMs 
 });
+
+// Access content via link
+const playoutOptions = await client.PlayoutOptions({
+  versionHash,
+  linkPath: "asset_metadata/titles/my-movie/trailers/default",
+  protocols: ["dash", "hls"],
+  drms: availableDRMs 
+});
 ```
 
 Now that the client is set up, we can use it to query the Fabric for information on how to play out content. Our content is represented by either an object ID (referring to content) or a version hash (referring to a specific version of content). For more information about how content on the Fabric is identified, see the [client documentation](https://github.com/eluv-io/elv-client-js).
+
+Additionally, if the playout is specified in a metadata link in the content, the path to that link can be specified using the `linkPath` parameter. 
 
 In this method, we specify which protocols we may want to play (Dash and HLS) as well as what DRM we support, and the fabric will respond with all the information we need to play the content in those configurations, depending on what the configuration the content itself supports. 
 
