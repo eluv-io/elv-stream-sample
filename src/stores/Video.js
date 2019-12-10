@@ -56,7 +56,7 @@ class VideoStore {
         this.videoType = "live";
       }
 
-      yield this.LoadVideoPlayout({objectId, versionHash, protocol});
+      yield this.LoadVideoPlayout({libraryId, objectId, versionHash, protocol});
     } catch(error) {
       // eslint-disable-next-line no-console
       console.error("Failed to load content:");
@@ -70,7 +70,7 @@ class VideoStore {
   });
 
   @action.bound
-  LoadVideoPlayout = flow(function * ({objectId, versionHash, protocol}) {
+  LoadVideoPlayout = flow(function * ({libraryId, objectId, versionHash, protocol}) {
     this.videoType = "normal";
     this.playoutOptions = yield this.rootStore.client.PlayoutOptions({
       objectId,
@@ -82,6 +82,7 @@ class VideoStore {
     this.authToken = yield this.rootStore.client.GenerateStateChannelToken({objectId, versionHash});
 
     this.posterUrl = yield this.rootStore.client.Rep({
+      libraryId,
       objectId,
       versionHash,
       rep: "player_background",
