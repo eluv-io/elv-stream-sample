@@ -168,15 +168,15 @@ Now that we have all the information we need to play the content, we can set up 
 ```javascript
 const video = document.getElementById("video");
 
-if(playoutOptions.dash) {
-  const authToken = await client.GenerateStateChannelToken({versionHash});
-  PlayDash(authToken, video, playoutOptions);
-} else {
+if(playoutOptions.hls) {
   PlayHLS(video, playoutOptions);
+} else {
+  const authToken = await client.GenerateStateChannelToken({objectId});
+  PlayDash(authToken, video, playoutOptions);
 }
 ```
 
-In this case, we're prioritizing Dash if it's available, otherwise we'll play HLS. When playing Dash with Widevine, the Widevine requests will require an authorization token when querying the Fabric. This is the same token that is appended to our playout URL, but this code get it explicitly from the client instead of parsing it off of the URL. At this point, the client has cached this token, so it will be the same as the previous one and will not require any additional requests.
+In this case, we're prioritizing HLS if it's available, otherwise we'll play Dash. When playing Dash with Widevine, the Widevine requests will require an authorization token when querying the Fabric. This is the same token that is appended to our playout URL, but this code get it explicitly from the client instead of parsing it off of the URL. At this point, the client has cached this token, so it will be the same as the previous one and will not require any additional requests.
 
  ##### Playing HLS
  

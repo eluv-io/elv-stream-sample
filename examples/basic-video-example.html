@@ -13,6 +13,7 @@
     <div id="app" class="app">
       <video
         id="video"
+        autoplay
         controls
       />
     </div>
@@ -62,12 +63,12 @@
 
         await client.SetSigner({signer});
 
-        const versionHash = "hq__B1WL1oJa9MCiRpWXBmaoHtAwQdgNGKU36vazGDjjg9e8xS7uQADLct8j5NByXG3qnNAVQ7DcTh";
+        const objectId = "iq__jhQF1y2ajx2B5x7tDKxh5T7zjFy";
 
         const availableDRMs = await client.AvailableDRMs();
 
         const playoutOptions = await client.PlayoutOptions({
-          versionHash,
+          objectId,
           protocols: ["dash", "hls"],
           drms: availableDRMs
         });
@@ -77,7 +78,7 @@
         if(playoutOptions.hls) {
           PlayHLS(video, playoutOptions);
         } else {
-          const authToken = await client.GenerateStateChannelToken({versionHash});
+          const authToken = await client.GenerateStateChannelToken({objectId});
           PlayDash(authToken, video, playoutOptions);
         }
       };
