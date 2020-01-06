@@ -134,20 +134,35 @@ Here is an example response from the `PlayoutOptions` method - requesting both H
 ```json
 {
   "dash": {
-    "playoutUrl": "https://host-66-220-3-82.contentfabric.io/q/hq__BD1BouHkFraAcDjvoyHoiKpVhf4dXzNsDT5USe8mrZ7YDhLPDoZGnoU32iZvDYiQW8vVi6X7rV/rep/playout/default/dash-widevine/dash.mpd?authorization=eyJxc3BhY2VfaWQiOiJpc3BjQXBvV1BRUnJUa1JRVjFLcFlqdnFQeVNBbXhhIiwicWxpYl9pZCI6ImlsaWJxTUdXTVNodUZjcTlLdU1pTHJaa1FNakFLanUiLCJhZGRyIjoiMHg5NmEwMTA0QkE0MzRCMzA2NTFBOTE2NTY4NTg5MDBCZGRDNTcwMzY0IiwicWlkIjoiaXFfXzJ2RGJteFRkYWl2UG5tRG44UktMYnhTSFVNZmoiLCJncmFudCI6InJlYWQiLCJ0eF9yZXF1aXJlZCI6ZmFsc2UsImlhdCI6MTU2NjQxNzMwMywiZXhwIjoxNTY2NTAzNzAzLCJhdXRoX3NpZyI6IkVTMjU2S19BRjNYMmRRQTFCb3JYUGRpbW5UcDhYdkQxSlJDUmdMZnU2Q2s1MTlMY05abllVYXRVallLS1BMRjc2TUsyRXliczZVWWtXaVFKanU4RVZBYVlYWURMcWhWUiIsImFmZ2hfcGsiOiIifQ%3D%3D.RVMyNTZLXzI2dDVvUkpIRlpaZjN3QWJndHk3bzVFR3lzV1A0cHk1ZWpHaXdkOURyOWNxNVJITmNSZEZwd1o1a2NlWjhaS2l4dVJhQW9meEdIU3VFeEFuUnJpU1h6b0J5",
-    "drms": {
+    "playoutMethods": {
+      "clear": {
+        "playoutUrl": "https://host-38-142-50-109.test.contentfabric.io/qlibs/ilibNcWqQbLKvF82XP29hPqWG45U4Ek/q/hq__2eMmqtaBp79RZPvtC6u7o1bB9aVzLtJcPfm68BakXHHoemEQnbB4V5LwgyPi33KNZ4NXFaSgH1/rep/playout/default/dash-clear/dash.mpd?authorization=eyJxc3BhY2VfaWQiOiJpc3BjNFE3UmNNS0tLbkpITmk1Z2Q2WGJWV2ZVQXI0ciIsInFsaWJfaWQiOiJpbGliTmNXcVFiTEt2RjgyWFAyOWhQcVdHNDVVNEVrIiwiYWRkciI6IjB4ZkUyREFlQTU0NjQyODYwMzM3M0M1NTBmOEM2Rjg1M2NENDczOGE4NiIsInFpZCI6ImlxX19qaFFGMXkyYWp4MkI1eDd0REt4aDVUN3pqRnkiLCJncmFudCI6InJlYWQiLCJ0eF9yZXF1aXJlZCI6ZmFsc2UsImlhdCI6MTU3ODMzOTc2MSwiZXhwIjoxNTc4NDI2MTYxLCJhdXRoX3NpZyI6IkVTMjU2S19HQTJnbVRqbjZXN3ExQkdiWHF3TnNxSmhyWTdSYUMyb215OU1KMWhoMTZ6RVJ3ZTN0THNoV21laTF5VG1hbVJhMnpSTVBZY3BBZ2VvWlcxR21pcndpR0tpIiwiYWZnaF9wayI6IiJ9.RVMyNTZLXzdSQjhFcTJXZWVoa3JqcHpScEZudUhiNFdMQm8zTXQ3RlBHampZV2ZIQ0w0V2JLN2gyUmZjUVFzUmV6TUdWbXY5aVFzZGdOQURNSzE1SzFmODlrMmZqN2t2"
+      },
       "widevine": {
-        "licenseServers": [
-          "https://host-66-220-3-82.contentfabric.io/wv/?qhash=hq__BD1BouHkFraAcDjvoyHoiKpVhf4dXzNsDT5USe8mrZ7YDhLPDoZGnoU32iZvDYiQW8vVi6X7rV",
-          "http://66.220.3.82:8545/wv/?qhash=hq__BD1BouHkFraAcDjvoyHoiKpVhf4dXzNsDT5USe8mrZ7YDhLPDoZGnoU32iZvDYiQW8vVi6X7rV"
-        ]
+        "playoutUrl": "https://host-38-142-50-109.test.contentfabric.io/qlibs/ilibNcWqQbLKvF82XP29hPqWG45U4Ek/q/hq__2eMmqtaBp79RZPvtC6u7o1bB9aVzLtJcPfm68BakXHHoemEQnbB4V5LwgyPi33KNZ4NXFaSgH1/rep/playout/default/dash-widevine/dash.mpd?authorization=eyJxc3BhY2VfaWQiOiJpc3BjNFE3UmNNS0tLbkpITmk1Z2Q2WGJWV2ZVQXI0ciIsInFsaWJfaWQiOiJpbGliTmNXcVFiTEt2RjgyWFAyOWhQcVdHNDVVNEVrIiwiYWRkciI6IjB4ZkUyREFlQTU0NjQyODYwMzM3M0M1NTBmOEM2Rjg1M2NENDczOGE4NiIsInFpZCI6ImlxX19qaFFGMXkyYWp4MkI1eDd0REt4aDVUN3pqRnkiLCJncmFudCI6InJlYWQiLCJ0eF9yZXF1aXJlZCI6ZmFsc2UsImlhdCI6MTU3ODMzOTc2MSwiZXhwIjoxNTc4NDI2MTYxLCJhdXRoX3NpZyI6IkVTMjU2S19HQTJnbVRqbjZXN3ExQkdiWHF3TnNxSmhyWTdSYUMyb215OU1KMWhoMTZ6RVJ3ZTN0THNoV21laTF5VG1hbVJhMnpSTVBZY3BBZ2VvWlcxR21pcndpR0tpIiwiYWZnaF9wayI6IiJ9.RVMyNTZLXzdSQjhFcTJXZWVoa3JqcHpScEZudUhiNFdMQm8zTXQ3RlBHampZV2ZIQ0w0V2JLN2gyUmZjUVFzUmV6TUdWbXY5aVFzZGdOQURNSzE1SzFmODlrMmZqN2t2",
+        "drms": {
+          "widevine": {
+            "licenseServers": [
+              "https://host-35-237-243-135.test.contentfabric.io/wv/?qhash=hq__2eMmqtaBp79RZPvtC6u7o1bB9aVzLtJcPfm68BakXHHoemEQnbB4V5LwgyPi33KNZ4NXFaSgH1",
+              "https://host-35-236-19-5.test.contentfabric.io/wv/?qhash=hq__2eMmqtaBp79RZPvtC6u7o1bB9aVzLtJcPfm68BakXHHoemEQnbB4V5LwgyPi33KNZ4NXFaSgH1",
+              "https://host-35-226-231-183.test.contentfabric.io/wv/?qhash=hq__2eMmqtaBp79RZPvtC6u7o1bB9aVzLtJcPfm68BakXHHoemEQnbB4V5LwgyPi33KNZ4NXFaSgH1"
+            ]
+          }
+        }
       }
     }
   },
   "hls": {
-    "playoutUrl": "https://host-66-220-3-82.contentfabric.io/q/hq__BD1BouHkFraAcDjvoyHoiKpVhf4dXzNsDT5USe8mrZ7YDhLPDoZGnoU32iZvDYiQW8vVi6X7rV/rep/playout/default/hls-aes/playlist.m3u8?authorization=eyJxc3BhY2VfaWQiOiJpc3BjQXBvV1BRUnJUa1JRVjFLcFlqdnFQeVNBbXhhIiwicWxpYl9pZCI6ImlsaWJxTUdXTVNodUZjcTlLdU1pTHJaa1FNakFLanUiLCJhZGRyIjoiMHg5NmEwMTA0QkE0MzRCMzA2NTFBOTE2NTY4NTg5MDBCZGRDNTcwMzY0IiwicWlkIjoiaXFfXzJ2RGJteFRkYWl2UG5tRG44UktMYnhTSFVNZmoiLCJncmFudCI6InJlYWQiLCJ0eF9yZXF1aXJlZCI6ZmFsc2UsImlhdCI6MTU2NjQxNzMwMywiZXhwIjoxNTY2NTAzNzAzLCJhdXRoX3NpZyI6IkVTMjU2S19BRjNYMmRRQTFCb3JYUGRpbW5UcDhYdkQxSlJDUmdMZnU2Q2s1MTlMY05abllVYXRVallLS1BMRjc2TUsyRXliczZVWWtXaVFKanU4RVZBYVlYWURMcWhWUiIsImFmZ2hfcGsiOiIifQ%3D%3D.RVMyNTZLXzI2dDVvUkpIRlpaZjN3QWJndHk3bzVFR3lzV1A0cHk1ZWpHaXdkOURyOWNxNVJITmNSZEZwd1o1a2NlWjhaS2l4dVJhQW9meEdIU3VFeEFuUnJpU1h6b0J5",
-    "drms": {
-      "aes-128": {}
+    "playoutMethods": {
+      "aes-128": {
+        "playoutUrl": "https://host-38-142-50-109.test.contentfabric.io/qlibs/ilibNcWqQbLKvF82XP29hPqWG45U4Ek/q/hq__2eMmqtaBp79RZPvtC6u7o1bB9aVzLtJcPfm68BakXHHoemEQnbB4V5LwgyPi33KNZ4NXFaSgH1/rep/playout/default/hls-aes/playlist.m3u8?player_profile=hls-js&authorization=eyJxc3BhY2VfaWQiOiJpc3BjNFE3UmNNS0tLbkpITmk1Z2Q2WGJWV2ZVQXI0ciIsInFsaWJfaWQiOiJpbGliTmNXcVFiTEt2RjgyWFAyOWhQcVdHNDVVNEVrIiwiYWRkciI6IjB4ZkUyREFlQTU0NjQyODYwMzM3M0M1NTBmOEM2Rjg1M2NENDczOGE4NiIsInFpZCI6ImlxX19qaFFGMXkyYWp4MkI1eDd0REt4aDVUN3pqRnkiLCJncmFudCI6InJlYWQiLCJ0eF9yZXF1aXJlZCI6ZmFsc2UsImlhdCI6MTU3ODMzOTc2MSwiZXhwIjoxNTc4NDI2MTYxLCJhdXRoX3NpZyI6IkVTMjU2S19HQTJnbVRqbjZXN3ExQkdiWHF3TnNxSmhyWTdSYUMyb215OU1KMWhoMTZ6RVJ3ZTN0THNoV21laTF5VG1hbVJhMnpSTVBZY3BBZ2VvWlcxR21pcndpR0tpIiwiYWZnaF9wayI6IiJ9.RVMyNTZLXzdSQjhFcTJXZWVoa3JqcHpScEZudUhiNFdMQm8zTXQ3RlBHampZV2ZIQ0w0V2JLN2gyUmZjUVFzUmV6TUdWbXY5aVFzZGdOQURNSzE1SzFmODlrMmZqN2t2",
+        "drms": {
+          "aes-128": {}
+        }
+      },
+      "clear": {
+        "playoutUrl": "https://host-38-142-50-109.test.contentfabric.io/qlibs/ilibNcWqQbLKvF82XP29hPqWG45U4Ek/q/hq__2eMmqtaBp79RZPvtC6u7o1bB9aVzLtJcPfm68BakXHHoemEQnbB4V5LwgyPi33KNZ4NXFaSgH1/rep/playout/default/hls-clear/playlist.m3u8?player_profile=hls-js&authorization=eyJxc3BhY2VfaWQiOiJpc3BjNFE3UmNNS0tLbkpITmk1Z2Q2WGJWV2ZVQXI0ciIsInFsaWJfaWQiOiJpbGliTmNXcVFiTEt2RjgyWFAyOWhQcVdHNDVVNEVrIiwiYWRkciI6IjB4ZkUyREFlQTU0NjQyODYwMzM3M0M1NTBmOEM2Rjg1M2NENDczOGE4NiIsInFpZCI6ImlxX19qaFFGMXkyYWp4MkI1eDd0REt4aDVUN3pqRnkiLCJncmFudCI6InJlYWQiLCJ0eF9yZXF1aXJlZCI6ZmFsc2UsImlhdCI6MTU3ODMzOTc2MSwiZXhwIjoxNTc4NDI2MTYxLCJhdXRoX3NpZyI6IkVTMjU2S19HQTJnbVRqbjZXN3ExQkdiWHF3TnNxSmhyWTdSYUMyb215OU1KMWhoMTZ6RVJ3ZTN0THNoV21laTF5VG1hbVJhMnpSTVBZY3BBZ2VvWlcxR21pcndpR0tpIiwiYWZnaF9wayI6IiJ9.RVMyNTZLXzdSQjhFcTJXZWVoa3JqcHpScEZudUhiNFdMQm8zTXQ3RlBHampZV2ZIQ0w0V2JLN2gyUmZjUVFzUmV6TUdWbXY5aVFzZGdOQURNSzE1SzFmODlrMmZqN2t2"
+      }
     }
   }
 }
@@ -156,10 +171,6 @@ Here is an example response from the `PlayoutOptions` method - requesting both H
 This particular content has both clear and protected options for both HLS and dash. As you can see, each protocol has a playout URL corresponding to the manifest/playlist, which includes an authorization token that allows the user to access it, as well as information about the DRM required to play the content.
 
 Note that support for protocols and DRM schemes can vary between content. It's a good idea for your application to be able to play multiple formats with and without DRM.
-
-**NOTE**: If any DRM options are specified, clear playout options will *not* be returned. If you want to play content without DRM, you must exclude the `drms` argument from the `PlayoutOptions` method; 
-
-
 
 #### Step 3 - Play the content
 
@@ -182,9 +193,12 @@ In this case, we're prioritizing HLS if it's available, otherwise we'll play Das
  
  ```javascript
 const PlayHLS = (video, playoutOptions) => {
-  const playoutUrl =`${playoutOptions.hls.playoutUrl}&player_profile=hls-js`;
+  const playoutUrl = !playoutOptions.hls.playoutMethods["aes-128"] ?
+    playoutOptions.hls.playoutMethods["aes-128"].playoutUrl :
+    playoutOptions.hls.playoutMethods.clear.playoutUrl;
   
   const player = new Hls();
+
   player.loadSource(playoutUrl);
   player.attachMedia(video);
 
@@ -195,19 +209,20 @@ const PlayHLS = (video, playoutOptions) => {
 };
 ```
 
-Playing HLS is quite straightforward. Only one minor tweak is necessary - when using hls.js with AES-128, the player profile for hls.js must be specified in the playout URL.
-
-
 ##### Playing Dash
 
 ```javascript
 const PlayDash = (authToken, video, playoutOptions) => {
   const player = dashjs.MediaPlayer().create();
-
-  if(playoutOptions.dash.drms) {
-    const widevineUrl = playoutOptions.dash.drms.widevine.licenseServers
+  
+  const playoutUrl = playoutOptions.dash.playoutMethods.widevine ?
+    playoutOptions.dash.playoutMethods.widevine.playoutUrl :
+    playoutOptions.dash.playoutMethods.clear.playoutUrl;
+  
+  if(playoutOptions.dash.playoutMethods.widevine) {
+    const widevineUrl = playoutOptions.dash.playoutMethods.widevine.drms.widevine.licenseServers
       .find(server => server.startsWith("https"));
-
+  
     player.setProtectionData({
       "com.widevine.alpha": {
         "serverURL": widevineUrl,
@@ -218,17 +233,19 @@ const PlayDash = (authToken, video, playoutOptions) => {
       }
     });
   }
-
-  player.initialize(video, playoutOptions.dash.playoutUrl, true);
+ 
+  player.initialize(video, playoutUrl, true);
 };
 ```
 
-Playing Dash is also straightforward, but some extra work must be done to set up Widevine.
+Both cases are straightforward - determine the playout url, then set up the corresponding player.
 
-First, the Widevine server URL for the content must be specified. This code selects only an HTTPS url to avoid issues with mixed content when the app is using HTTPS.
+With dash, a bit of extra work must be done to set up Widevine:
+- Determine the widevine server url, which is specified in `drms.widevine.licenseServers`. In this case, we are explicitly preferring HTTPS urls, in case any of the server urls are HTTP.
+- Set the Fabric authorization token we retrieved previously in the Widevine request headers. This will ensure that the HTTP requests to the Fabric are properly authenticated. We also explicitly specify withCredentials=false to avoid CORS issues for these requests.
 
-And secondly, the authorization token we retrieved before must be specified in the Widevine request headers. We also specify withCredentials=false to avoid CORS issues.
 
+Note: Both of these examples intend for the video to autoplay, but many modern browsers block autoplay by default without user interaction.
 
 #### Step 4 - Watch
 

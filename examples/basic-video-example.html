@@ -4,7 +4,7 @@
     <title>Eluvio Video Sample</title>
     <meta content="text/html;charset=utf-8" http-equiv="Content-Type"/>
 
-    <script src="https://cdn.jsdelivr.net/npm/@eluvio/elv-client-js@0.2.7/dist/ElvClient-min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@eluvio/elv-client-js@latest/dist/ElvClient-min.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
@@ -19,7 +19,10 @@
     </div>
     <script type="text/javascript">
       const PlayHLS = (video, playoutOptions) => {
-        const playoutUrl =`${playoutOptions.hls.playoutUrl}&player_profile=hls-js`;
+        const playoutUrl = !playoutOptions.hls.playoutMethods["aes-128"] ?
+          playoutOptions.hls.playoutMethods["aes-128"].playoutUrl :
+          playoutOptions.hls.playoutMethods.clear.playoutUrl;
+
         const player = new Hls();
 
         player.loadSource(playoutUrl);
@@ -34,8 +37,12 @@
       const PlayDash = (authToken, video, playoutOptions) => {
         const player = dashjs.MediaPlayer().create();
 
-        if(playoutOptions.dash.drms) {
-          const widevineUrl = playoutOptions.dash.drms.widevine.licenseServers
+        const playoutUrl = playoutOptions.dash.playoutMethods.widevine ?
+          playoutOptions.dash.playoutMethods.widevine.playoutUrl :
+          playoutOptions.dash.playoutMethods.clear.playoutUrl;
+
+        if(playoutOptions.dash.playoutMethods.widevine) {
+          const widevineUrl = playoutOptions.dash.playoutMethods.widevine.drms.widevine.licenseServers
             .find(server => server.startsWith("https"));
 
           player.setProtectionData({
@@ -49,7 +56,7 @@
           });
         }
 
-        player.initialize(video, playoutOptions.dash.playoutUrl, true);
+        player.initialize(video, playoutUrl, true);
       };
 
       const Load = async () => {
