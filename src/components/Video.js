@@ -51,7 +51,7 @@ class Video extends React.Component {
 
     const player = this.props.video.protocol === "hls" ?
       this.InitializeHLS(video, playoutOptions.playoutUrl) :
-      this.InitializeDash(video, playoutOptions.playoutUrl, playoutOptions.drms.widevine);
+      this.InitializeDash(video, playoutOptions.playoutUrl, playoutOptions.drms);
 
     this.InitializeMuxMonitoring(video, player, playoutOptions.playoutUrl);
 
@@ -115,7 +115,7 @@ class Video extends React.Component {
     const player = DashJS.MediaPlayer().create();
 
     if(this.props.video.drm === "widevine") {
-      const widevineUrl = widevineOptions.licenseServers[0];
+      const widevineUrl = widevineOptions.widevine.licenseServers[0];
 
       player.setProtectionData({
         "com.widevine.alpha": {
