@@ -70,6 +70,9 @@
 
         await client.SetSigner({signer});
 
+        // If using OAuth, you can just set the OAuth token in the client instead of setting the signer
+        // await this.props.client.SetOauthToken({token: oauthToken});
+
         const objectId = "iq__jhQF1y2ajx2B5x7tDKxh5T7zjFy";
 
         const availableDRMs = await client.AvailableDRMs();

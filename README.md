@@ -54,6 +54,17 @@ On the other hand, if a stronger user identity is desired, you can design your a
 
 Note that the more the account is used for, the more valuable the account becomes. Always treat private keys (and mnemonics) as private, sensitive user data. Always store and transfer them encrypted (the client has a method for encrypting private keys with a password - see see [ElvWallet#GenerateEncryptedPrivateKey](https://eluv-io.github.io/elv-client-js/ElvWallet.html#GenerateEncryptedPrivateKey)). A plaintext private key or mnemonic should *never* leave the user's browser - all use of the private key is done on the client.
 
+##### Using an OAuth token for authentication
+
+If authenticating with OAuth, you can simply set the OAuth token in the client in lieu of setting the signer:
+
+```
+const configUrl = "https://demo.net955210.contentfabric.io/config";
+const client = await ElvClient.FromConfigurationUrl({configUrl});
+
+await this.props.client.SetOauthToken({token: oauthToken});
+```
+
 
 #### Step 2 - Access the content
 
