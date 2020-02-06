@@ -16,12 +16,18 @@ class RootStore {
   @observable balance = 0;
   @observable availableProtocols = ["hls"];
   @observable availableDRMs = ["clear", "aes-128"];
+  @observable devMode = false;
 
   constructor() {
     this.videoStore = new VideoStore(this);
     this.metricsStore = new MetricsStore(this);
 
     this.InitializeClient();
+  }
+
+  @action.bound
+  SetDevMode() {
+    this.devMode = true;
   }
 
   @action.bound

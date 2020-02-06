@@ -1,4 +1,5 @@
 import "../static/stylesheets/app.scss";
+import "../static/stylesheets/dev.scss";
 
 import React from "react";
 import {render} from "react-dom";
@@ -23,6 +24,8 @@ class App extends React.Component {
     this.state = {
       version: 0
     };
+
+    props.root.SetDevMode();
   }
 
   RegionSelection() {
@@ -66,7 +69,9 @@ class App extends React.Component {
 
   PlayoutInfo() {
     if(!this.props.video.playoutOptions) { return; }
-
+    let playoutOptions = this.props.video.playoutOptions[this.props.video.protocol];
+    playoutOptions = playoutOptions && playoutOptions.playoutMethods[this.props.video.drm];
+    const playoutUrl = playoutOptions && playoutOptions.playoutUrl;
     return (
       <React.Fragment>
         <h3>Playout URLs</h3>
@@ -74,7 +79,7 @@ class App extends React.Component {
           return (
             <React.Fragment>
               <h4>{protocol}</h4>
-              <div className="node-uri">{this.props.video.playoutOptions[protocol].playoutUrl}</div>
+              <div className="node-uri">{playoutUrl}</div>
             </React.Fragment>
           );
         })}

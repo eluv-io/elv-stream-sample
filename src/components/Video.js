@@ -5,7 +5,10 @@ import DashJS from "dashjs";
 import URI from "urijs";
 import Mux from "mux-embed";
 import {inject, observer} from "mobx-react";
+import {Action} from "elv-components-js";
+import JsonTextArea from "elv-components-js/src/components/JsonInput";
 
+@inject("root")
 @inject("video")
 @inject("metrics")
 @observer
@@ -16,7 +19,12 @@ class Video extends React.Component {
     this.state = {
       initialTime: undefined,
       player: undefined,
-      video: undefined
+      video: undefined,
+      videoVersion: 1,
+      hlsOptions: JSON.stringify({
+        maxBufferLength: 300,
+        maxBufferSize: 300
+      }, null, 2)
     };
 
     this.InitializeVideo = this.InitializeVideo.bind(this);
@@ -34,6 +42,24 @@ class Video extends React.Component {
     if(this.state.player) {
       this.state.player.destroy ? this.state.player.destroy() : this.state.player.reset();
     }
+  }
+
+  HLSOptionsForm() {
+    if(!this.props.root.devMode || this.props.video.protocol !== "hls") {
+      return;
+    }
+
+    return (
+      <div className="hls-options-form">
+        <label>HLS Options</label>
+        <JsonTextArea
+          name="hlsOptions"
+          value={this.state.hlsOptions}
+          onChange={event => this.setState({hlsOptions: event.target.value})}
+        />
+        <Action onClick={() => this.setState({videoVersion: this.state.videoVersion + 1})}>Reload</Action>
+      </div>
+    );
   }
 
   InitializeVideo(video) {
@@ -72,10 +98,8 @@ class Video extends React.Component {
   }
 
   InitializeHLS(video, playoutUrl) {
-    const player = new HLSPlayer({
-      nudgeOffset: 0.2,
-      nudgeMaxRetry: 30,
-    });
+    const options = JSON.parse(this.state.hlsOptions);
+    const player = new HLSPlayer(options);
 
     player.loadSource(playoutUrl);
     player.attachMedia(video);
@@ -249,12 +273,14 @@ class Video extends React.Component {
       <div className="video-container">
         { this.Header() }
         <video
+          key={`video-version-${this.state.videoVersion}`}
           poster={this.props.video.posterUrl}
           crossOrigin="anonymous"
           ref={this.InitializeVideo}
           playsInline
           controls
         />
+        { this.HLSOptionsForm() }
       </div>
     );
   }

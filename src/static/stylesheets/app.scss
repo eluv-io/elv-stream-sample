@@ -183,7 +183,7 @@ footer {
   .node-uri {
     font-family: $elv-font-monospace;
     font-size: $elv-font-s;
-    word-wrap: anywhere;
+    word-break: break-all;
   }
 }
 
