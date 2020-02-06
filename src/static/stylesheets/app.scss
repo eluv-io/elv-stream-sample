@@ -205,7 +205,7 @@ footer {
   }
 
   .header-with-subheader {
-    margin: $elv-spacing-s 0 $elv-spacing-xs;
+    margin-bottom: $elv-spacing-xs;
 
     h1 {
       margin: 0;
@@ -260,6 +260,7 @@ footer {
     margin-top: $elv-spacing-xxs;
     max-height: 100%;
     overflow-y: scroll;
+    padding-right: 0.7rem;
     width: 100%;
 
     div {
@@ -276,11 +277,13 @@ footer {
 
     .segments-header {
       border: 0;
+      border-right: 1px solid $elv-color-lightergray;
       font-weight: 600;
     }
 
     .timing {
       border-left: 1px solid $elv-color-lightergray;
+      border-right: 1px solid $elv-color-lightergray;
       font-size: $elv-font-xs;
       justify-content: flex-start;
       padding-right: $elv-spacing-xxs;

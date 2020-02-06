@@ -227,7 +227,7 @@ class Controls extends React.Component {
   }
 
   Video() {
-    if(this.props.video.loading || this.props.video.error) { return null; }
+    if(!this.props.video.contentId || this.props.video.loading || this.props.video.error) { return null; }
 
     return (
       <React.Fragment>
@@ -240,24 +240,14 @@ class Controls extends React.Component {
     );
   }
 
-  Content() {
-    if(!this.props.video.contentId) {
-      return null;
-    }
-
-    return (
-      <LoadingElement loading={this.props.video.loading && !this.props.video.error} fullPage>
-        { this.Video() }
-      </LoadingElement>
-    );
-  }
-
   render() {
     return (
       <div className="controls-container">
-        { this.ErrorMessage() }
-        { this.Content() }
-        { this.ControlsSection() }
+        <LoadingElement loading={this.state.contentId && (this.props.video.loading && !this.props.video.error)} fullPage>
+          { this.ErrorMessage() }
+          { this.Video() }
+          { this.ControlsSection() }
+        </LoadingElement>
       </div>
     );
   }
