@@ -34,6 +34,7 @@ class Controls extends React.Component {
       (props.video.availableContent.length > 0 ? props.video.availableContent[0].versionHash : "");
 
     this.state = {
+      loading: false,
       showControls: true,
       currentVideoIndex: 0,
       contentId: initialContentId
@@ -58,12 +59,19 @@ class Controls extends React.Component {
   async LoadVideo(protocol) {
     if(!this.state.contentId) { return; }
 
-    this.setState({showControls: true});
-
-    await this.props.video.LoadVideo({
-      contentId: this.state.contentId,
-      protocol: protocol
+    this.setState({
+      loading: true,
+      showControls: true
     });
+
+    try {
+      await this.props.video.LoadVideo({
+        contentId: this.state.contentId,
+        protocol: protocol
+      });
+    } finally {
+      this.setState({loading: false});
+    }
   }
 
   async PlayNext() {
@@ -243,7 +251,7 @@ class Controls extends React.Component {
   render() {
     return (
       <div className="controls-container">
-        <LoadingElement loading={this.state.contentId && (this.props.video.loading && !this.props.video.error)} fullPage>
+        <LoadingElement loading={this.state.loading} fullPage>
           { this.ErrorMessage() }
           { this.Video() }
           { this.ControlsSection() }
