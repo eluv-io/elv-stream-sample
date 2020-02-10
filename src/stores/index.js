@@ -13,6 +13,7 @@ class RootStore {
   @observable client;
   @observable region;
   @observable nodes;
+  @observable selectedNode;
   @observable balance = 0;
   @observable availableProtocols = ["hls"];
   @observable availableDRMs = ["clear", "aes-128"];
@@ -31,7 +32,7 @@ class RootStore {
   }
 
   @action.bound
-  InitializeClient = flow(function * (region="") {
+  InitializeClient = flow(function * (region="", selectedNode="") {
     this.client = undefined;
 
     let client;
@@ -66,7 +67,18 @@ class RootStore {
       }
     }
 
+    // Record available nodes
     this.nodes = yield client.Nodes();
+
+    if(this.devMode) {
+      // Set specific fabric node for testing (disables failover)
+      if(!selectedNode) {
+        selectedNode = this.nodes.fabricURIs[0];
+      }
+
+      yield client.SetNodes({fabricURIs: [selectedNode]});
+      this.selectedNode = selectedNode;
+    }
 
     this.availableDRMs = [...(yield client.AvailableDRMs()), "clear"];
 

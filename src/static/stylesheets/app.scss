@@ -181,9 +181,32 @@ footer {
   }
 
   .node-uri {
+    background-color: $elv-color-bg-white;
+    border: 0;
     font-family: $elv-font-monospace;
     font-size: $elv-font-s;
+    margin: 0;
+    padding: $elv-spacing-s $elv-spacing-xs;
+    text-align: center;
+    width: 100%;
     word-break: break-all;
+
+    &.selectable-uri {
+      cursor: pointer;
+
+      &:hover {
+        background-color: $elv-color-lightgray;
+      }
+
+      &.node-uri-selected {
+        background-color: $elv-color-mediumblue;
+        color: $elv-color-white;
+      }
+    }
+
+    & + h3 {
+      margin-top: $elv-spacing-m;
+    }
   }
 }
 

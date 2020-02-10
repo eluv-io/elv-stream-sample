@@ -18,11 +18,10 @@ class Video extends React.Component {
 
     this.state = {
       initialTime: undefined,
-      player: undefined,
       video: undefined,
       videoVersion: 1,
       hlsOptions: JSON.stringify({
-        maxBufferLength: 300,
+        maxBufferLength: 30,
         maxBufferSize: 300
       }, null, 2)
     };
@@ -38,9 +37,12 @@ class Video extends React.Component {
 
   componentWillUnmount(){
     this.StopSampling();
+    this.DestroyPlayer();
+  }
 
-    if(this.state.player) {
-      this.state.player.destroy ? this.state.player.destroy() : this.state.player.reset();
+  DestroyPlayer() {
+    if(this.player) {
+      this.player.destroy ? this.player.destroy() : this.player.reset();
     }
   }
 
@@ -57,13 +59,19 @@ class Video extends React.Component {
           value={this.state.hlsOptions}
           onChange={event => this.setState({hlsOptions: event.target.value})}
         />
-        <Action onClick={() => this.setState({videoVersion: this.state.videoVersion + 1})}>Reload</Action>
+        <Action onClick={() => {
+          this.DestroyPlayer();
+          this.setState({videoVersion: this.state.videoVersion + 1});
+          this.props.metrics.Reset();
+        }}>Reload</Action>
       </div>
     );
   }
 
   InitializeVideo(video) {
     if(!video) { return; }
+
+    this.DestroyPlayer();
 
     const playoutOptions = this.props.video.playoutOptions[this.props.video.protocol].playoutMethods[this.props.video.drm];
 
@@ -75,15 +83,14 @@ class Video extends React.Component {
       return;
     }
 
-    const player = this.props.video.protocol === "hls" ?
+    this.props.video.protocol === "hls" ?
       this.InitializeHLS(video, playoutOptions.playoutUrl) :
       this.InitializeDash(video, playoutOptions.playoutUrl, playoutOptions.drms);
 
-    this.InitializeMuxMonitoring(video, player, playoutOptions.playoutUrl);
+    this.InitializeMuxMonitoring(video, playoutOptions.playoutUrl);
 
     this.setState({
       initialTime: performance.now(),
-      player,
       video
     }, this.StartSampling);
 
@@ -99,15 +106,15 @@ class Video extends React.Component {
 
   InitializeHLS(video, playoutUrl) {
     const options = JSON.parse(this.state.hlsOptions);
-    const player = new HLSPlayer(options);
+    this.player = new HLSPlayer(options);
 
-    player.loadSource(playoutUrl);
-    player.attachMedia(video);
+    this.player.loadSource(playoutUrl);
+    this.player.attachMedia(video);
 
-    player.on(HLSPlayer.Events.FRAG_LOADED, (_, {frag, stats}) => {
+    this.player.on(HLSPlayer.Events.FRAG_LOADED, (_, {frag, stats}) => {
       if(frag.type !== "main" || frag.sn === "initSegment") { return; }
 
-      const level = player.levels[frag.level];
+      const level = this.player.levels[frag.level];
       const bitrate = level.bitrate / 1000;
       const resolution = level.attrs.RESOLUTION;
 
@@ -131,17 +138,15 @@ class Video extends React.Component {
         downloadRate
       });
     });
-
-    return player;
   }
 
   InitializeDash(video, playoutUrl, widevineOptions) {
-    const player = DashJS.MediaPlayer().create();
+    this.player = DashJS.MediaPlayer().create();
 
     if(this.props.video.drm === "widevine") {
       const widevineUrl = widevineOptions.widevine.licenseServers[0];
 
-      player.setProtectionData({
+      this.player.setProtectionData({
         "com.widevine.alpha": {
           "serverURL": widevineUrl,
           "httpRequestHeaders": {
@@ -153,17 +158,17 @@ class Video extends React.Component {
     }
 
     // Subtitles are enabled by default - disable them
-    player.on(
+    this.player.on(
       DashJS.MediaPlayer.events.CAN_PLAY,
-      () => player.setTextTrack(-1)
+      () => this.player.setTextTrack(-1)
     );
 
-    player.on(
+    this.player.on(
       DashJS.MediaPlayer.events.FRAGMENT_LOADING_COMPLETED,
       ({request, response}) => {
         if(request.mediaType !== "video" || !request.index) { return; }
 
-        const quality = player.getBitrateInfoListFor("video")[request.quality];
+        const quality = this.player.getBitrateInfoListFor("video")[request.quality];
         const bitrate = quality.bitrate / 1000;
         const resolution = `${quality.width}x${quality.height}`;
 
@@ -189,12 +194,10 @@ class Video extends React.Component {
       }
     );
 
-    player.initialize(video, playoutUrl);
-
-    return player;
+    this.player.initialize(video, playoutUrl);
   }
 
-  InitializeMuxMonitoring(video, player, playoutUrl) {
+  InitializeMuxMonitoring(video, playoutUrl) {
     const options = {
       debug: false,
       data: {
@@ -205,13 +208,13 @@ class Video extends React.Component {
       }
     };
 
-    if(player) {
+    if(this.player) {
       if (this.props.video.protocol === "hls") {
-        options.hlsjs = player;
+        options.hlsjs = this.player;
         options.Hls = HLSPlayer;
         options.data.player_name = "stream-sample-hls";
       } else if (this.props.video.protocol === "dash") {
-        options.dashjs = player;
+        options.dashjs = this.player;
         options.data.player_name = "stream-sample-dash";
       }
     }
@@ -270,10 +273,9 @@ class Video extends React.Component {
 
   render() {
     return (
-      <div className="video-container">
+      <div className="video-container" key={`video-version-${this.state.videoVersion}`}>
         { this.Header() }
         <video
-          key={`video-version-${this.state.videoVersion}`}
           poster={this.props.video.posterUrl}
           crossOrigin="anonymous"
           ref={this.InitializeVideo}

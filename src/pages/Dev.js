@@ -57,7 +57,13 @@ class App extends React.Component {
       <React.Fragment>
         <h3>Fabric Nodes</h3>
         { this.props.root.nodes.fabricURIs.map(uri =>
-          <div key={`fabric-uri-${uri}`} className="node-uri">{uri}</div>
+          <button
+            key={`fabric-uri-${uri}`}
+            className={`node-uri selectable-uri ${uri === this.props.root.selectedNode ? "node-uri-selected" : ""}`}
+            onClick={() => this.props.root.InitializeClient(this.props.root.region, uri)}
+          >
+            { uri }
+          </button>
         )}
         <h3>Blockchain Nodes</h3>
         { this.props.root.nodes.ethereumURIs.map(uri =>
