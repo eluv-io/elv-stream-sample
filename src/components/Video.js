@@ -20,6 +20,7 @@ class Video extends React.Component {
       initialTime: undefined,
       video: undefined,
       videoVersion: 1,
+      bandwidthEstimate: 0,
       hlsOptions: JSON.stringify({
         maxBufferLength: 30,
         maxBufferSize: 300
@@ -41,6 +42,11 @@ class Video extends React.Component {
   }
 
   DestroyPlayer() {
+    if(this.bandwidthInterval) {
+      clearInterval(this.bandwidthInterval);
+      this.bandwidthInterval = undefined;
+    }
+
     if(this.player) {
       this.player.destroy ? this.player.destroy() : this.player.reset();
     }
@@ -52,19 +58,25 @@ class Video extends React.Component {
     }
 
     return (
-      <div className="hls-options-form">
-        <label>HLS Options</label>
-        <JsonTextArea
-          name="hlsOptions"
-          value={this.state.hlsOptions}
-          onChange={event => this.setState({hlsOptions: event.target.value})}
-        />
-        <Action onClick={() => {
-          this.DestroyPlayer();
-          this.setState({videoVersion: this.state.videoVersion + 1});
-          this.props.metrics.Reset();
-        }}>Reload</Action>
-      </div>
+      <React.Fragment>
+        <div className="hls-bandwidth-estimate">
+          <label>Bandwidth Estimate:</label>
+          <span>{(this.state.bandwidthEstimate / 1000).toFixed(1)} Kbps</span>
+        </div>
+        <div className="hls-options-form">
+          <label>HLS Options</label>
+          <JsonTextArea
+            name="hlsOptions"
+            value={this.state.hlsOptions}
+            onChange={event => this.setState({hlsOptions: event.target.value})}
+          />
+          <Action onClick={() => {
+            this.DestroyPlayer();
+            this.setState({videoVersion: this.state.videoVersion + 1});
+            this.props.metrics.Reset();
+          }}>Reload</Action>
+        </div>
+      </React.Fragment>
     );
   }
 
@@ -107,6 +119,13 @@ class Video extends React.Component {
   InitializeHLS(video, playoutUrl) {
     const options = JSON.parse(this.state.hlsOptions);
     this.player = new HLSPlayer(options);
+
+    if(this.props.root.devMode) {
+      this.bandwidthInterval = setInterval(
+        () => this.setState({bandwidthEstimate: this.player.bandwidthEstimate}),
+        1000
+      );
+    }
 
     this.player.loadSource(playoutUrl);
     this.player.attachMedia(video);
