@@ -22,9 +22,9 @@ class MetricsStore {
   }
 
   @action.bound
-  LogSegment({id, quality, size, duration, latency, downloadTime, downloadRate}) {
+  LogSegment({id, quality, size, duration, latency, downloadTime, downloadRate, fullDownloadRate}) {
     this.segmentData = [
-      { id, quality, size, duration, latency, downloadTime, downloadRate },
+      { id, quality, size, duration, latency, downloadTime, downloadRate, fullDownloadRate },
       ...this.segmentData
     ];
   }

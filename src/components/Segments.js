@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 import {inject, observer} from "mobx-react";
 import {reaction} from "mobx";
 
+@inject("root")
 @inject("metrics")
 @observer
 class Segments extends React.Component {
@@ -38,6 +39,11 @@ class Segments extends React.Component {
         <div className="segments-header">Quality</div>
         <div className="segments-header">Size</div>
         <div className="segments-header">Download Rate</div>
+        {
+          this.props.root.devMode ?
+            <div className="segments-header">Full Download Rate</div> :
+            null
+        }
         <div className="segments-header">Timing (ms)</div>
       </React.Fragment>
     );
@@ -55,6 +61,11 @@ class Segments extends React.Component {
         <div>{segment.quality}</div>
         <div>{`${segment.size.toFixed(2)} MB`}</div>
         <div>{`${segment.downloadRate.toFixed(1)} Mbps`}</div>
+        {
+          this.props.root.devMode ?
+            <div>{`${segment.fullDownloadRate.toFixed(1)} Mbps`}</div> :
+            null
+        }
         <div className="timing">
           <span
             className="duration"
@@ -86,7 +97,7 @@ class Segments extends React.Component {
     return (
       <div className="segments-container">
         <h3>Segment Metrics</h3>
-        <div className="segments">
+        <div className={`segments ${this.props.root.devMode ? "segments-dev" : ""}`}>
           { this.Header() }
           { this.props.metrics.segmentData.map(this.Segment)}
         </div>

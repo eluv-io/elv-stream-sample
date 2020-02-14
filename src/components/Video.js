@@ -146,6 +146,7 @@ class Video extends React.Component {
 
       // Megabits per second
       const downloadRate = (8 * stats.total) / (downloadTime / 1000) / 1000000;
+      const fullDownloadRate = (8 * stats.total) / ((downloadTime + latency) / 1000) / 1000000;
 
       this.props.metrics.LogSegment({
         id: frag.sn.toString(),
@@ -154,7 +155,8 @@ class Video extends React.Component {
         duration: frag.duration,
         latency,
         downloadTime,
-        downloadRate
+        downloadRate,
+        fullDownloadRate
       });
     });
   }
@@ -200,6 +202,7 @@ class Video extends React.Component {
 
         // Megabits per second
         const downloadRate = (8 * response.byteLength) / (downloadTime / 1000) / 1000000;
+        const fullDownloadRate = (8 * response.byteLength) / ((downloadTime + latency) / 1000) / 1000000;
 
         this.props.metrics.LogSegment({
           id: request.index.toString(),
@@ -208,7 +211,8 @@ class Video extends React.Component {
           duration: request.duration,
           latency,
           downloadTime,
-          downloadRate
+          downloadRate,
+          fullDownloadRate
         });
       }
     );

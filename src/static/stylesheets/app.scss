@@ -286,6 +286,10 @@ footer {
     padding-right: 0.7rem;
     width: 100%;
 
+    &.segments-dev {
+      grid-template-columns: 3rem 1fr 6rem 8rem 8rem 2fr;
+    }
+
     div {
       @include elv-ellipsis;
       align-items: center;
