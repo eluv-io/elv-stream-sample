@@ -4,63 +4,79 @@
 
 This small application is designed to demonstrate the video serving capabilities of the Eluvio Content Fabric. 
 
-Feel free to look at the code to learn how to serve video from the Fabric in your own application, or keep reading for a detailed explanation of the [basic example page](examples/basic-video-example.html)
+Feel free to look at the code to learn how to serve video from the Fabric in your own application, or keep reading for a detailed explanation of the [basic example page](examples/old-basic-video-example.html)
 
 ## Quick Start - Serving video from the Eluvio Content Fabric
 
 Playing video from the Fabric using the Dash and HLS adaptive bitrate streaming protocols can be done in a few simple steps:
 
-- Import the [Eluvio JavaScript client (ElvClient)](https://github.com/eluv-io/elv-client-js) and initialize ElvClient with the appropriate configuration URL and user private key (generating one if necessary)
-- Use the client to retrieve the dash manifest / HLS playlist for the content - along with any DRM specific information
-- Initialize your player with the manifest/playlist + DRM info and start playing
+- Import the [Eluvio JavaScript client (ElvClient)](https://github.com/eluv-io/elv-client-js) and initialize ElvClient with the appropriate configuration URL and user private key (generating one if necessary) or OAuth token
+- Use the client to retrieve the dash manifest / HLS playlist for the content, along with any DRM specific information
+- Initialize the player with the manifest/playlist + DRM info and start playing
 
 
 ### Basic Example - Step by Step
 
-The basic process for playing video can be seen in this [example page](examples/basic-video-example.html). This example is a standalone HTML page that will go through the above steps and play video content from the Fabric with Dash + Widevine if supported, and HLS + AES-128 encryption otherwise. 
+The basic process for playing video can be seen in this [example page](examples/old-basic-video-example.html). This example is a standalone HTML page that will go through the above steps and play video content from the Fabric. It allows playout of both Dash and HLS, either in the clear or with widevine or AES-128 protection, respectively, and includes three different players: [dash.js](https://github.com/Dash-Industry-Forum/dash.js), [hls.js](https://github.com/video-dev/hls.js), and [Bitmovin](https://bitmovin.com/video-player) - though any Dash and/or HLS capable players should work similarly.
 
-Below is a detailed explanation of how this example page is set up.
+Below is a detailed explanation of how this example page works.
 
-In this example, we are using [dash.js](https://github.com/Dash-Industry-Forum/dash.js) and [hls.js](https://github.com/video-dev/hls.js) players, but any other Dash or HLS capable players should work.
+#### Important Note: 
 
-*Note: Much of this code lies within async functions and uses the `await` syntax. The same can be achieved with the `Promise.then()` syntax.*
+The Bitmovin player will not run from a static HTML file. In order to run this sample with Bitmovin support, it must be accessed from a web server. You can use the node [http-server](https://www.npmjs.com/package/http-server) utility to serve the file locally:
+
+- Install http-server using `npm install -g http-server`
+- Use http-server to serve the examples directory `http-server ./examples`
+- Open `http://localhost:8080/basic-video-example.html` in your browser
+
+### Video Playout Example Page
+
+When you open the example page (`examples/basic-video-example.html`) in your browser, you'll see a form that allows you to select a player and a protocol/drm combination for playing video, as well as a configuration URL for the client, and a ID or version hash for content on the Fabric. When you enter a valid ID and press the "Load" button, the page will initialize the Eluvio JavaScript client, load the playout options for the content, set up the video player to play the content.
 
 #### Step 1 - Initialize the client
 
+Starting at the top of the file, we are importing the various players, as well as the Eluvio JavaScript client (elv-client-js).
+
 ```javascript
-<script src="https://cdn.jsdelivr.net/npm/@eluvio/elv-client-js@latest/dist/ElvClient-min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/eluv-io/elv-client-js/dist/ElvClient-min.js"></script>
 ```
 
-Here we are importing the minified Eluvio JavaScript client from GitHub using jsDelivr. The client is also available on [NPM](https://www.npmjs.com/package/@eluvio/elv-client-js). For more information, check the [client documentation](https://github.com/eluv-io/elv-client-js).
+This line imports the minified Eluvio JavaScript client from [GitHub](https://github.com/eluv-io/elv-client-js) using the [jsDelivr](https://www.jsdelivr.com) CDN. The client is also available on [NPM](https://www.npmjs.com/package/@eluvio/elv-client-js). For more information, check the [client documentation](https://eluv-io.github.io/elv-client-js/ElvClient.html).
+
+Moving down to the `Load` method (~line 300):
 
 ```javascript
-const configUrl = "https://demo.net955210.contentfabric.io/config";
-const client = await ElvClient.FromConfigurationUrl({configUrl});
+const client = await ElvClient.FromConfigurationUrl({
+  configUrl: document.getElementById("config-url").value
+});
 
 const wallet = client.GenerateWallet();
-const mnemonic = wallet.GenerateMnemonic();
-const signer = wallet.AddAccountFromMnemonic({mnemonic});
+const signer = wallet.AddAccountFromMnemonic({
+  mnemonic: wallet.GenerateMnemonic()
+});
 
-client.SetSigner({signer});
+await client.SetSigner({signer});
 ```
 
-This is the process of intitializing the client. 
+This is the basic process of intitializing the client. 
 
-Being built on blockchain technology, interaction with the fabric requires the use of an ethereum private key, representing a user account, in order to verify and authenticate requests, perform encryption, transfer funds, and generally serve as an identity for the user. 
+Being built on blockchain technology, interaction with the Fabric requires the use of an ethereum private key, representing a user account, in order to verify and authenticate requests, perform encryption, transfer funds, and generally serve as an identity for the user. 
 
-However, in many cases where the goal is simply to serve video, much of this functionality is unnecessary for an end user. Instead, we can simply generate a private key as needed in order to perform the functions necessary to access the fabric without the hassle of managing user data. In this case, we generate a random mnemonic phrase, which is then converted into a "signer" containing - among other things - a private key that the client may use to perform operations on the Fabric.
+However, in many cases where the goal is simply to serve video, much of this functionality is unnecessary for an end user. Instead, we can simply generate a private key as needed in order to perform the functions necessary to access the Fabric without the hassle of managing user data. In this case, we generate a random mnemonic phrase, which is then converted into a "signer" containing - among other things - a private key that the client may use to perform operations on the Fabric.
 
-On the other hand, if a stronger user identity is desired, you can design your application to keep track of this mnemonic (or the private key it represents) and use it any time that user accesses a video or any other content on the Fabric. Because accessing content creates a blockchain record, it is then possible to see exactly which content was accessed by which user. 
+On the other hand, if a stronger user identity is desired, you can design your application to keep track of this mnemonic (or the private key it represents) and use it any time that user accesses a video or any other content on the Fabric. Because accessing content creates a blockchain record, it is then possible to correlate every content access to the specific user who accessed it.
 
-Note that the more the account is used for, the more valuable the account becomes. Always treat private keys (and mnemonics) as private, sensitive user data. Always store and transfer them encrypted (the client has a method for encrypting private keys with a password - see see [ElvWallet#GenerateEncryptedPrivateKey](https://eluv-io.github.io/elv-client-js/ElvWallet.html#GenerateEncryptedPrivateKey)). A plaintext private key or mnemonic should *never* leave the user's browser - all use of the private key is done on the client.
+Note that the more the account is used for, the more valuable the account becomes. Always treat private keys (and mnemonics) as private, sensitive user data. Always store and transfer them encrypted (the client has a method for encrypting private keys with a password - see see [ElvWallet#GenerateEncryptedPrivateKey](https://eluv-io.github.io/elv-client-js/ElvWallet.html#GenerateEncryptedPrivateKey)). A plaintext private key or mnemonic should *never* leave the user's browser - all use of the private key should done on the client side.
 
 ##### Using an OAuth token for authentication
 
-If authenticating with OAuth, you can simply set the OAuth token in the client in lieu of setting the signer:
+If authenticating with OAuth, you can simply set the OAuth token in the client in lieu of setting the signer. Here is an example using an [Okta](https://developer.okta.com/code/javascript/okta_auth_sdk/) ID token:
 
 ```
-const configUrl = "https://demo.net955210.contentfabric.io/config";
+const configUrl = "https://demov3.net955210.contentfabric.io/config";
 const client = await ElvClient.FromConfigurationUrl({configUrl});
+
+const oauthToken = await okta.getIdToken();
 
 await this.props.client.SetOauthToken({token: oauthToken});
 ```
@@ -68,79 +84,75 @@ await this.props.client.SetOauthToken({token: oauthToken});
 
 #### Step 2 - Access the content
 
+Now that the client is set up, we can use it to query the Fabric for information on how to play out content. Our content is represented by either an object ID (referring to content) or a version hash (referring to a specific version of content). The page checks the prefix of the specified ID to determine which type it is. For more information about how content on the Fabric is identified, see the [client documentation](https://github.com/eluv-io/elv-client-js).
+
+The rest of the load method uses the now initialized client to retrieve playout options to play the content via the selected protocol and DRM combination, then passes that information to the appropriate method to set up the selected player.
+
+```javascript
+const contentId = document.getElementById("content-id").value;
+const objectId = contentId.startsWith("iq__") ? contentId : "";
+const versionHash = contentId.startsWith("hq__") ? contentId : "";
+
+let playoutOptions;
+if(PLAYER_TYPE === "bitmovin") {
+  playoutOptions = await client.BitmovinPlayoutOptions({
+    objectId,
+    versionHash,
+    protocols: [PROTOCOL],
+    drms: [DRM]
+  });
+
+  LoadBitmovin(playoutOptions);
+} else {
+  playoutOptions = await client.PlayoutOptions({
+    objectId,
+    versionHash,
+    protocols: [PROTOCOL],
+    drms: [DRM]
+  });
+
+  if(PROTOCOL === "hls") {
+    LoadHlsJs(playoutOptions);
+  } else {
+    LoadDash(playoutOptions);
+  }
+}
+```
+
+If the playout is specified in a metadata link in the content, the path to that link can be specified using the `linkPath` parameter. 
+
+```javascript
+await client.PlayoutOptions({
+  objectId,
+  versionHash,
+  protocols: [PROTOCOL],
+  drms: [DRM],
+  linkPath: "public/asset_metadata/titles/0/sources/default"
+});
+```
+
+In the `PlayoutOptions` method, we specify which protocols we may want to play (Dash and HLS) as well as what DRM we support, and the Fabric will respond with all the information we need to play the content in those configurations, depending on what the configuration the content itself supports. 
+
+The `BitmovinPlayoutOptions` method is a convenience for setting up playout with the Bitmovin player. This method produces playout options in a format that can be passed directly to the `load` method of the Bitmovin SDK.
+
+The normal `PlayoutOptions` method can be used instead if you want to explicitly craft your Bitmovin options.
+
+##### DRM
+
+DRM support can be determined by the client using the `AvailableDRMs` method:
+
 ```javascript
 const availableDRMs = await client.AvailableDRMs();
-
-// Play the latest version of the content
-const objectId = "iq__3MRbyPWE1EwEnPb2uNgVPHgF57Qj";
-
-const playoutOptions = await client.PlayoutOptions({
-  objectId,
-  protocols: ["dash", "hls"],
-  drms: availableDRMs 
-});
-
-// Play a specific version of the content
-const versionHash = "hq__B1WL1oJa9MCiRpWXBmaoHtAwQdgNGKU36vazGDjjg9e8xS7uQADLct8j5NByXG3qnNAVQ7DcTh";
-
-const playoutOptions = await client.PlayoutOptions({
-  versionHash,
-  protocols: ["dash", "hls"],
-  drms: availableDRMs 
-});
-
-// Access content via link
-const playoutOptions = await client.PlayoutOptions({
-  versionHash,
-  linkPath: "asset_metadata/titles/my-movie/trailers/default",
-  protocols: ["dash", "hls"],
-  drms: availableDRMs 
-});
+> ["clear", "aes-128"] or ["clear", "aes-128", "widevine"]
 ```
 
-Now that the client is set up, we can use it to query the Fabric for information on how to play out content. Our content is represented by either an object ID (referring to content) or a version hash (referring to a specific version of content). For more information about how content on the Fabric is identified, see the [client documentation](https://github.com/eluv-io/elv-client-js).
-
-Additionally, if the playout is specified in a metadata link in the content, the path to that link can be specified using the `linkPath` parameter. 
-
-In this method, we specify which protocols we may want to play (Dash and HLS) as well as what DRM we support, and the fabric will respond with all the information we need to play the content in those configurations, depending on what the configuration the content itself supports. 
-
-DRM support is determined by the client in the `AvailableDRMs` method with the following logic:
-
-```javascript
-const AvailableDRMs = async () => {
-  const availableDRMs = ["aes-128"];
-
-  if(typeof window.navigator.requestMediaKeySystemAccess !== "function") {
-    return availableDRMs;
-  }
-
-  try {
-    const config = [{
-      initDataTypes: ["cenc"],
-      audioCapabilities: [{
-        contentType: "audio/mp4;codecs=\"mp4a.40.2\""
-      }],
-      videoCapabilities: [{
-        contentType: "video/mp4;codecs=\"avc1.42E01E\""
-      }]
-    }];
-
-    await navigator.requestMediaKeySystemAccess("com.widevine.alpha", config);
-
-    availableDRMs.push("widevine");
-  } catch (e) {
-    console.log("No Widevine support detected");
-  }
-
-  return availableDRMs;
-};
-```
-
-This code simply uses the [Navigator.requestMediaKeySystemAccess API](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/requestMediaKeySystemAccess) to see if Widevine support is available. 
+This code uses the [Navigator.requestMediaKeySystemAccess API](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/requestMediaKeySystemAccess) to see if Widevine support is available. 
 
 Widevine is generally supported in Firefox and Chromium-based browsers. With hls.js, HLS with AES-128 encryption is supported by all major browsers, so there is no need to check for any support. 
 
-Here is an example response from the `PlayoutOptions` method - requesting both HLS and Dash, and supporting both AES-128 and Widevine:
+##### Example Playout Options
+
+Here is an example response from the `PlayoutOptions` method - requesting both HLS and Dash, and supporting clear playout as well as AES-128 and Widevine:
 
 ```json
 {
@@ -179,84 +191,112 @@ Here is an example response from the `PlayoutOptions` method - requesting both H
 }
 ```
 
-This particular content has both clear and protected options for both HLS and dash. As you can see, each protocol has a playout URL corresponding to the manifest/playlist, which includes an authorization token that allows the user to access it, as well as information about the DRM required to play the content.
+This particular content has both clear and protected options for both HLS and Dash. As you can see, each protocol has a playout URL corresponding to the manifest/playlist, which includes an authorization token that allows the user to access it, as well as information about the DRM required to play the content.
 
-Note that support for protocols and DRM schemes can vary between content. It's a good idea for your application to be able to play multiple formats with and without DRM.
+Note that support for protocols and DRM schemes can vary between content. It may be good idea for your application to be able to play multiple formats with and without DRM if you're unsure about the exact specifications of your content.
 
 #### Step 3 - Play the content
 
-Now that we have all the information we need to play the content, we can set up our player.
+Now that we have all the information we need to play the content, we can set up the player.
 
-```javascript
-const video = document.getElementById("video");
-
-if(playoutOptions.hls) {
-  PlayHLS(video, playoutOptions);
-} else {
-  const authToken = await client.GenerateStateChannelToken({objectId});
-  PlayDash(authToken, video, playoutOptions);
-}
-```
-
-In this case, we're prioritizing HLS if it's available, otherwise we'll play Dash. When playing Dash with Widevine, the Widevine requests will require an authorization token when querying the Fabric. This is the same token that is appended to our playout URL, but this code get it explicitly from the client instead of parsing it off of the URL. At this point, the client has cached this token, so it will be the same as the previous one and will not require any additional requests.
-
- ##### Playing HLS
+##### Playing HLS
  
  ```javascript
-const PlayHLS = (video, playoutOptions) => {
-  const playoutUrl = !playoutOptions.hls.playoutMethods["aes-128"] ?
-    playoutOptions.hls.playoutMethods["aes-128"].playoutUrl :
-    playoutOptions.hls.playoutMethods.clear.playoutUrl;
-  
-  const player = new Hls();
+const LoadHlsJs = (playoutOptions) => {
+  const playoutMethods = playoutOptions.hls.playoutMethods;
 
-  player.loadSource(playoutUrl);
-  player.attachMedia(video);
+  let playoutInfo;
+  if(DRM === "aes-128") {
+    playoutInfo = playoutMethods["aes-128"];
+  } else {
+    playoutInfo = playoutMethods.clear;
+  }
 
-  // Autoplay
-  player.on(Hls.Events.MANIFEST_PARSED, () => {
-    video.play();
-  });
+  if(!playoutInfo) {
+    SetErrorMessage(`HLS ${DRM} playout not supported for this content`);
+    return;
+  }
+
+  const playerElement = CreatePlayerElement();
+  player = new Hls();
+  player.loadSource(playoutInfo.playoutUrl);
+  player.attachMedia(playerElement);
 };
 ```
 
 ##### Playing Dash
 
 ```javascript
-const PlayDash = (authToken, video, playoutOptions) => {
-  const player = dashjs.MediaPlayer().create();
-  
-  const playoutUrl = playoutOptions.dash.playoutMethods.widevine ?
-    playoutOptions.dash.playoutMethods.widevine.playoutUrl :
-    playoutOptions.dash.playoutMethods.clear.playoutUrl;
-  
-  if(playoutOptions.dash.playoutMethods.widevine) {
-    const widevineUrl = playoutOptions.dash.playoutMethods.widevine.drms.widevine.licenseServers
-      .find(server => server.startsWith("https"));
-  
-    player.setProtectionData({
-      "com.widevine.alpha": {
-        "serverURL": widevineUrl,
-        "httpRequestHeaders": {
-          "Authorization": `Bearer ${authToken}`
-        },
-        "withCredentials": false
-      }
-    });
+const LoadDash = (playoutOptions) => {
+  const playoutMethods = playoutOptions.dash.playoutMethods;
+
+  let playoutInfo, licenseServer;
+  if(DRM === "widevine") {
+    playoutInfo = playoutMethods.widevine;
+
+    if(playoutInfo) {
+      licenseServer = playoutMethods.widevine.drms.widevine.licenseServers[0];
+    }
+  } else {
+    // Play clear
+    playoutInfo = playoutMethods.clear;
   }
- 
-  player.initialize(video, playoutUrl, true);
+
+  if(!playoutInfo) {
+    SetErrorMessage(`Dash ${DRM} playout not supported for this content`);
+    return;
+  }
+
+  const playerElement = CreatePlayerElement();
+  player = dashjs.MediaPlayer().create();
+  player.setProtectionData({
+    "com.widevine.alpha": {
+      "serverURL": licenseServer
+    }
+  });
+
+  player.initialize(playerElement, playoutInfo.playoutUrl);
 };
 ```
 
-Both cases are straightforward - determine the playout url, then set up the corresponding player.
+Both cases are straightforward - determine the playout url, then set up the corresponding player. 
 
-With dash, a bit of extra work must be done to set up Widevine:
-- Determine the widevine server url, which is specified in `drms.widevine.licenseServers`. In this case, we are explicitly preferring HTTPS urls, in case any of the server urls are HTTP.
-- Set the Fabric authorization token we retrieved previously in the Widevine request headers. This will ensure that the HTTP requests to the Fabric are properly authenticated. We also explicitly specify withCredentials=false to avoid CORS issues for these requests.
+To set up Widevine in the Dash case, an additional step must be done to indicate the license server to use. With dashjs, this is done using the `setProtectionData` method. The list of valid license servers is specified in `drms.widevine.licenseServers` of the Dash/Widevine playout methods.
 
+##### Bitmovin
 
-Note: Both of these examples intend for the video to autoplay, but many modern browsers block autoplay by default without user interaction.
+```javascript
+const LoadBitmovin = (playoutOptions) => {
+  const playerElement = CreatePlayerElement();
+
+  const config = {
+    key: "<bitmovin-key>",
+    playback: {
+      autoplay: true
+    }
+  };
+
+  // API 8
+  const player = new bitmovin.player.Player(playerElement, config);
+
+  player.load(playoutOptions).then(
+    () => {
+      console.log('Successfully created Bitmovin Player instance');
+    },
+    (error) => {
+      DestroyPlayer();
+      if(error.name === "SOURCE_NO_SUPPORTED_TECHNOLOGY") {
+        SetErrorMessage(`${PROTOCOL} ${DRM} playout not supported for this content`);
+      } else {
+        SetErrorMessage(`Bitmovin error: ${error.name}`);
+        console.error(error);
+      }
+    }
+  );
+};
+```
+
+Setting up Bitmovin is simpler than setting up HLS or Dash playout separately, because the client automatically sets up the configuration based on the specified protocol and drm options. This includes indicating the Widevine license server, which has to be done explicitly in the dashjs example.
 
 #### Step 4 - Watch
 
