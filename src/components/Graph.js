@@ -1,68 +1,87 @@
 import React from "react";
-import PropTypes from "prop-types";
-import {
-  VictoryLine,
-  VictoryChart,
-  VictoryAxis,
-  VictoryTheme,
-  VictoryLabel
-} from "victory";
+import {inject, observer} from "mobx-react";
+import {Scatter} from "react-chartjs-2";
+import {toJS} from "mobx";
 
 class Graph extends React.Component {
   render() {
-    let xMax = Math.max(...(this.props.data.map(point => point.x)), 0);
-    const xMin = Math.max(0, xMax - this.props.windowSize);
-    xMax = xMin + this.props.windowSize;
-
-    const visibleData = this.props.data.filter(({x}) => x >= xMax - (2 * this.props.windowSize));
-
-    let yMax = visibleData.length > 0 ? Math.max(...(visibleData.map(point => point.y))) : 1;
-    yMax *= 1.1;
+    const xMax = Math.max(...(this.props.data.map(point => point.x)), this.props.windowSize);
 
     return (
-      <div className="graph-container">
-        <h3>{this.props.name}</h3>
-        <VictoryChart
-          height={300}
-          padding={{left: 50, bottom: 50}}
-          theme={VictoryTheme.material}
-          maxDomain={{x: xMax, y: yMax}}
-          minDomain={{x: xMin, y: 0}}
-        >
-          <VictoryAxis
-            label="Time (s)"
-            axisLabelComponent={<VictoryLabel dy={20}/>}
-            style={{
-              tickLabels: {fill: "gray", fontSize: 10},
-              axisLabel: {fill: "gray"}
-            }}
-          />
-          <VictoryAxis
-            dependentAxis
-            style={{tickLabels: {fill: "gray", fontSize: 10}}}
-          />
-          <VictoryLine
-            style={{
-              data: { stroke: this.props.color, strokeWidth: 1 },
-            }}
-            data={this.props.data}
-          />
-        </VictoryChart>
+      <div className="graph-container controls-container">
+        <h3 className="controls-header">{this.props.name}</h3>
+        <Scatter
+          options={
+            ({
+              animation: false,
+              legend: {
+                display: false
+              },
+              title: {
+                display: false
+              },
+              scales: {
+                yAxes: [{
+                  display: true,
+                  ticks: {
+                    min: 0,
+                    stepSize: 10,
+                    suggestedMax: 30,
+                    fontSize: 10
+                  }
+                }],
+                xAxes: [{
+                  display: true,
+                  ticks: {
+                    // Hide edge labels as graph scrolls
+                    callback: value => value % 5 === 0 ? value : "",
+                    min: xMax - this.props.windowSize,
+                    max: xMax,
+                    stepSize: 10,
+                    fontSize: 10
+                  }
+                }]
+              }
+            })
+          }
+          data={
+            ({
+
+              datasets: [{
+                showLine: true,
+                data: toJS(this.props.data),
+                borderCapStyle: "square",
+                borderColor: "#1b73e8",
+                borderWidth: 2,
+                lineTension: 0,
+                pointRadius: 0,
+                fill: false,
+                showTooltips: false
+              }]
+            })
+          }
+        />
       </div>
     );
   }
 }
 
-Graph.propTypes = {
-  name: PropTypes.string,
-  color: PropTypes.string,
-  data: PropTypes.arrayOf(
-    PropTypes.shape({
-      x: PropTypes.number,
-      y: PropTypes.number
-    })
-  ).isRequired,
-  windowSize: PropTypes.number
-};
+@inject("metricsStore")
+@inject("videoStore")
+@observer
+class BufferGraph extends React.Component {
+  render() {
+    if(!this.props.videoStore.playoutOptions) { return null; }
 
-export default Graph;
+    return (
+      <Graph
+        name="Buffer Level (seconds)"
+        data={this.props.metricsStore.bufferData}
+        color={"#00589d"}
+        windowSize={this.props.metricsStore.sampleWindow}
+      />
+    );
+  }
+}
+
+export default BufferGraph;

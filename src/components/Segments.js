@@ -1,11 +1,12 @@
 import React from "react";
 import PropTypes from "prop-types";
+import PrettyBytes from "pretty-bytes";
 
 import {inject, observer} from "mobx-react";
 import {reaction} from "mobx";
 
-@inject("root")
-@inject("metrics")
+@inject("metricsStore")
+@inject("videoStore")
 @observer
 class Segments extends React.Component {
   constructor(props) {
@@ -15,11 +16,11 @@ class Segments extends React.Component {
       timingScale: 2000,
       // Each time a segment is added, recalculate the maximum segment download time
       DisposeMaxSegmentLengthReaction: reaction(
-        () => this.props.metrics.segmentData.length,
+        () => this.props.metricsStore.segmentData.length,
         () => {
           const maxTime = Math.max(
-            ...(this.props.metrics.segmentData.map(segment => segment.duration * 1000)),
-            ...(this.props.metrics.segmentData.map(segment => segment.latency + segment.downloadTime))
+            ...(this.props.metricsStore.segmentData.map(segment => segment.duration * 1000)),
+            ...(this.props.metricsStore.segmentData.map(segment => segment.latency + segment.downloadTime))
           );
 
           this.setState({
@@ -34,18 +35,13 @@ class Segments extends React.Component {
 
   Header() {
     return (
-      <React.Fragment>
-        <div className="segments-header">ID</div>
-        <div className="segments-header">Quality</div>
-        <div className="segments-header">Size</div>
-        <div className="segments-header">Download Rate</div>
-        {
-          this.props.root.devMode ?
-            <div className="segments-header">Full Download Rate</div> :
-            null
-        }
-        <div className="segments-header">Timing (ms)</div>
-      </React.Fragment>
+      <div className="segments-header">
+        <div className="segments-header-column">ID</div>
+        <div className="segments-header-column">Quality</div>
+        <div className="segments-header-column">Size</div>
+        <div className="segments-header-column">Download Rate</div>
+        <div className="segments-header-column">Timing (ms)</div>
+      </div>
     );
   }
 
@@ -56,16 +52,11 @@ class Segments extends React.Component {
     const downloadWidth = (segment.downloadTime / this.state.timingScale) * 100;
 
     return (
-      <React.Fragment key={`segment-${i}`}>
+      <div className={`segment-row ${parseInt(segment.id) % 2 === 0 ? "even" : "odd"}`} key={`segment-${i}`}>
         <div>{segment.id}</div>
         <div>{segment.quality}</div>
         <div>{`${segment.size.toFixed(2)} MB`}</div>
         <div>{`${segment.downloadRate.toFixed(1)} Mbps`}</div>
-        {
-          this.props.root.devMode ?
-            <div>{`${segment.fullDownloadRate.toFixed(1)} Mbps`}</div> :
-            null
-        }
         <div className="timing">
           <span
             className="duration"
@@ -89,17 +80,24 @@ class Segments extends React.Component {
             { segment.downloadTime.toFixed(0) }
           </span>
         </div>
-      </React.Fragment>
+      </div>
     );
   }
 
   render() {
+    if(!this.props.videoStore.playoutOptions) { return null; }
+
     return (
       <div className="segments-container">
-        <h3>Segment Metrics</h3>
-        <div className={`segments ${this.props.root.devMode ? "segments-dev" : ""}`}>
+        <h3 className="controls-header">
+          Segment Metrics
+          <span>Bandwidth Estimate: { PrettyBytes(this.props.videoStore.bandwidthEstimate || 0) }/s </span>
+        </h3>
+        <div className="segments-table">
           { this.Header() }
-          { this.props.metrics.segmentData.map(this.Segment)}
+          <div className={"segments"}>
+            { this.props.metricsStore.segmentData.map(this.Segment)}
+          </div>
         </div>
       </div>
     );

@@ -47,7 +47,7 @@ module.exports = {
     fs: "empty"
   },
   mode: "development",
-  devtool: "eval-source-map",
+  devtool: "source-map",
   plugins: [
     new webpack.optimize.LimitChunkCountPlugin({
       maxChunks: 1,
