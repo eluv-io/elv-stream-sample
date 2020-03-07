@@ -29,7 +29,7 @@
   "dependencies": {
     "chart.js": "^2.9.3",
     "dashjs": "^2.9.3",
-    "elv-client-js": "git+https://github.com/eluv-io/elv-client-js.git#modules",
+    "elv-client-js": "git+https://github.com/eluv-io/elv-client-js.git#develop",
     "elv-components-js": "git+https://github.com/eluv-io/elv-components-js.git#develop",
     "hls.js": "^0.13.1",
     "mobx": "^5.13.0",

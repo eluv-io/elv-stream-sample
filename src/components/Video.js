@@ -141,13 +141,13 @@ class Video extends React.Component {
       // Megabytes
       const size = stats.total / (1024 * 1024);
 
-      // Milliseconds
-      const latency = stats.tfirst - stats.trequest;
-      const downloadTime = stats.tload - stats.tfirst;
+      // Seconds
+      const latency = Math.max(1, stats.tfirst - stats.trequest) / 1000;
+      const downloadTime = Math.max(1, stats.tload - stats.tfirst) / 1000;
 
-      // Megabits per second
-      const downloadRate = (8 * stats.total) / (downloadTime / 1000) / 1000000;
-      const fullDownloadRate = (8 * stats.total) / ((downloadTime + latency) / 1000) / 1000000;
+      // Bits per second
+      const downloadRate = (8 * stats.total) / downloadTime;
+      const fullDownloadRate = (8 * stats.total) / (downloadTime + latency);
 
       this.props.metricsStore.LogSegment({
         id: frag.sn.toString(),
@@ -164,6 +164,11 @@ class Video extends React.Component {
 
   InitializeDash(video, playoutUrl, widevineOptions) {
     this.player = DashJS.MediaPlayer().create();
+
+    this.bandwidthInterval = setInterval(
+      () => this.props.videoStore.SetBandwidthEstimate(this.player.getAverageThroughput("video") * 1000),
+      1000
+    );
 
     if(this.props.videoStore.drm === "widevine") {
       const widevineUrl = widevineOptions.widevine.licenseServers[0];
@@ -193,13 +198,13 @@ class Video extends React.Component {
         // Megabytes
         const size = response.byteLength / (1024 * 1024);
 
-        // Milliseconds
-        const latency = request.firstByteDate - request.requestStartDate;
-        const downloadTime = request.requestEndDate - request.firstByteDate;
+        // Seconds
+        const latency = Math.max(1, request.firstByteDate - request.requestStartDate) / 1000;
+        const downloadTime = Math.max(1, request.requestEndDate - request.firstByteDate) / 1000;
 
-        // Megabits per second
-        const downloadRate = (8 * response.byteLength) / (downloadTime / 1000) / 1000000;
-        const fullDownloadRate = (8 * response.byteLength) / ((downloadTime + latency) / 1000) / 1000000;
+        // Bits per second
+        const downloadRate = (8 * response.byteLength) / downloadTime;
+        const fullDownloadRate = (8 * response.byteLength) / (downloadTime + latency);
 
         this.props.metricsStore.LogSegment({
           id: request.index.toString(),
@@ -215,11 +220,6 @@ class Video extends React.Component {
     );
 
     this.player.initialize(video, playoutUrl);
-
-    this.bandwidthInterval = setInterval(
-      () => this.props.videoStore.SetBandwidthEstimate(this.player.getAverageThroughput("video")),
-      1000
-    );
   }
 
   InitializeMuxMonitoring(video, playoutUrl) {

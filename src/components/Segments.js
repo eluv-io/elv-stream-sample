@@ -20,7 +20,7 @@ class Segments extends React.Component {
         () => {
           const maxTime = Math.max(
             ...(this.props.metricsStore.segmentData.map(segment => segment.duration * 1000)),
-            ...(this.props.metricsStore.segmentData.map(segment => segment.latency + segment.downloadTime))
+            ...(this.props.metricsStore.segmentData.map(segment => (segment.latency + segment.downloadTime) * 1000))
           );
 
           this.setState({
@@ -40,23 +40,28 @@ class Segments extends React.Component {
         <div className="segments-header-column">Quality</div>
         <div className="segments-header-column">Size</div>
         <div className="segments-header-column">Download Rate</div>
+        <div className="segments-header-column">Throughput</div>
         <div className="segments-header-column">Timing (ms)</div>
       </div>
     );
   }
 
   Segment(segment, i) {
+    const latency = segment.latency * 1000;
+    const downloadTime = segment.downloadTime * 1000;
+
     const duration = Math.round(segment.duration) * 1000;
-    const durationWidth = (duration/ this.state.timingScale) * 100;
-    const latencyWidth = (segment.latency / this.state.timingScale) * 100;
-    const downloadWidth = (segment.downloadTime / this.state.timingScale) * 100;
+    const durationWidth = (duration / this.state.timingScale) * 100;
+    const latencyWidth = (latency / this.state.timingScale) * 100;
+    const downloadWidth = (downloadTime / this.state.timingScale) * 100;
 
     return (
       <div className={`segment-row ${parseInt(segment.id) % 2 === 0 ? "even" : "odd"}`} key={`segment-${i}`}>
         <div>{segment.id}</div>
         <div>{segment.quality}</div>
         <div>{`${segment.size.toFixed(2)} MB`}</div>
-        <div>{`${segment.downloadRate.toFixed(1)} Mbps`}</div>
+        <div>{`${PrettyBytes(segment.downloadRate, {bits: true}) }/s`}</div>
+        <div>{`${PrettyBytes(segment.fullDownloadRate, {bits: true}) }/s`}</div>
         <div className="timing">
           <span
             className="duration"
@@ -68,16 +73,16 @@ class Segments extends React.Component {
           <span
             className="latency"
             style={{width: `${latencyWidth}%`}}
-            title={`Latency: ${segment.latency.toFixed(0)}ms`}
+            title={`Latency: ${latency.toFixed(0)}ms`}
           >
-            { segment.latency.toFixed(0) }
+            { latency.toFixed(0) }
           </span>
           <span
             className="download"
             style={{width: `${downloadWidth}%`}}
-            title={`Download: ${segment.downloadTime.toFixed(0)}ms`}
+            title={`Download: ${downloadTime.toFixed(0)}ms`}
           >
-            { segment.downloadTime.toFixed(0) }
+            { downloadTime.toFixed(0) }
           </span>
         </div>
       </div>
@@ -90,8 +95,15 @@ class Segments extends React.Component {
     return (
       <div className="segments-container">
         <h3 className="controls-header">
-          Segment Metrics
-          <span>Bandwidth Estimate: { PrettyBytes(this.props.videoStore.bandwidthEstimate || 0) }/s </span>
+          <span>
+            Segment Metrics
+          </span>
+          <span>
+            Player Bandwidth Estimate:
+            <span className="bandwidth-estimate">
+              { PrettyBytes(this.props.videoStore.bandwidthEstimate || 0, {bits: true}) }/s
+            </span>
+          </span>
         </h3>
         <div className="segments-table">
           { this.Header() }

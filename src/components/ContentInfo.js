@@ -9,7 +9,7 @@ class ContentInfo extends React.Component {
     super(props);
 
     this.state = {
-      contentId: this.props.videoStore.contentId
+      contentId: this.props.videoStore.contentId || ""
     };
   }
 
