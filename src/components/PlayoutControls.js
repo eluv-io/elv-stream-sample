@@ -2,22 +2,29 @@ import React from "react";
 import {inject, observer} from "mobx-react";
 import {Action} from "elv-components-js";
 
+@inject("rootStore")
 @inject("videoStore")
 @observer
 class PlayoutControls extends React.Component {
-  DRMSelection() {
-    let drms = this.props.videoStore.protocol === "dash" ?
+  DRMS(protocol) {
+    let drms = protocol === "dash" ?
       ["widevine", "clear"] : ["aes-128", "clear"];
 
     if(this.props.videoStore.playoutOptions) {
-      drms = Object.keys(this.props.videoStore.playoutOptions[this.props.videoStore.protocol].playoutMethods)
+      drms = Object.keys(this.props.videoStore.playoutOptions[protocol].playoutMethods)
         .sort((a) => a === "widevine" || a === "aes-128" ? -1 : 1);
     }
 
+    drms = drms.filter(drm => this.props.rootStore.availableDRMs.includes(drm));
+
+    return drms;
+  }
+
+  DRMSelection() {
     return (
       <div className="control-row">
         {
-          drms.map(drm =>
+          this.DRMS(this.props.videoStore.protocol).map(drm =>
             <Action
               key={`drm-selection-${drm}`}
               onClick={() => this.props.videoStore.SetDRM(drm)}
@@ -37,6 +44,9 @@ class PlayoutControls extends React.Component {
     if(this.props.videoStore.playoutOptions) {
       protocols = Object.keys(this.props.videoStore.playoutOptions);
     }
+
+    // Hide protocol option if no DRM options are available
+    protocols = protocols.filter(protocol => this.DRMS(protocol).length > 0);
 
     return (
       <div className="control-row">

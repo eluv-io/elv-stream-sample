@@ -3,7 +3,7 @@ import HLSPlayer from "hls.js/dist/hls";
 
 class VideoStore {
   @observable loading = false;
-  @observable error;
+  @observable error = "";
 
   @observable hlsjsSupported = HLSPlayer.isSupported();
   @observable contentId;
@@ -35,6 +35,7 @@ class VideoStore {
     this.contentId = "";
     this.bandwidthEstimate = 0;
     this.error = "";
+    this.loading = false;
   }
 
   @action.bound
@@ -62,8 +63,11 @@ class VideoStore {
 
   @action.bound
   LoadVideo = flow(function * ({contentId}) {
+    this.Reset();
+
+    if(!contentId) { return; }
+
     this.loading = true;
-    this.error = undefined;
     this.contentId = contentId;
 
     const client = this.rootStore.client;
@@ -76,7 +80,6 @@ class VideoStore {
       } else if(contentId.startsWith("hq")) {
         versionHash = contentId;
       } else {
-        this.Reset();
         this.error = `Invalid content ID: ${contentId}`;
         return;
       }

@@ -60,26 +60,45 @@ main {
   background: $elv-color-lightergray;
   display: flex;
   grid-column: 1 / 3;
-  padding: $elv-spacing-xs $elv-spacing-xxl;
+  padding: $elv-spacing-xs $elv-spacing-l;
+  align-items: center;
 
   .content-input {
     align-items: center;
     display: flex;
-    width: 100%;
+    flex: 5 1 0;
 
     input {
       flex: 1 1;
       font-size: $elv-font-l;
       width: 100%;
     }
+  }
 
-    input,
-    button {
-      border: 0;
-      border-radius: 0;
-      height: 2rem;
-      outline: 0;
-    }
+  .available-content-select {
+    margin-left: $elv-spacing-s;
+    flex: 1 1 0;
+  }
+
+  input,
+  button,
+  select {
+    height: 2rem;
+  }
+
+  input,
+  button {
+    border: 0;
+    border-radius: 0;
+    outline: 0;
+  }
+
+  select {
+    background-color: $elv-color-bg-white;
+    outline: 1px solid $elv-color-lightgray;
+    border: 0;
+    color: $elv-color-text-light;
+    padding: 0 $elv-spacing-xs;
   }
 }
 
@@ -87,13 +106,24 @@ main {
   align-items: center;
   color: $elv-color-text-dark;
   display: flex;
-  font-size: 1.8rem;
+  font-size: 2rem;
   font-weight: normal;
   justify-content: center;
 
   &.error {
     color: $elv-color-mediumred;
     font-size: $elv-font-xxl;
+  }
+}
+
+.content-title-sample {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  h1 {
+    font-size: 1.6rem;
   }
 }
 
@@ -167,6 +197,7 @@ main {
     grid-template-columns: 3rem 1fr 6rem 8rem 8rem 2fr;
     height: 2.2rem;
     text-align: center;
+    margin-right: $elv-spacing-s;
   }
 
   .segments-header {
@@ -190,7 +221,6 @@ main {
     display: flex;
     font-size: $elv-font-s;
     height: 100%;
-    margin-right: $elv-spacing-xxs;
     position: relative;
 
     .duration {

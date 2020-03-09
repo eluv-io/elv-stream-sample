@@ -73,7 +73,8 @@ class RootStore {
       yield client.SetNodes({fabricURIs: [this.fabricNode], ethereumURIs: [this.ethNode]});
     }
 
-    this.availableDRMs = [...(yield client.AvailableDRMs()), "clear"];
+    this.availableDRMs = yield client.AvailableDRMs();
+
     this.client = client;
     this.region = region;
 

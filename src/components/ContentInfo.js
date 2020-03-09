@@ -13,6 +13,30 @@ class ContentInfo extends React.Component {
     };
   }
 
+  AvailableContent() {
+    const content = EluvioConfiguration.availableContent;
+
+    if(!content || content.length === 0) { return null; }
+
+    const options = content.map(({title, versionHash}) =>
+      <option key={`available-content-${versionHash}`} value={versionHash}>{title}</option>
+    );
+
+    return (
+      <select
+        value={this.props.videoStore.contentId}
+        className="available-content-select"
+        onChange={event => {
+          this.props.videoStore.LoadVideo({contentId: event.target.value});
+          this.setState({contentId: event.target.value});
+        }}
+      >
+        <option value="">{"Sample Content..."}</option>
+        { options }
+      </select>
+    );
+  }
+
   ContentInput() {
     const Submit = () => this.props.videoStore.LoadVideo({contentId: this.state.contentId});
 
@@ -36,6 +60,18 @@ class ContentInfo extends React.Component {
       );
     }
 
+    const sampleContent = (EluvioConfiguration.availableContent || [])
+      .find(({versionHash}) => versionHash === this.props.videoStore.contentId);
+
+    if(sampleContent) {
+      return (
+        <div className="content-title-sample">
+          <h1 className="content-title">{ sampleContent.title || this.props.videoStore.title }</h1>
+          { sampleContent.subHeader ? <h3>{ sampleContent.subHeader }</h3> : null }
+        </div>
+      );
+    }
+
     return (
       <h1 className="content-title">{ this.props.videoStore.title }</h1>
     );
@@ -46,6 +82,7 @@ class ContentInfo extends React.Component {
       <React.Fragment>
         <div className="content-info-container">
           { this.ContentInput() }
+          { this.AvailableContent() }
         </div>
         { this.Title() }
         <div className="buffer" />
