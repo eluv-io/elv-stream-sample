@@ -1,4 +1,4 @@
-import "./static/stylesheets/app.scss";
+import "../static/stylesheets/app.scss";
 
 import React from "react";
 import {render} from "react-dom";
@@ -6,17 +6,17 @@ import {inject, observer, Provider} from "mobx-react";
 
 import {IconLink, ImageIcon, LoadingElement} from "elv-components-js";
 
-import * as Stores from "./stores";
+import * as Stores from "../stores";
 
-import Logo from "./static/images/Logo.png";
-import GithubIcon from "./static/icons/github.svg";
-import ContentInfo from "./components/ContentInfo";
-import Video from "./components/Video";
-import Segments from "./components/Segments";
-import PlayoutControls from "./components/PlayoutControls";
-import BufferGraph from "./components/Graph";
-import PlayoutInfo from "./components/PlayoutInfo";
-import AdvancedControls from "./components/AdvancedControls";
+import Logo from "../static/images/Logo.png";
+import GithubIcon from "../static/icons/github.svg";
+import ContentInfo from "../components/ContentInfo";
+import Video from "../components/Video";
+import Segments from "../components/Segments";
+import PlayoutControls from "../components/PlayoutControls";
+import BufferGraph from "../components/Graph";
+import PlayoutInfo from "../components/PlayoutInfo";
+import AdvancedControls from "../components/AdvancedControls";
 
 @inject("rootStore")
 @observer
@@ -41,9 +41,11 @@ class App extends React.Component {
     return (
       <main>
         <ContentInfo />
-        <Video />
-        <Segments />
-        <div className="controls controls-section">
+        <div className="video-section">
+          <Video />
+          <Segments />
+        </div>
+        <div className="controls-section">
           <PlayoutControls />
           <BufferGraph />
           <PlayoutInfo />
@@ -57,19 +59,19 @@ class App extends React.Component {
     return (
       <div className="app-container">
         <header>
-          <div className="header-logo">
-            <IconLink href="https://eluv.io" className="logo" icon={Logo} label="Eluvio"/>
-            <h1>
-              Video Streaming Sample
-            </h1>
-          </div>
-          { this.SourceLink() }
+          <IconLink href="https://eluv.io" className="logo" icon={Logo} label="Eluvio"/>
+          <h1>
+            Video Streaming Sample
+          </h1>
         </header>
         <LoadingElement
           loading={!this.props.rootStore.client}
           fullPage={true}
           render={this.App}
         />
+        <footer>
+          { this.SourceLink() }
+        </footer>
       </div>
     );
   }

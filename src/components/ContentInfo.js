@@ -56,7 +56,7 @@ class ContentInfo extends React.Component {
   Title() {
     if(this.props.videoStore.error) {
       return (
-        <h1 className="content-title error">{ this.props.videoStore.error }</h1>
+        <h1 className="title content-title error">{ this.props.videoStore.error }</h1>
       );
     }
 
@@ -65,7 +65,7 @@ class ContentInfo extends React.Component {
 
     if(sampleContent) {
       return (
-        <div className="content-title-sample">
+        <div className="title content-title-sample">
           <h1 className="content-title">{ sampleContent.title || this.props.videoStore.title }</h1>
           { sampleContent.subHeader ? <h3>{ sampleContent.subHeader }</h3> : null }
         </div>
@@ -73,19 +73,18 @@ class ContentInfo extends React.Component {
     }
 
     return (
-      <h1 className="content-title">{ this.props.videoStore.title }</h1>
+      <h1 className="title content-title">{ this.props.videoStore.title }</h1>
     );
   }
 
   render() {
     return (
       <React.Fragment>
-        <div className="content-info-container">
+        <div className="selection content-info-container">
           { this.ContentInput() }
           { this.AvailableContent() }
         </div>
         { this.Title() }
-        <div className="buffer" />
       </React.Fragment>
     );
   }

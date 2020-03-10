@@ -276,7 +276,7 @@ class Video extends React.Component {
 
   render() {
     return (
-      <div className="video-container" key={`video-version-${this.state.videoVersion}`}>
+      <div className="video video-container" key={`video-version-${this.state.videoVersion}`}>
         <LoadingElement loadingClassname="video-loading" loading={this.props.videoStore.loading}>
           <video
             key={`video-${this.props.videoStore.contentId}-${this.props.videoStore.protocol}-${this.props.videoStore.drm}`}

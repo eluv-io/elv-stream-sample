@@ -2,7 +2,7 @@
 @import "~elv-components-js/src/stylesheets/styles";
 
 html {
-  font-size: 12px;
+  font-size: 14px;
 }
 
 body,
@@ -16,7 +16,10 @@ body,
 .app-container {
   display: grid;
   flex: 1 1 0;
-  grid-template-rows: auto 1fr auto;
+
+  // Header + page
+  grid-template-rows: auto 1fr;
+
   max-height: 100%;
 }
 
@@ -26,8 +29,8 @@ h3 {
 }
 
 header {
-  align-items: flex-end;
   display: flex;
+  justify-content: space-between;
   padding: $elv-spacing-xs $elv-spacing-s;
 
   .logo {
@@ -37,31 +40,43 @@ header {
   h1 {
     @include elv-no-select;
     color: $elv-color-text-light;
-    font-size: $elv-font-xl;
+    font-size: $elv-font-xxl;
     font-weight: normal;
-    margin-left: $elv-spacing-m;
+    margin-left: $elv-spacing-s;
   }
 }
 
-main {
-  display: grid;
-  flex-grow: 1;
-  grid-template-columns: 3fr minmax(25%, 1fr);
-  grid-template-rows: 3rem 4rem 1fr;
-  max-height: 100%;
+.header-logo {
+  align-items: flex-end;
+  display: flex;
+  flex: 1 1 0;
+}
 
-  .video-section,
-  .controls-section {
-    min-height: 100%;
+.source-link {
+  align-items: center;
+  border: 1px solid $elv-color-mediumgray;
+  border-radius: 3px;
+  display: flex;
+  font-size: $elv-font-m;
+  padding: $elv-spacing-xxs $elv-spacing-xs;
+  width: auto;
+
+  .github-icon {
+    height: $elv-font-xxl;
+    margin-right: $elv-spacing-xs;
+    width: $elv-font-xxl;
+  }
+
+  &:hover {
+    background-color: $elv-color-lightestgray;
   }
 }
 
 .content-info-container {
+  align-items: center;
   background: $elv-color-lightergray;
   display: flex;
-  grid-column: 1 / 3;
-  padding: $elv-spacing-xs $elv-spacing-l;
-  align-items: center;
+  padding: $elv-spacing-xs $elv-spacing-s;
 
   .content-input {
     align-items: center;
@@ -76,8 +91,8 @@ main {
   }
 
   .available-content-select {
-    margin-left: $elv-spacing-s;
     flex: 1 1 0;
+    margin-left: $elv-spacing-s;
   }
 
   input,
@@ -95,9 +110,10 @@ main {
 
   select {
     background-color: $elv-color-bg-white;
-    outline: 1px solid $elv-color-lightgray;
     border: 0;
     color: $elv-color-text-light;
+    font-size: $elv-font-m;
+    outline: 1px solid $elv-color-lightgray;
     padding: 0 $elv-spacing-xs;
   }
 }
@@ -117,62 +133,58 @@ main {
 }
 
 .content-title-sample {
-  text-align: center;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  text-align: center;
 
   h1 {
     font-size: 1.6rem;
   }
 }
 
-.video-section {
-  display: grid;
-  grid-template-rows: 45vh 1fr;
 
-  .video-container {
-    background: $elv-color-black;
-    display: flex;
-    justify-content: center;
+.video-container {
+  background: $elv-color-black;
+  display: flex;
+  justify-content: center;
 
-    .video-loading {
-      height: 100%;
-      width: 100%;
-    }
-
-    video {
-      background: $elv-color-black;
-      cursor: pointer;
-      max-height: 100%;
-      max-width: 100%;
-      min-height: 100%;
-      width: 100%;
-    }
-  }
-
-  .video-container,
-  video {
-    border-radius: 0 $elv-spacing-ss $elv-spacing-ss 0;
-  }
-
-  .segments-container {
-    display: flex;
-    flex-direction: column;
-    max-height: 100%;
-    padding-left: $elv-spacing-m;
+  .video-loading {
+    height: 100%;
     width: 100%;
+  }
 
-    .controls-header {
-      justify-content: space-between;
-      padding: $elv-spacing-s $elv-spacing-xs $elv-spacing-xxs;
-    }
+  video {
+    background: $elv-color-black;
+    cursor: pointer;
+    max-height: 100%;
+    max-width: 100%;
+    min-height: 100%;
+    width: 100%;
+  }
+}
 
-    .bandwidth-estimate {
-      display: inline-block;
-      min-width: 7rem;
-      text-align: right;
-    }
+.video-container,
+video {
+  border-radius: 0 $elv-spacing-ss $elv-spacing-ss 0;
+}
+
+.segments-container {
+  display: flex;
+  flex-direction: column;
+  max-height: 100%;
+  padding-left: $elv-spacing-m;
+  width: 100%;
+
+  .controls-header {
+    justify-content: space-between;
+    padding: $elv-spacing-s $elv-spacing-xs $elv-spacing-xxs;
+  }
+
+  .bandwidth-estimate {
+    display: inline-block;
+    min-width: 7rem;
+    text-align: right;
   }
 }
 
@@ -196,8 +208,8 @@ main {
     display: grid;
     grid-template-columns: 3rem 1fr 6rem 8rem 8rem 2fr;
     height: 2.2rem;
-    text-align: center;
     margin-right: $elv-spacing-s;
+    text-align: center;
   }
 
   .segments-header {
@@ -312,39 +324,132 @@ main {
     font-size: $elv-font-m;
     height: 2.5rem;
     margin-top: $elv-spacing-xxs;
+    padding: 0 $elv-spacing-xs;
     text-align: center;
     width: 100%;
   }
 }
 
-footer {
-  color: $elv-color-text-lighter;
-  display: flex;
-  justify-content: flex-end;
-  padding: $elv-spacing-xs;
-}
-
-.source-link {
+.graph-container {
   align-items: center;
-  border: 1px solid $elv-color-mediumgray;
-  border-radius: 3px;
-  display: flex;
-  font-size: $elv-font-m;
-  margin-right: $elv-spacing-xs;
-  padding: $elv-spacing-xxs $elv-spacing-xs;
-  width: auto;
-
-  .github-icon {
-    height: $elv-font-xxl;
-    margin-right: $elv-spacing-xs;
-    width: $elv-font-xxl;
-  }
-
-  &:hover {
-    background-color: $elv-color-lightestgray;
-  }
+  margin: auto;
+  max-width: 80vw;
 }
 
 .app-version {
   display: none;
 }
+
+// Layout
+
+.selection {
+  grid-area: selection;
+}
+
+.title {
+  grid-area: title;
+}
+
+.video {
+  grid-area: video;
+  max-height: calc(50vh - 6rem);
+}
+
+.segments {
+  grid-area: segments;
+}
+
+.controls {
+  grid-area: controls;
+}
+
+// Layout
+
+main {
+  display: grid;
+  flex-grow: 1;
+  grid-template-areas: "selection selection" "title empty" "video controls" "segments controls";
+  grid-template-columns: 3fr minmax(25%, 1fr);
+  grid-template-rows: 3rem 4rem 1fr 1fr;
+  max-height: 100%;
+  padding-bottom: $elv-spacing-m;
+}
+
+@media only screen and (max-width: 1000px) {
+  html {
+    font-size: 10px;
+  }
+
+  main {
+    grid-template-areas: "selection" "title" "video" "controls" "segments";
+    grid-template-columns: 100%;
+    grid-template-rows: 5rem 6rem 50vh 1fr 1fr;
+  }
+
+  .content-info-container {
+    .content-input {
+      flex: 2 1 0;
+
+      button {
+        margin-left: $elv-spacing-xs;
+        max-width: 10rem;
+        min-width: 10rem;
+      }
+    }
+
+    .available-content-select {
+      flex: 1 1 0;
+    }
+
+    input,
+    button,
+    select {
+      // sass-lint:disable no-important
+      font-size: $elv-font-xl !important;
+      // sass-lint:enable no-important
+      height: 3rem;
+    }
+  }
+
+  .video {
+    border-radius: 0;
+    min-height: 100%;
+  }
+
+  .controls {
+    margin-top: $elv-spacing-m;
+    padding: 0 $elv-spacing-l;
+
+    .controls-header {
+      font-size: $elv-font-xxl;
+      margin-bottom: $elv-spacing-m;
+    }
+
+    .control-row {
+      justify-content: center;
+      margin-bottom: $elv-spacing-s;
+
+      button {
+        margin-right: $elv-spacing-s;
+        max-width: 35%;
+        min-height: 4rem;
+
+        &.-elv-button {
+          font-size: $elv-font-xl;
+        }
+      }
+    }
+  }
+
+  .segments-table {
+    font-size: $elv-font-l;
+  }
+}
+
+// Make things larger on mobile devices
+@media only screen and (max-device-width: 1000px) {
+  html {
+    font-size: 16px;
+  }
+}
+

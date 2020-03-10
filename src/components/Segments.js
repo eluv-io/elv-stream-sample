@@ -93,7 +93,7 @@ class Segments extends React.Component {
     if(!this.props.videoStore.playoutOptions) { return null; }
 
     return (
-      <div className="segments-container">
+      <div className="segments segments-container">
         <h3 className="controls-header">
           <span>
             Segment Metrics

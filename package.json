@@ -7,10 +7,9 @@
   "homepage": "https://github.com/eluv-io/elv-stream-sample",
   "scripts": {
     "serve": "webpack-dev-server --hot --port 8084",
-    "serve-dev": "webpack-dev-server --entry ./src/pages/Dev.js --hot --port 8084",
     "serve-display-app": "webpack-dev-server --entry ./src/pages/DisplayApp.js --hot --port 8084",
-    "build": "rm -rf dist/main/* && NODE_ENV=production node ./node_modules/webpack-cli/bin/cli.js -p --progress --colors --devtool none",
-    "build-display-app": "rm -rf dist/displayApp/* && NODE_ENV=production node ./node_modules/webpack-cli/bin/cli.js --entry ./src/pages/DisplayApp.js --output-path ./dist/displayApp/ -p --progress --colors --devtool none",
+    "build": "rm -rf dist/main/* && NODE_ENV=production node ./node_modules/webpack-cli/bin/cli.js --output-path ./dist/main/ -p --progress --colors --devtool none",
+    "build-display-app": "rm -rf dist/displayApp/* && NODE_ENV=production DISPLAY_APP=true node ./node_modules/webpack-cli/bin/cli.js --output-path ./dist/displayApp/ -p --progress --colors --devtool none",
     "add-build": "git add dist",
     "lint": "npm run fix-scss ; npm run lint-scss ; npm run fix-js",
     "lint-show": "npm run lint-scss ; npm run lint-js",
@@ -84,9 +83,9 @@
     "style-loader": "^0.22.1",
     "svg-inline-loader": "^0.8.0",
     "svg-inline-react": "^3.1.0",
-    "webpack": "^4.29.6",
+    "webpack": "^4.42.0",
     "webpack-bundle-analyzer": "^3.3.2",
-    "webpack-cli": "^3.3.0",
+    "webpack-cli": "^3.3.11",
     "webpack-dev-server": "^3.2.1"
   },
   "babel": {
