@@ -14,8 +14,9 @@ body,
 }
 
 .app-container {
-  display: grid;
+  display: flex;
   flex: 1 1 0;
+  flex-direction: column;
 
   // Header + page
   grid-template-rows: auto 1fr;
@@ -31,6 +32,9 @@ h3 {
 header {
   display: flex;
   justify-content: space-between;
+
+  max-height: 3.5rem;
+  min-height: 3.5rem;
   padding: $elv-spacing-xs $elv-spacing-s;
 
   .logo {
@@ -353,6 +357,7 @@ video {
 .video {
   grid-area: video;
   max-height: calc(50vh - 6rem);
+  min-height: calc(50vh - 6rem);
 }
 
 .segments {
@@ -373,6 +378,25 @@ main {
   grid-template-rows: 3rem 4rem 1fr 1fr;
   max-height: 100%;
   padding-bottom: $elv-spacing-m;
+
+  &.display-app {
+    grid-template-areas: "video controls" "segments controls";
+    grid-template-rows: 3fr 2fr;
+
+    .video-container,
+    video {
+      border-radius: 0 0 $elv-spacing-ss;
+    }
+  }
+
+  .video {
+    max-height: 66vh;
+    min-height: 66vh;
+  }
+
+  .controls {
+    padding-top: $elv-spacing-xs;
+  }
 }
 
 @media only screen and (max-width: 1000px) {
@@ -384,6 +408,12 @@ main {
     grid-template-areas: "selection" "title" "video" "controls" "segments";
     grid-template-columns: 100%;
     grid-template-rows: 5rem 6rem 50vh 1fr 1fr;
+
+    &.display-app {
+      grid-template-areas: "video video" "segments controls";
+      grid-template-columns: 10fr 1fr;
+      grid-template-rows: 3fr 2fr;
+    }
   }
 
   .content-info-container {
@@ -412,8 +442,11 @@ main {
   }
 
   .video {
-    border-radius: 0;
-    min-height: 100%;
+    .video-container,
+    video {
+      border-radius: 0;
+      min-height: 100%;
+    }
   }
 
   .controls {
@@ -431,7 +464,7 @@ main {
 
       button {
         margin-right: $elv-spacing-s;
-        max-width: 35%;
+        max-width: 40%;
         min-height: 4rem;
 
         &.-elv-button {

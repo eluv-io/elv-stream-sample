@@ -97,7 +97,6 @@ class VideoStore {
           versionHash,
           metadataSubtree: "public/name"
         }));
-
       yield this.LoadVideoPlayout({libraryId, objectId, versionHash});
     } catch(error) {
       // eslint-disable-next-line no-console
@@ -115,7 +114,7 @@ class VideoStore {
 
   @action.bound
   LoadVideoPlayout = flow(function * ({libraryId, objectId, versionHash}) {
-    this.playoutOptions = yield this.rootStore.client.PlayoutOptions({
+    const playoutOptions = yield this.rootStore.client.PlayoutOptions({
       objectId,
       versionHash
     });
@@ -129,15 +128,17 @@ class VideoStore {
     });
 
     if(
-      !this.playoutOptions[this.protocol] ||
-      !this.playoutOptions[this.protocol].playoutMethods[this.drm]
+      !playoutOptions[this.protocol] ||
+      !playoutOptions[this.protocol].playoutMethods[this.drm]
     ) {
-      this.protocol = Object.keys(this.playoutOptions)[0] || "hls";
+      this.protocol = Object.keys(playoutOptions)[0] || "hls";
 
       // Prefer DRM
-      const playoutMethods = this.playoutOptions[this.protocol].playoutMethods;
+      const playoutMethods = playoutOptions[this.protocol].playoutMethods;
       this.drm = playoutMethods["aes-128"] ? "aes-128" : (playoutMethods.widevine ? "widevine" : "clear");
     }
+
+    this.playoutOptions = playoutOptions;
   });
 }
 
