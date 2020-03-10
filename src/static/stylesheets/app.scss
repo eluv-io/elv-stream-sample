@@ -152,9 +152,10 @@ header {
   background: $elv-color-black;
   display: flex;
   justify-content: center;
+  min-height: 100%;
 
   .video-loading {
-    height: 100%;
+    min-height: 100%;
     width: 100%;
   }
 
@@ -387,11 +388,11 @@ main {
     video {
       border-radius: 0 0 $elv-spacing-ss;
     }
-  }
 
-  .video {
-    max-height: 66vh;
-    min-height: 66vh;
+    .video {
+      max-height: 66vh;
+      min-height: 66vh;
+    }
   }
 
   .controls {

@@ -1,7 +1,6 @@
 import {configure, observable, action, flow} from "mobx";
 
 import { FrameClient } from "elv-client-js/src/FrameClient";
-import { ElvClient } from "elv-client-js";
 
 import VideoStore from "./VideoStore";
 import MetricsStore from "./Metrics";
@@ -41,6 +40,8 @@ class RootStore {
     let client;
     // Initialize ElvClient or FrameClient
     if(window.self === window.top) {
+      const ElvClient = (yield import("elv-client-js")).ElvClient;
+
       client = yield ElvClient.FromConfigurationUrl({
         configUrl: EluvioConfiguration["config-url"],
         region

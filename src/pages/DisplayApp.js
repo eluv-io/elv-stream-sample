@@ -58,7 +58,6 @@ render(
       <Provider {...Stores}>
         <App />
       </Provider>
-      <div className="app-version">{EluvioConfiguration.version}</div>
     </React.Fragment>
   ),
   document.getElementById("app")

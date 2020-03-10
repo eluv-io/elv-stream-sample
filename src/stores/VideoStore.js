@@ -127,12 +127,11 @@ class VideoStore {
       channelAuth: true
     });
 
-    if(
-      !playoutOptions[this.protocol] ||
-      !playoutOptions[this.protocol].playoutMethods[this.drm]
-    ) {
+    if(!playoutOptions[this.protocol]) {
       this.protocol = Object.keys(playoutOptions)[0] || "hls";
+    }
 
+    if(!playoutOptions[this.protocol].playoutMethods[this.drm]) {
       // Prefer DRM
       const playoutMethods = playoutOptions[this.protocol].playoutMethods;
       this.drm = playoutMethods["aes-128"] ? "aes-128" : (playoutMethods.widevine ? "widevine" : "clear");
