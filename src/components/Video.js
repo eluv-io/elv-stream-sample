@@ -5,12 +5,11 @@ import DashJS from "dashjs";
 import URI from "urijs";
 import Mux from "mux-embed";
 import {inject, observer} from "mobx-react";
-import {Action} from "elv-components-js";
-import JsonTextArea from "elv-components-js/src/components/JsonInput";
+import {LoadingElement} from "elv-components-js";
 
-@inject("root")
-@inject("video")
-@inject("metrics")
+@inject("rootStore")
+@inject("videoStore")
+@inject("metricsStore")
 @observer
 class Video extends React.Component {
   constructor(props) {
@@ -20,7 +19,6 @@ class Video extends React.Component {
       initialTime: undefined,
       video: undefined,
       videoVersion: 1,
-      bandwidthEstimate: 0,
       hlsOptions: JSON.stringify({
         maxBufferLength: 30,
         maxBufferSize: 300
@@ -33,7 +31,7 @@ class Video extends React.Component {
   }
 
   componentDidMount() {
-    this.props.metrics.Reset();
+    this.props.metricsStore.Reset();
   }
 
   componentWillUnmount(){
@@ -42,6 +40,8 @@ class Video extends React.Component {
   }
 
   DestroyPlayer() {
+    this.StopSampling();
+
     if(this.bandwidthInterval) {
       clearInterval(this.bandwidthInterval);
       this.bandwidthInterval = undefined;
@@ -52,8 +52,9 @@ class Video extends React.Component {
     }
   }
 
+  /*
   HLSOptionsForm() {
-    if(!this.props.root.devMode || this.props.video.protocol !== "hls") {
+    if(this.props.videoStore.protocol !== "hls") {
       return;
     }
 
@@ -73,29 +74,31 @@ class Video extends React.Component {
           <Action onClick={() => {
             this.DestroyPlayer();
             this.setState({videoVersion: this.state.videoVersion + 1});
-            this.props.metrics.Reset();
+            this.props.metricsStore.Reset();
           }}>Reload</Action>
         </div>
       </React.Fragment>
     );
   }
+  */
 
   InitializeVideo(video) {
-    if(!video) { return; }
+    if(!video || !this.props.videoStore.playoutOptions) { return; }
 
+    this.props.metricsStore.Reset();
     this.DestroyPlayer();
 
-    const playoutOptions = this.props.video.playoutOptions[this.props.video.protocol].playoutMethods[this.props.video.drm];
+    const playoutOptions = this.props.videoStore.playoutOptions[this.props.videoStore.protocol].playoutMethods[this.props.videoStore.drm];
 
     // Media extensions API not supported - set up native HLS playback and skip monitoring
-    if(!this.props.video.hlsjsSupported) {
+    if(this.props.videoStore.protocol === "hls" && !this.props.videoStore.hlsjsSupported) {
       video.src = playoutOptions.playoutUrl;
       this.InitializeMuxMonitoring(video, undefined, playoutOptions.playoutUrl);
 
       return;
     }
 
-    this.props.video.protocol === "hls" ?
+    this.props.videoStore.protocol === "hls" ?
       this.InitializeHLS(video, playoutOptions.playoutUrl) :
       this.InitializeDash(video, playoutOptions.playoutUrl, playoutOptions.drms);
 
@@ -120,12 +123,10 @@ class Video extends React.Component {
     const options = JSON.parse(this.state.hlsOptions);
     this.player = new HLSPlayer(options);
 
-    if(this.props.root.devMode) {
-      this.bandwidthInterval = setInterval(
-        () => this.setState({bandwidthEstimate: this.player.bandwidthEstimate}),
-        1000
-      );
-    }
+    this.bandwidthInterval = setInterval(
+      () => this.props.videoStore.SetBandwidthEstimate(this.player.bandwidthEstimate),
+      1000
+    );
 
     this.player.loadSource(playoutUrl);
     this.player.attachMedia(video);
@@ -140,15 +141,15 @@ class Video extends React.Component {
       // Megabytes
       const size = stats.total / (1024 * 1024);
 
-      // Milliseconds
-      const latency = stats.tfirst - stats.trequest;
-      const downloadTime = stats.tload - stats.tfirst;
+      // Seconds
+      const latency = Math.max(1, stats.tfirst - stats.trequest) / 1000;
+      const downloadTime = Math.max(1, stats.tload - stats.tfirst) / 1000;
 
-      // Megabits per second
-      const downloadRate = (8 * stats.total) / (downloadTime / 1000) / 1000000;
-      const fullDownloadRate = (8 * stats.total) / ((downloadTime + latency) / 1000) / 1000000;
+      // Bits per second
+      const downloadRate = (8 * stats.total) / downloadTime;
+      const fullDownloadRate = (8 * stats.total) / (downloadTime + latency);
 
-      this.props.metrics.LogSegment({
+      this.props.metricsStore.LogSegment({
         id: frag.sn.toString(),
         quality: `${resolution} (${bitrate} Kbps)`,
         size,
@@ -164,16 +165,17 @@ class Video extends React.Component {
   InitializeDash(video, playoutUrl, widevineOptions) {
     this.player = DashJS.MediaPlayer().create();
 
-    if(this.props.video.drm === "widevine") {
+    this.bandwidthInterval = setInterval(
+      () => this.props.videoStore.SetBandwidthEstimate(this.player.getAverageThroughput("video") * 1000),
+      1000
+    );
+
+    if(this.props.videoStore.drm === "widevine") {
       const widevineUrl = widevineOptions.widevine.licenseServers[0];
 
       this.player.setProtectionData({
         "com.widevine.alpha": {
-          "serverURL": widevineUrl,
-          "httpRequestHeaders": {
-            "Authorization": `Bearer ${this.props.video.authToken}`
-          },
-          "withCredentials": false
+          "serverURL": widevineUrl
         }
       });
     }
@@ -196,15 +198,15 @@ class Video extends React.Component {
         // Megabytes
         const size = response.byteLength / (1024 * 1024);
 
-        // Milliseconds
-        const latency = request.firstByteDate - request.requestStartDate;
-        const downloadTime = request.requestEndDate - request.firstByteDate;
+        // Seconds
+        const latency = Math.max(1, request.firstByteDate - request.requestStartDate) / 1000;
+        const downloadTime = Math.max(1, request.requestEndDate - request.firstByteDate) / 1000;
 
-        // Megabits per second
-        const downloadRate = (8 * response.byteLength) / (downloadTime / 1000) / 1000000;
-        const fullDownloadRate = (8 * response.byteLength) / ((downloadTime + latency) / 1000) / 1000000;
+        // Bits per second
+        const downloadRate = (8 * response.byteLength) / downloadTime;
+        const fullDownloadRate = (8 * response.byteLength) / (downloadTime + latency);
 
-        this.props.metrics.LogSegment({
+        this.props.metricsStore.LogSegment({
           id: request.index.toString(),
           quality: `${resolution} (${bitrate} kbps)`,
           size,
@@ -225,18 +227,18 @@ class Video extends React.Component {
       debug: false,
       data: {
         env_key: "2i5480sms8vdgj0sv9bv6lpk5",
-        video_id: this.props.video.contentId,
-        video_title: this.props.video.metadata.name,
+        video_id: this.props.videoStore.contentId,
+        video_title: this.props.videoStore.title,
         video_cdn: URI(playoutUrl).hostname()
       }
     };
 
     if(this.player) {
-      if (this.props.video.protocol === "hls") {
+      if (this.props.videoStore.protocol === "hls") {
         options.hlsjs = this.player;
         options.Hls = HLSPlayer;
         options.data.player_name = "stream-sample-hls";
-      } else if (this.props.video.protocol === "dash") {
+      } else if (this.props.videoStore.protocol === "dash") {
         options.dashjs = this.player;
         options.data.player_name = "stream-sample-dash";
       }
@@ -258,11 +260,9 @@ class Video extends React.Component {
   }
 
   StartSampling() {
-    const samplePeriod = 250;
+    const samplePeriod = this.props.metricsStore.samplePeriod * 1000;
 
     this.metricsInterval = setInterval(() => {
-      //this.TrimSamples();
-
       // Determine buffer level relative to the current video time
       const buffer = this.state.video.buffered;
       const buffered = [...Array(buffer.length).keys()]
@@ -270,42 +270,24 @@ class Video extends React.Component {
 
       const currentTime = (performance.now() - this.state.initialTime) / 1000;
 
-      this.props.metrics.LogBuffer({currentTime, buffered});
+      this.props.metricsStore.LogBuffer({currentTime, buffered});
     }, samplePeriod);
-  }
-
-  Header() {
-    const selectedOption = this.props.video.availableContent
-      .find(content => content.versionHash === this.props.video.contentId);
-
-    if(selectedOption) {
-      if(selectedOption.subHeader) {
-        return (
-          <div className="header-with-subheader">
-            <h1>{selectedOption.header}</h1>
-            <h3>{selectedOption.subHeader}</h3>
-          </div>
-        );
-      } else {
-        return <h1>{selectedOption.header}</h1>;
-      }
-    } else {
-      return <h1>{this.props.video.metadata.name}</h1>;
-    }
   }
 
   render() {
     return (
-      <div className="video-container" key={`video-version-${this.state.videoVersion}`}>
-        { this.Header() }
-        <video
-          poster={this.props.video.posterUrl}
-          crossOrigin="anonymous"
-          ref={this.InitializeVideo}
-          playsInline
-          controls
-        />
-        { this.HLSOptionsForm() }
+      <div className="video video-container" key={`video-version-${this.state.videoVersion}`}>
+        <LoadingElement loadingClassname="video-loading" loading={this.props.videoStore.loading}>
+          <video
+            key={`video-${this.props.videoStore.contentId}-${this.props.videoStore.protocol}-${this.props.videoStore.drm}`}
+            poster={this.props.videoStore.posterUrl}
+            crossOrigin="anonymous"
+            ref={this.InitializeVideo}
+            autoPlay
+            playsInline
+            controls={!!this.props.videoStore.playoutOptions}
+          />
+        </LoadingElement>
       </div>
     );
   }

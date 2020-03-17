@@ -7,6 +7,13 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const TerserPlugin = require("terser-webpack-plugin");
 const HtmlWebpackInlineSourcePlugin = require("html-webpack-inline-source-plugin");
 
+let externals = {};
+if(process.env.DISPLAY_APP) {
+  externals = {
+    "elv-client-js": "elv-client-js"
+  };
+}
+
 module.exports = {
   entry: "./src/index.js",
   target: "web",
@@ -47,7 +54,8 @@ module.exports = {
     fs: "empty"
   },
   mode: "development",
-  devtool: "eval-source-map",
+  devtool: "source-map",
+  externals,
   plugins: [
     new webpack.optimize.LimitChunkCountPlugin({
       maxChunks: 1,
@@ -59,7 +67,7 @@ module.exports = {
       },
       {
         from: Path.join(__dirname, "configuration.js"),
-        to: Path.join(__dirname, "dist", "dev", "configuration.js")
+        to: Path.join(__dirname, "dist", "displayApp", "configuration.js")
       }
     ]),
     new HtmlWebpackPlugin({

@@ -1,45 +1,40 @@
 @import "~elv-components-js/src/stylesheets/defaults";
 @import "~elv-components-js/src/stylesheets/styles";
 
-.app-version {
-  display: none;
-}
-
 html {
-  color: $elv-color-text-dark;
-  font-size: 16px;
+  font-size: 14px;
 }
 
 body,
-.app,
-.app-container,
-main,
-.two-column,
-.controls-container {
+.app {
   display: flex;
-  flex: 1 1 auto;
   flex-direction: column;
+  flex-grow: 1;
+  min-height: 100%;
 }
 
-.two-column {
+.app-container {
   display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  padding: 0 $elv-spacing-l;
-  width: 100%;
+  flex: 1 1 0;
+  flex-direction: column;
 
-  .advanced-options {
-    padding: 0 $elv-spacing-l;
-  }
+  // Header + page
+  grid-template-rows: auto 1fr;
 
-  & > .controls-container {
-    width: auto;
-  }
+  max-height: 100%;
+}
+
+h3 {
+  color: $elv-color-text-light;
+  font-size: $elv-font-xl;
 }
 
 header {
-  align-items: flex-end;
   display: flex;
+  justify-content: space-between;
+
+  max-height: 3.5rem;
+  min-height: 3.5rem;
   padding: $elv-spacing-xs $elv-spacing-s;
 
   .logo {
@@ -49,27 +44,16 @@ header {
   h1 {
     @include elv-no-select;
     color: $elv-color-text-light;
-    font-size: $elv-font-xl;
+    font-size: $elv-font-xxl;
     font-weight: normal;
-    margin-left: $elv-spacing-m;
+    margin-left: $elv-spacing-s;
   }
 }
 
-main {
-  align-items: center;
+.header-logo {
+  align-items: flex-end;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  margin-bottom: $elv-spacing-l;
-  min-height: 80%;
-  width: 100%;
-}
-
-footer {
-  color: $elv-color-text-lighter;
-  display: flex;
-  justify-content: flex-end;
-  padding: $elv-spacing-s;
+  flex: 1 1 0;
 }
 
 .source-link {
@@ -78,7 +62,6 @@ footer {
   border-radius: 3px;
   display: flex;
   font-size: $elv-font-m;
-  margin-right: $elv-spacing-xs;
   padding: $elv-spacing-xxs $elv-spacing-xs;
   width: auto;
 
@@ -93,341 +76,414 @@ footer {
   }
 }
 
-.error-message {
-  color: $elv-color-mediumred;
-  font-size: $elv-font-xl;
-  padding: $elv-spacing-s;
-  text-align: center;
-}
-
-.controls-container {
+.content-info-container {
+  align-items: center;
+  background: $elv-color-lightergray;
   display: flex;
-  flex-direction: column;
-  width: 75rem;
+  padding: $elv-spacing-xs $elv-spacing-s;
 
-  .control-block {
+  .content-input {
     align-items: center;
-    border: 1px solid $elv-color-lightgray;
-    border-radius: 3px;
     display: flex;
-    flex-direction: column;
-    justify-content: center;
-    margin: 0 $elv-spacing-xxs $elv-spacing-xs;
-    padding: $elv-spacing-s $elv-spacing-m 0;
-    width: 30rem;
-
-    & > * {
-      margin-bottom: $elv-spacing-s;
-    }
+    flex: 5 1 0;
 
     input {
-      font-size: $elv-font-m;
-      height: 2.2rem;
-      margin: $elv-spacing-s;
-      padding: $elv-spacing-xs;
+      flex: 1 1;
+      font-size: $elv-font-l;
       width: 100%;
     }
   }
 
-  h4 {
-    font-size: $elv-font-l;
-    margin: 0 0 $elv-spacing-s;
-    text-align: center;
-    width: 100%;
+  .available-content-select {
+    flex: 1 1 0;
+    margin-left: $elv-spacing-s;
   }
 
-  .selection {
-    align-items: center;
-    display: flex;
-    margin-bottom: $elv-spacing-xs;
-    width: 100%;
-
-    &:last-child {
-      margin: 0;
-    }
-
-    label {
-      font-size: $elv-font-l;
-      width: 7rem;
-    }
+  input,
+  button,
+  select {
+    height: 2rem;
   }
 
-  .toggle-controls {
-    @include elv-no-select;
-    color: $elv-color-text-light;
-    cursor: pointer;
-    margin-top: $elv-spacing-l;
-    padding: $elv-spacing-xs 0;
-    width: 15rem;
+  input,
+  button {
+    border: 0;
+    border-radius: 0;
+    outline: 0;
   }
 
-  .controls {
-    display: flex;
-    margin-top: $elv-spacing-s;
-
-    &.hidden {
-      display: none;
-    }
-
-    &.centered {
-      justify-content: center;
-    }
-  }
-
-  .region-selection {
-    &.-elv-tab-container {
-      margin-bottom: $elv-spacing-l;
-    }
-  }
-
-  .node-uri {
+  select {
     background-color: $elv-color-bg-white;
     border: 0;
-    font-family: $elv-font-monospace;
-    font-size: $elv-font-s;
-    margin: 0;
-    padding: $elv-spacing-s $elv-spacing-xs;
-    text-align: center;
-    width: 100%;
-    word-break: break-all;
-
-    &.selectable-uri {
-      cursor: pointer;
-
-      &:hover {
-        background-color: $elv-color-lightgray;
-      }
-
-      &.node-uri-selected {
-        background-color: $elv-color-mediumblue;
-        color: $elv-color-white;
-      }
-    }
-
-    & + h3 {
-      margin-top: $elv-spacing-m;
-    }
+    color: $elv-color-text-light;
+    font-size: $elv-font-m;
+    outline: 1px solid $elv-color-lightgray;
+    padding: 0 $elv-spacing-xs;
   }
 }
 
-.video-container {
-  h1 {
+.content-title {
+  align-items: center;
+  color: $elv-color-text-dark;
+  display: flex;
+  font-size: 2rem;
+  font-weight: normal;
+  justify-content: center;
+
+  &.error {
+    color: $elv-color-mediumred;
     font-size: $elv-font-xxl;
-    font-weight: normal;
-    margin: $elv-spacing-s 0;
-    text-align: center;
+  }
+}
+
+.content-title-sample {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+
+  h1 {
+    font-size: 1.6rem;
+  }
+}
+
+
+.video-container {
+  background: $elv-color-black;
+  display: flex;
+  justify-content: center;
+  min-height: 100%;
+
+  .video-loading {
+    min-height: 100%;
+    width: 100%;
   }
 
   video {
-    background-color: $elv-color-bg-black;
+    background: $elv-color-black;
     cursor: pointer;
-    height: 45vh;
-    max-height: 45vh;
+    max-height: 100%;
     max-width: 100%;
+    min-height: 100%;
     width: 100%;
-  }
-
-  .header-with-subheader {
-    margin-bottom: $elv-spacing-xs;
-
-    h1 {
-      margin: 0;
-    }
-
-    h3 {
-      font-size: $elv-font-s;
-      font-style: italic;
-      text-align: center;
-    }
   }
 }
 
-.metrics-container {
+.video-container,
+video {
+  border-radius: 0 $elv-spacing-ss $elv-spacing-ss 0;
+}
+
+.segments-container {
   display: flex;
-  flex: 1 1 auto;
-  justify-content: space-between;
-  margin: $elv-spacing-m 0;
-  max-height: 25vh;
+  flex-direction: column;
+  max-height: 100%;
+  padding-left: $elv-spacing-m;
   width: 100%;
 
-  .graph-container {
-    flex-grow: 0;
-    margin: 0;
-    padding: 0;
-
-    svg {
-      height: 25vh !important; // sass-lint:disable-line no-important
-    }
+  .controls-header {
+    justify-content: space-between;
+    padding: $elv-spacing-s $elv-spacing-xs $elv-spacing-xxs;
   }
 
-  h3 {
-    color: $elv-color-text-light;
-    font-size: $elv-font-l;
-    padding-bottom: $elv-spacing-xs;
+  .bandwidth-estimate {
+    display: inline-block;
+    min-width: 7rem;
+    text-align: right;
+  }
+}
+
+.segments-table {
+  border: 1px solid $elv-color-lightgray;
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  font-size: $elv-font-m;
+  max-height: 100%;
+  overflow-y: auto;
+
+  .segments {
+    flex: 1 1 0;
+    overflow-y: auto;
+  }
+
+  .segments-header,
+  .segment-row {
+    align-items: center;
+    display: grid;
+    grid-template-columns: 3rem 1fr 6rem 8rem 8rem 2fr;
+    height: 2.2rem;
+    margin-right: $elv-spacing-s;
     text-align: center;
   }
 
-  .segments-container {
-    flex-grow: 1;
-    padding: 0 0 $elv-spacing-l $elv-spacing-l;
+  .segments-header {
+    border-bottom: 1px solid $elv-color-lightgray;
+    font-weight: 500;
   }
 
-  .segments {
-    border: 1px solid $elv-color-mediumgray;
-    color: $elv-color-text-light;
-    display: grid;
-    font-size: $elv-font-m;
-    grid-auto-rows: 2.1rem;
-    grid-template-columns: 3rem 1fr 6rem 8rem 2fr;
+  .segment-row {
+    &.even {
+      background: $elv-color-lightergray;
+    }
+
+    * {
+      @include elv-ellipsis
+    }
+  }
+
+  .timing {
+    align-items: flex-end;
+    color: $elv-color-white;
+    display: flex;
+    font-size: $elv-font-s;
     height: 100%;
-    margin-top: $elv-spacing-xxs;
-    max-height: 100%;
-    overflow-y: scroll;
-    padding-right: 0.7rem;
-    width: 100%;
+    position: relative;
 
-    &.segments-dev {
-      grid-template-columns: 3rem 1fr 6rem 8rem 8rem 2fr;
-    }
-
-    div {
-      @include elv-ellipsis;
-      align-items: center;
-      background-color: $elv-color-white;
-      border-top: 1px solid $elv-color-lightgray;
-      display: flex;
-      flex-wrap: nowrap;
-      justify-content: flex-start;
-      overflow: hidden;
-      padding-left: $elv-spacing-xs;
-    }
-
-    .segments-header {
-      border: 0;
-      border-right: 1px solid $elv-color-lightergray;
-      font-weight: 600;
-    }
-
-    .timing {
-      border-left: 1px solid $elv-color-lightergray;
-      border-right: 1px solid $elv-color-lightergray;
-      font-size: $elv-font-xs;
-      justify-content: flex-start;
-      padding-right: $elv-spacing-xxs;
-      position: relative;
-
-      .duration {
-        background-color: $elv-color-lightergray;
-        height: 75%;
-        padding-right: $elv-spacing-ss;
-        position: absolute;
-        text-align: right;
-        width: 100%;
-      }
-
-      .latency,
-      .download {
-        align-items: center;
-        color: $elv-color-white;
-        display: flex;
-        height: 50%;
-        justify-content: center;
-        overflow: hidden;
-        text-align: center;
-        z-index: 10;
-      }
-
-      .latency {
-        background-color: $elv-color-darkblue;
-      }
-
-      .download {
-        background-color: $elv-color-mediumblue;
-      }
-    }
-  }
-}
-
-.-elv-tab-container {
-  &.-elv-tab-container {
-    margin: 0;
-
-    &.secondary {
-      .-elv-tab {
-        font-size: $elv-font-m;
-        min-width: 0;
-        padding: $elv-spacing-xs;
-        text-align: center;
-        width: 6rem;
-
-        &.selected {
-          background: $elv-color-action-primary;
-          color: $elv-color-text-white;
-        }
-      }
-    }
-
-    &.vertical-tabs {
-      flex-direction: column;
+    .duration {
+      background: $elv-color-gray;
+      height: 50%;
+      position: absolute;
+      text-align: right;
       width: 100%;
+    }
 
-      .-elv-tab {
-        border: 1px solid $elv-color-lightgray;
-        width: 100%;
+    .latency,
+    .download {
+      align-items: center;
+      display: flex;
+      justify-content: center;
+      overflow: hidden;
+      text-align: center;
+    }
 
-        &:not(:last-child) {
-          border-bottom: 0;
-        }
-      }
+    .latency {
+      background: $elv-color-darkblue;
+      box-shadow: $elv-color-black 1px 2px 3px;
+      height: 70%;
+      z-index: 15;
+    }
+
+    .download {
+      background: $elv-color-mediumblue;
+      box-shadow: $elv-color-black 1px 2px 3px;
+      height: 60%;
+      z-index: 10;
     }
   }
 }
 
-@media screen and (max-width: 1200px) {
-  html {
-    font-size: 14px;
-  }
+.controls-header {
+  display: flex;
+  font-size: $elv-font-l;
+  font-weight: 600;
+  justify-content: center;
+  margin-bottom: $elv-spacing-xxs;
+  padding: 0;
 
-  .controls-container {
-    width: 55rem;
-  }
-}
+  .copy-button {
+    align-items: center;
+    display: flex;
 
-@media screen and (max-width: 900px) {
-  html {
-    font-size: 12px;
-  }
-
-  .controls-container {
-    width: 55rem;
+    svg {
+      height: $elv-font-xl;
+    }
   }
 }
 
-@media screen and (max-width: 650px) {
+.controls-section {
+  .controls-container {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-bottom: $elv-spacing-s;
+    padding: 0 $elv-spacing-m;
+  }
+
+  .control-row {
+    display: flex;
+    justify-content: flex-start;
+    margin: $elv-spacing-xxs 0;
+    min-width: 100%;
+
+    button {
+      flex: 1 1;
+      margin-right: $elv-spacing-xs;
+
+      &.-elv-button {
+        min-width: $elv-spacing-l;
+      }
+    }
+  }
+
+  .playout-url {
+    color: $elv-color-text-lightest;
+    font-size: $elv-font-xs;
+    max-width: 100%;
+    min-width: 100%;
+    word-break: break-all;
+  }
+
+  select {
+    font-size: $elv-font-m;
+    height: 2.5rem;
+    margin-top: $elv-spacing-xxs;
+    padding: 0 $elv-spacing-xs;
+    text-align: center;
+    width: 100%;
+  }
+}
+
+.graph-container {
+  align-items: center;
+  margin: auto;
+  max-width: 80vw;
+}
+
+.app-version {
+  display: none;
+}
+
+// Layout
+
+.selection {
+  grid-area: selection;
+}
+
+.title {
+  grid-area: title;
+}
+
+.video {
+  grid-area: video;
+  max-height: calc(50vh - 6rem);
+  min-height: calc(50vh - 6rem);
+}
+
+.segments {
+  grid-area: segments;
+}
+
+.controls {
+  grid-area: controls;
+}
+
+// Layout
+
+main {
+  display: grid;
+  flex-grow: 1;
+  grid-template-areas: "selection selection" "title empty" "video controls" "segments controls";
+  grid-template-columns: 3fr minmax(25%, 1fr);
+  grid-template-rows: 3rem 4rem 1fr 1fr;
+  max-height: 100%;
+  padding-bottom: $elv-spacing-m;
+
+  &.display-app {
+    grid-template-areas: "video controls" "segments controls";
+    grid-template-rows: 3fr 2fr;
+
+    .video-container,
+    video {
+      border-radius: 0 0 $elv-spacing-ss;
+    }
+
+    .video {
+      max-height: 66vh;
+      min-height: 66vh;
+    }
+  }
+
+  .controls {
+    padding-top: $elv-spacing-xs;
+  }
+}
+
+@media only screen and (max-width: 1000px) {
   html {
     font-size: 10px;
   }
 
-  .controls-container {
-    width: 80%;
+  main {
+    grid-template-areas: "selection" "title" "video" "controls" "segments";
+    grid-template-columns: 100%;
+    grid-template-rows: 5rem 6rem 50vh 1fr 1fr;
+
+    &.display-app {
+      grid-template-areas: "video video" "segments controls";
+      grid-template-columns: 10fr 1fr;
+      grid-template-rows: 3fr 2fr;
+    }
   }
 
-  .metrics-container {
-    flex-direction: column;
-    height: auto;
+  .content-info-container {
+    .content-input {
+      flex: 2 1 0;
 
-    .graph-container {
-      padding-right: $elv-spacing-l;
+      button {
+        margin-left: $elv-spacing-xs;
+        max-width: 10rem;
+        min-width: 10rem;
+      }
     }
 
-    .segments-container {
-      max-height: 30rem;
-      overflow-y: auto;
-      padding: 0;
+    .available-content-select {
+      flex: 1 1 0;
     }
 
-    .segments {
-      height: auto;
+    input,
+    button,
+    select {
+      // sass-lint:disable no-important
+      font-size: $elv-font-xl !important;
+      // sass-lint:enable no-important
+      height: 3rem;
     }
+  }
+
+  .video {
+    .video-container,
+    video {
+      border-radius: 0;
+      min-height: 100%;
+    }
+  }
+
+  .controls {
+    margin-top: $elv-spacing-m;
+    padding: 0 $elv-spacing-l;
+
+    .controls-header {
+      font-size: $elv-font-xxl;
+      margin-bottom: $elv-spacing-m;
+    }
+
+    .control-row {
+      justify-content: center;
+      margin-bottom: $elv-spacing-s;
+
+      button {
+        margin-right: $elv-spacing-s;
+        max-width: 40%;
+        min-height: 4rem;
+
+        &.-elv-button {
+          font-size: $elv-font-xl;
+        }
+      }
+    }
+  }
+
+  .segments-table {
+    font-size: $elv-font-l;
   }
 }
+
+// Make things larger on mobile devices
+@media only screen and (max-device-width: 1000px) {
+  html {
+    font-size: 16px;
+  }
+}
+

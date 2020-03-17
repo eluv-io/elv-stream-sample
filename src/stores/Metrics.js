@@ -3,7 +3,8 @@ import {observable, action} from "mobx";
 class MetricsStore {
   @observable bufferData = [];
   @observable segmentData = [];
-  @observable sampleWindow = 20;
+  @observable sampleWindow = 30;
+  @observable samplePeriod = 0.5;
   @observable initialTime;
 
   constructor(rootStore) {
@@ -44,20 +45,14 @@ class MetricsStore {
   TrimSamples() {
     if(this.bufferData.length === 0) { return; }
 
-    // Max visible samples is 300 seconds times 4 samples per second
-    const maxSamples = 300 * 4;
+    const maxSamples = this.sampleWindow * (1 / this.samplePeriod) * 1.25;
 
     // Trim after threshold is reached to avoid trimming after every sample
-    const trimThreshold = maxSamples * 1.1;
+    const trimThreshold = maxSamples * 1.25;
 
-    // Earliest visible time is 300 seconds ago
-    const minVisibleTime = performance.now() - (300 * 1000);
+    if(this.bufferData.length < trimThreshold) { return; }
 
-    const trim = data => data.slice(-maxSamples).filter(({x}) => x > minVisibleTime);
-
-    if(this.bufferData.length > trimThreshold) {
-      this.bufferData = trim(this.bufferData);
-    }
+    this.bufferData = this.bufferData.slice(-maxSamples);
   }
 }
 

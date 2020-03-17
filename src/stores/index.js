@@ -1,7 +1,8 @@
 import {configure, observable, action, flow} from "mobx";
 
-import {FrameClient} from "elv-client-js/src/FrameClient";
-import VideoStore from "./Video";
+import { FrameClient } from "elv-client-js/src/FrameClient";
+
+import VideoStore from "./VideoStore";
 import MetricsStore from "./Metrics";
 
 // Force strict mode so mutations are only allowed within actions.
@@ -10,14 +11,14 @@ configure({
 });
 
 class RootStore {
+  @observable initialLoadComplete = false;
+  @observable manualNodeSelection = false;
+
   @observable client;
   @observable region;
   @observable nodes;
-  @observable selectedNode;
-  @observable balance = 0;
-  @observable availableProtocols = ["hls"];
-  @observable availableDRMs = ["clear", "aes-128"];
-  @observable devMode = false;
+  @observable fabricNode;
+  @observable ethNode;
 
   constructor() {
     this.videoStore = new VideoStore(this);
@@ -27,23 +28,19 @@ class RootStore {
   }
 
   @action.bound
-  SetDevMode() {
-    this.devMode = true;
-  }
-
-  @action.bound
-  InitializeClient = flow(function * (region="", selectedNode="") {
+  InitializeClient = flow(function * (region="", fabricNode="", ethNode) {
     this.client = undefined;
 
-    let client;
+    if(region || fabricNode || ethNode) {
+      this.manualNodeSelection = true;
+    } else {
+      this.manualNodeSelection = false;
+    }
 
+    let client;
     // Initialize ElvClient or FrameClient
     if(window.self === window.top) {
-      const ElvClient = (yield import(
-        /* webpackChunkName: "elv-client-js" */
-        /* webpackMode: "lazy" */
-        "elv-client-js"
-      )).ElvClient;
+      const ElvClient = (yield import("elv-client-js")).ElvClient;
 
       client = yield ElvClient.FromConfigurationUrl({
         configUrl: EluvioConfiguration["config-url"],
@@ -70,40 +67,38 @@ class RootStore {
     // Record available nodes
     this.nodes = yield client.Nodes();
 
-    if(this.devMode) {
-      // Set specific fabric node for testing (disables failover)
-      if(!selectedNode) {
-        selectedNode = this.nodes.fabricURIs[0];
-      }
+    if(this.manualNodeSelection) {
+      this.fabricNode = fabricNode || this.nodes.fabricURIs[0];
+      this.ethNode = ethNode || this.nodes.ethereumURIs[0];
 
-      yield client.SetNodes({fabricURIs: [selectedNode]});
-      this.selectedNode = selectedNode;
+      yield client.SetNodes({fabricURIs: [this.fabricNode], ethereumURIs: [this.ethNode]});
     }
 
-    this.availableDRMs = [...(yield client.AvailableDRMs()), "clear"];
-
-    const balance = parseFloat(
-      yield client.GetBalance({
-        address: yield client.CurrentAccountAddress()
-      })
-    );
-
-    let availableProtocols = ["hls"];
-    if(this.availableDRMs.includes("widevine")) {
-      availableProtocols.push("dash");
-    }
+    this.availableDRMs = yield client.AvailableDRMs();
 
     this.client = client;
     this.region = region;
-    this.availableProtocols = availableProtocols;
-    this.balance = balance;
-  })
+
+    if(!this.initialLoadComplete) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const initialContentId =
+        urlParams.get("objectId") ||
+        urlParams.get("versionHash");
+
+      if(initialContentId) {
+        yield this.videoStore.LoadVideo({contentId: initialContentId});
+      }
+    } else if(this.videoStore.contentId) {
+      yield this.videoStore.LoadVideo({contentId: this.videoStore.contentId});
+    }
+
+    this.initialLoadComplete = true;
+  });
 }
 
-const rootStore = new RootStore();
-const videoStore = rootStore.videoStore;
-const metricsStore = rootStore.metricsStore;
+const root = new RootStore();
 
-export const root = rootStore;
-export const video = videoStore;
-export const metrics = metricsStore;
+export const rootStore = root;
+export const videoStore = root.videoStore;
+export const metricsStore = root.metricsStore;
+
