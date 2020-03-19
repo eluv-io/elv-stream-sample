@@ -14,6 +14,8 @@ class AdvancedControls extends React.Component {
   }
 
   BlockchainNodes() {
+    if(!this.props.rootStore.devMode) { return; }
+
     return (
       <div className="controls-container">
         <h3 className="controls-header">Blockchain Node</h3>
@@ -53,7 +55,8 @@ class AdvancedControls extends React.Component {
       ["NA Northwest", "na-west-north"],
       ["NA Southwest", "na-west-south"],
       ["NA East", "na-east"],
-      ["EU West", "eu-west"]
+      ["EU West", "eu-west"],
+      ["AU East", "au-east"]
     ];
 
     return (

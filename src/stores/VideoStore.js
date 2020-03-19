@@ -114,9 +114,18 @@ class VideoStore {
 
   @action.bound
   LoadVideoPlayout = flow(function * ({libraryId, objectId, versionHash}) {
+    // Check for default source link
+    const defaultSource = yield this.rootStore.client.ContentObjectMetadata({
+      libraryId,
+      objectId,
+      versionHash,
+      metadataSubtree: "public/asset_metadata/sources/default"
+    });
+
     const playoutOptions = yield this.rootStore.client.PlayoutOptions({
       objectId,
-      versionHash
+      versionHash,
+      linkPath: defaultSource ? "public/asset_metadata/sources/default" : ""
     });
 
     this.posterUrl = yield this.rootStore.client.Rep({

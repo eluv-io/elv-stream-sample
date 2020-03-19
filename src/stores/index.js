@@ -1,5 +1,5 @@
 import {configure, observable, action, flow} from "mobx";
-
+import URI from "urijs";
 import { FrameClient } from "elv-client-js/src/FrameClient";
 
 import VideoStore from "./VideoStore";
@@ -19,6 +19,8 @@ class RootStore {
   @observable nodes;
   @observable fabricNode;
   @observable ethNode;
+
+  @observable devMode = URI(window.location.toString()).hasQuery("dev");
 
   constructor() {
     this.videoStore = new VideoStore(this);
@@ -62,6 +64,9 @@ class RootStore {
       if(region) {
         yield client.UseRegion({region});
       }
+
+      // Hide header if in frame
+      client.SendMessage({options: {operation: "HideHeader"}, noResponse: true});
     }
 
     // Record available nodes

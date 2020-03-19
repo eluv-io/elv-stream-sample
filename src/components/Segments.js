@@ -5,6 +5,7 @@ import PrettyBytes from "pretty-bytes";
 import {inject, observer} from "mobx-react";
 import {reaction} from "mobx";
 
+@inject("rootStore")
 @inject("metricsStore")
 @inject("videoStore")
 @observer
@@ -89,6 +90,19 @@ class Segments extends React.Component {
     );
   }
 
+  PlayerEstimate() {
+    if(!this.props.rootStore.devMode) { return; }
+
+    return (
+      <span>
+        Player Bandwidth Estimate:
+        <span className="bandwidth-estimate">
+          { PrettyBytes(this.props.videoStore.bandwidthEstimate || 0, {bits: true}) }/s
+        </span>
+      </span>
+    );
+  }
+
   render() {
     if(!this.props.videoStore.playoutOptions) { return null; }
 
@@ -98,12 +112,7 @@ class Segments extends React.Component {
           <span>
             Segment Metrics
           </span>
-          <span>
-            Player Bandwidth Estimate:
-            <span className="bandwidth-estimate">
-              { PrettyBytes(this.props.videoStore.bandwidthEstimate || 0, {bits: true}) }/s
-            </span>
-          </span>
+          { this.PlayerEstimate() }
         </h3>
         <div className="segments-table">
           { this.Header() }

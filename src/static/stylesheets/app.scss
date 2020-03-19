@@ -127,7 +127,7 @@ header {
   color: $elv-color-text-dark;
   display: flex;
   font-size: 2rem;
-  font-weight: normal;
+  font-weight: 300;
   justify-content: center;
 
   &.error {
@@ -178,6 +178,7 @@ video {
   display: flex;
   flex-direction: column;
   max-height: 100%;
+  overflow-x: hidden;
   padding-left: $elv-spacing-m;
   width: 100%;
 
