@@ -12,8 +12,8 @@ class VideoStore {
   @observable title;
   @observable bandwidthEstimate = 0;
 
-  @observable protocol = "hls";
-  @observable drm = "aes-128";
+  @observable protocol = "dash";
+  @observable drm = "widevine";
 
   constructor(rootStore) {
     this.rootStore = rootStore;
