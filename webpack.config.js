@@ -7,18 +7,11 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const TerserPlugin = require("terser-webpack-plugin");
 const HtmlWebpackInlineSourcePlugin = require("html-webpack-inline-source-plugin");
 
-let externals = {};
-if(process.env.DISPLAY_APP) {
-  externals = {
-    "elv-client-js": "elv-client-js"
-  };
-}
-
 module.exports = {
   entry: "./src/index.js",
   target: "web",
   output: {
-    path: Path.resolve(__dirname, "dist", "main"),
+    path: Path.resolve(__dirname, "dist"),
     filename: "index.js",
     chunkFilename: "[name].bundle.js"
   },
@@ -55,7 +48,6 @@ module.exports = {
   },
   mode: "development",
   devtool: "source-map",
-  externals,
   plugins: [
     new webpack.optimize.LimitChunkCountPlugin({
       maxChunks: 1,
@@ -63,11 +55,7 @@ module.exports = {
     new CopyWebpackPlugin([
       {
         from: Path.join(__dirname, "configuration.js"),
-        to: Path.join(__dirname, "dist", "main", "configuration.js")
-      },
-      {
-        from: Path.join(__dirname, "configuration.js"),
-        to: Path.join(__dirname, "dist", "displayApp", "configuration.js")
+        to: Path.join(__dirname, "dist","configuration.js")
       }
     ]),
     new HtmlWebpackPlugin({

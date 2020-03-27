@@ -21,6 +21,7 @@ class RootStore {
   @observable ethNode;
 
   @observable devMode = URI(window.location.toString()).hasQuery("dev");
+  @observable displayAppMode = URI(window.location.toString()).hasQuery("action");
 
   constructor() {
     this.videoStore = new VideoStore(this);
@@ -99,6 +100,11 @@ class RootStore {
 
     this.initialLoadComplete = true;
   });
+
+  @action.bound
+  ToggleDevMode(enable) {
+    this.devMode = enable;
+  }
 }
 
 const root = new RootStore();

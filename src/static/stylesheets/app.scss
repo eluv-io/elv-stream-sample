@@ -1,6 +1,8 @@
 @import "~elv-components-js/src/stylesheets/defaults";
 @import "~elv-components-js/src/stylesheets/styles";
 
+$header-height: 3rem;
+
 html {
   font-size: 14px;
 }
@@ -32,12 +34,14 @@ h3 {
 header {
   display: flex;
   justify-content: space-between;
-
-  max-height: 3.5rem;
-  min-height: 3.5rem;
+  max-height: $header-height;
+  min-height: $header-height;
   padding: $elv-spacing-xs $elv-spacing-s;
 
   .logo {
+    display: flex;
+    height: 100%;
+    max-width: 8rem;
     width: auto;
   }
 
@@ -293,6 +297,8 @@ video {
 }
 
 .controls-section {
+  overflow-y: auto;
+
   .controls-container {
     align-items: center;
     display: flex;
@@ -378,12 +384,13 @@ main {
   grid-template-areas: "selection selection" "title empty" "video controls" "segments controls";
   grid-template-columns: 3fr minmax(25%, 1fr);
   grid-template-rows: 3rem 4rem 1fr 1fr;
-  max-height: 100%;
+  max-height: calc(100% - #{$header-height});
   padding-bottom: $elv-spacing-m;
 
   &.display-app {
     grid-template-areas: "video controls" "segments controls";
     grid-template-rows: 3fr 2fr;
+    max-height: 100%;
 
     .video-container,
     video {
@@ -479,6 +486,16 @@ main {
   .segments-table {
     font-size: $elv-font-l;
   }
+}
+
+.dev-mode-button {
+  background-color: transparent;
+  border: 0;
+  bottom: 0;
+  height: 1rem;
+  left: 0;
+  position: absolute;
+  width: 0.5rem;
 }
 
 // Make things larger on mobile devices

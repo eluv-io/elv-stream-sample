@@ -8,9 +8,7 @@
   "scripts": {
     "serve": "webpack-dev-server --hot --port 8084",
     "serve-display-app": "webpack-dev-server --entry ./src/pages/DisplayApp.js --hot --port 8084",
-    "build": "npm run build-app && npm run build-display-app",
-    "build-app": "rm -rf dist/main/* && NODE_ENV=production node ./node_modules/webpack-cli/bin/cli.js --output-path ./dist/main/ -p --progress --colors --devtool none",
-    "build-display-app": "rm -rf dist/displayApp/* && NODE_ENV=production DISPLAY_APP=true node ./node_modules/webpack-cli/bin/cli.js --entry ./src/pages/DisplayApp.js --output-path ./dist/displayApp/ -p --progress --colors --devtool none",
+    "build": "rm -rf dist/* && NODE_ENV=production node ./node_modules/webpack-cli/bin/cli.js --output-path ./dist/ -p --progress --colors --devtool none",
     "add-build": "git add dist",
     "lint": "npm run fix-scss ; npm run lint-scss ; npm run fix-js",
     "lint-show": "npm run lint-scss ; npm run lint-js",
