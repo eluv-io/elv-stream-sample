@@ -11,9 +11,10 @@ class VideoStore {
   @observable playoutOptions;
   @observable title;
   @observable bandwidthEstimate = 0;
+  @observable volume = 1;
 
   @observable protocol = "dash";
-  @observable drm = "widevine";
+  @observable drm = "clear";
 
   constructor(rootStore) {
     this.rootStore = rootStore;
@@ -39,6 +40,11 @@ class VideoStore {
   }
 
   @action.bound
+  UpdateVolume(event) {
+    this.volume = event.target.muted ? 0 : event.target.volume;
+  }
+
+  @action.bound
   SetBandwidthEstimate(estimate) {
     this.bandwidthEstimate = estimate;
   }
@@ -48,9 +54,9 @@ class VideoStore {
     this.protocol = protocol;
 
     if(this.playoutOptions) {
-      // Prefer DRM
+      // Prefer clear
       const playoutMethods = this.playoutOptions[this.protocol].playoutMethods;
-      this.drm = playoutMethods["aes-128"] ? "aes-128" : (playoutMethods.widevine ? "widevine" : "clear");
+      this.drm = playoutMethods.clear ? "clear" : (playoutMethods["aes-128"] ? "aes-128" : "widevine");
     } else if(this.drm !== "clear") {
       this.drm = this.protocol === "hls" ? "aes-128" : "widevine";
     }
@@ -143,7 +149,7 @@ class VideoStore {
     if(!playoutOptions[this.protocol].playoutMethods[this.drm]) {
       // Prefer DRM
       const playoutMethods = playoutOptions[this.protocol].playoutMethods;
-      this.drm = playoutMethods["aes-128"] ? "aes-128" : (playoutMethods.widevine ? "widevine" : "clear");
+      this.drm = playoutMethods.clear ? "clear" : (playoutMethods["aes-128"] ? "aes-128" : "widevine");
     }
 
     this.playoutOptions = playoutOptions;

@@ -156,6 +156,7 @@ header {
   background: $elv-color-black;
   display: flex;
   justify-content: center;
+  margin-left: $elv-spacing-m;
   min-height: 100%;
 
   .video-loading {
@@ -175,7 +176,7 @@ header {
 
 .video-container,
 video {
-  border-radius: 0 $elv-spacing-ss $elv-spacing-ss 0;
+  border-radius: $elv-spacing-xxs;
 }
 
 .segments-container {
@@ -364,8 +365,8 @@ video {
 
 .video {
   grid-area: video;
-  max-height: calc(50vh - 6rem);
-  min-height: calc(50vh - 6rem);
+  max-height: calc(60vh - 7rem);
+  min-height: calc(60vh - 7rem);
 }
 
 .segments {
@@ -383,7 +384,7 @@ main {
   flex-grow: 1;
   grid-template-areas: "selection selection" "title empty" "video controls" "segments controls";
   grid-template-columns: 3fr minmax(25%, 1fr);
-  grid-template-rows: 3rem 4rem 1fr 1fr;
+  grid-template-rows: 3rem 4rem 3fr 2fr;
   max-height: calc(100% - #{$header-height});
   padding-bottom: $elv-spacing-m;
 
@@ -392,14 +393,18 @@ main {
     grid-template-rows: 3fr 2fr;
     max-height: 100%;
 
+    .video-container {
+      margin-top: $elv-spacing-s;
+    }
+
     .video-container,
     video {
-      border-radius: 0 0 $elv-spacing-ss;
+      border-radius: $elv-spacing-xs;
     }
 
     .video {
-      max-height: 66vh;
-      min-height: 66vh;
+      max-height: 60vh;
+      min-height: 60vh;
     }
   }
 
@@ -416,7 +421,7 @@ main {
   main {
     grid-template-areas: "selection" "title" "video" "controls" "segments";
     grid-template-columns: 100%;
-    grid-template-rows: 5rem 6rem 50vh 1fr 1fr;
+    grid-template-rows: 5rem 6rem 45vh 1fr 1fr;
 
     &.display-app {
       grid-template-areas: "video video" "segments controls";
@@ -456,6 +461,14 @@ main {
       border-radius: 0;
       min-height: 100%;
     }
+  }
+
+  .video-container {
+    margin-left: 0;
+  }
+
+  .controls-section {
+    overflow-y: unset;
   }
 
   .controls {

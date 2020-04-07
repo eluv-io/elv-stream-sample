@@ -8,11 +8,11 @@ import {Action} from "elv-components-js";
 class PlayoutControls extends React.Component {
   DRMS(protocol) {
     let drms = protocol === "dash" ?
-      ["widevine", "clear"] : ["aes-128", "clear"];
+      ["clear", "widevine"] : ["clear", "aes-128"];
 
     if(this.props.videoStore.playoutOptions) {
       drms = Object.keys(this.props.videoStore.playoutOptions[protocol].playoutMethods)
-        .sort((a) => a === "widevine" || a === "aes-128" ? -1 : 1);
+        .sort((a) => a === "clear" ? -1 : 1);
     }
 
     drms = drms.filter(drm => this.props.rootStore.availableDRMs.includes(drm));

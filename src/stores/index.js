@@ -93,6 +93,10 @@ class RootStore {
 
       if(initialContentId) {
         yield this.videoStore.LoadVideo({contentId: initialContentId});
+      } else if(!this.displayAppMode && EluvioConfiguration.availableContent && EluvioConfiguration.availableContent.length > 0) {
+        // Start muted for non-autoplay content
+        this.videoStore.volume = 0;
+        yield this.videoStore.LoadVideo({contentId: EluvioConfiguration.availableContent[0].versionHash});
       }
     } else if(this.videoStore.contentId) {
       yield this.videoStore.LoadVideo({contentId: this.videoStore.contentId});
