@@ -53,36 +53,6 @@ class Video extends React.Component {
     }
   }
 
-  /*
-  HLSOptionsForm() {
-    if(this.props.videoStore.protocol !== "hls") {
-      return;
-    }
-
-    return (
-      <React.Fragment>
-        <div className="hls-bandwidth-estimate">
-          <label>Bandwidth Estimate:</label>
-          <span>{(this.state.bandwidthEstimate / 1000).toFixed(1)} Kbps</span>
-        </div>
-        <div className="hls-options-form">
-          <label>HLS Options</label>
-          <JsonTextArea
-            name="hlsOptions"
-            value={this.state.hlsOptions}
-            onChange={event => this.setState({hlsOptions: event.target.value})}
-          />
-          <Action onClick={() => {
-            this.DestroyPlayer();
-            this.setState({videoVersion: this.state.videoVersion + 1});
-            this.props.metricsStore.Reset();
-          }}>Reload</Action>
-        </div>
-      </React.Fragment>
-    );
-  }
-  */
-
   InitializeVideo(video) {
     if(!video || !this.props.videoStore.playoutOptions) { return; }
 
@@ -135,34 +105,47 @@ class Video extends React.Component {
     this.player.loadSource(playoutUrl);
     this.player.attachMedia(video);
 
+    this.player.on(HLSPlayer.Events.LEVEL_SWITCHED, () =>
+      this.props.videoStore.SetPlayerLevels({
+        levels: this.player.levels.map(level => ({resolution: level.attrs.RESOLUTION, bitrate: level.bitrate})),
+        currentLevel: this.player.currentLevel
+      }));
+
     this.player.on(HLSPlayer.Events.FRAG_LOADED, (_, {frag, stats}) => {
-      if(frag.type !== "main" || frag.sn === "initSegment") { return; }
+      try {
+        if(frag.type !== "main" || frag.sn === "initSegment") { return; }
 
-      const level = this.player.levels[frag.level];
-      const bitrate = level.bitrate / 1000;
-      const resolution = level.attrs.RESOLUTION;
+        const level = this.player.levels[frag.level];
+        const bitrate = level.bitrate / 1000;
+        const resolution = level.attrs.RESOLUTION;
 
-      // Megabytes
-      const size = stats.total / (1024 * 1024);
+        // Megabytes
+        const size = stats.total / (1024 * 1024);
 
-      // Seconds
-      const latency = Math.max(1, stats.tfirst - stats.trequest) / 1000;
-      const downloadTime = Math.max(1, stats.tload - stats.tfirst) / 1000;
+        // Seconds
+        const latency = Math.max(1, stats.tfirst - stats.trequest) / 1000;
+        const downloadTime = Math.max(1, stats.tload - stats.tfirst) / 1000;
 
-      // Bits per second
-      const downloadRate = (8 * stats.total) / downloadTime;
-      const fullDownloadRate = (8 * stats.total) / (downloadTime + latency);
+        // Bits per second
+        const downloadRate = (8 * stats.total) / downloadTime;
+        const fullDownloadRate = (8 * stats.total) / (downloadTime + latency);
 
-      this.props.metricsStore.LogSegment({
-        id: frag.sn.toString(),
-        quality: `${resolution} (${bitrate} Kbps)`,
-        size,
-        duration: frag.duration,
-        latency,
-        downloadTime,
-        downloadRate,
-        fullDownloadRate
-      });
+        this.props.metricsStore.LogSegment({
+          id: frag.sn.toString(),
+          quality: `${resolution} (${bitrate} Kbps)`,
+          size,
+          duration: frag.duration,
+          latency,
+          downloadTime,
+          downloadRate,
+          fullDownloadRate
+        });
+      } catch(error) {
+        // eslint-disable-next-line no-console
+        console.error("Error recording HLS segment stats:");
+        // eslint-disable-next-line no-console
+        console.error(error);
+      }
     });
   }
 
@@ -184,46 +167,63 @@ class Video extends React.Component {
       });
     }
 
-    // Subtitles are enabled by default - disable them
     this.player.on(
       DashJS.MediaPlayer.events.CAN_PLAY,
-      () => this.player.setTextTrack(-1)
+      () => {
+        // Subtitles are enabled by default - disable them
+        this.player.setTextTrack(-1);
+
+        this.props.videoStore.SetPlayerLevels({
+          levels: this.player.getBitrateInfoListFor("video")
+            .map(level => ({resolution: `${level.width}x${level.height}`, bitrate: level.bitrate, qualityIndex: level.qualityIndex})),
+          currentLevel: 1
+        });
+      }
     );
 
     this.player.on(
       DashJS.MediaPlayer.events.FRAGMENT_LOADING_COMPLETED,
       ({request, response}) => {
-        if(request.mediaType !== "video" || !request.index) { return; }
+        try {
+          if(request.mediaType !== "video" || !request.index) { return; }
 
-        const quality = this.player.getBitrateInfoListFor("video")[request.quality];
-        const bitrate = quality.bitrate / 1000;
-        const resolution = `${quality.width}x${quality.height}`;
+          const quality = this.player.getBitrateInfoListFor("video")[request.quality];
+          const bitrate = quality.bitrate / 1000;
+          const resolution = `${quality.width}x${quality.height}`;
 
-        // Megabytes
-        const size = response.byteLength / (1024 * 1024);
+          // Megabytes
+          const size = response.byteLength / (1024 * 1024);
 
-        // Seconds
-        const latency = Math.max(1, request.firstByteDate - request.requestStartDate) / 1000;
-        const downloadTime = Math.max(1, request.requestEndDate - request.firstByteDate) / 1000;
+          // Seconds
+          const latency = Math.max(1, request.firstByteDate - request.requestStartDate) / 1000;
+          const downloadTime = Math.max(1, request.requestEndDate - request.firstByteDate) / 1000;
 
-        // Bits per second
-        const downloadRate = (8 * response.byteLength) / downloadTime;
-        const fullDownloadRate = (8 * response.byteLength) / (downloadTime + latency);
+          // Bits per second
+          const downloadRate = (8 * response.byteLength) / downloadTime;
+          const fullDownloadRate = (8 * response.byteLength) / (downloadTime + latency);
 
-        this.props.metricsStore.LogSegment({
-          id: request.index.toString(),
-          quality: `${resolution} (${bitrate} kbps)`,
-          size,
-          duration: request.duration,
-          latency,
-          downloadTime,
-          downloadRate,
-          fullDownloadRate
-        });
+          this.props.metricsStore.LogSegment({
+            id: request.index.toString(),
+            quality: `${resolution} (${bitrate} kbps)`,
+            size,
+            duration: request.duration,
+            latency,
+            downloadTime,
+            downloadRate,
+            fullDownloadRate
+          });
+        } catch(error) {
+          // eslint-disable-next-line no-console
+          console.error("Error recording dash segment stats:");
+          // eslint-disable-next-line no-console
+          console.error(error);
+        }
       }
     );
 
     this.player.initialize(video, playoutUrl);
+
+    window.player = this.player;
   }
 
   InitializeMuxMonitoring(video, playoutUrl) {
@@ -278,6 +278,54 @@ class Video extends React.Component {
     }, samplePeriod);
   }
 
+  PlaybackLevel() {
+    if(!this.props.rootStore.devMode) { return null; }
+    let SetLevel, selected;
+    if(this.props.videoStore.protocol === "hls") {
+      SetLevel = event => {
+        this.player.currentLevel = parseInt(event.target.value);
+        selected = this.player.autoLevelEnabled ? -1 : this.props.videoStore.playerCurrentLevel;
+      };
+    } else {
+      SetLevel = event => {
+        // Set quality, disable or enable auto level, and seek a bit to make it reload segments
+        this.player.setFastSwitchEnabled(true);
+        this.player.setQualityFor("video", parseInt(event.target.value));
+        this.player.setAutoSwitchQualityFor("video", parseInt(event.target.value) < 0);
+        this.player.seek(Math.max(this.player.getVideoElement().currentTime - 0.1, 0));
+      };
+    }
+
+    let levels = Object.keys(this.props.videoStore.playerLevels).map(levelIndex => {
+      const level = this.props.videoStore.playerLevels[levelIndex];
+      const value = typeof level.qualityIndex === "undefined" ? levelIndex : level.qualityIndex;
+
+      return (
+        <option key={`playback-level-${levelIndex}`} value={value}>
+          {`${level.resolution} (${(level.bitrate / 1000 / 1000).toFixed(1)}Mbps)`}
+        </option>
+      );
+    });
+
+    // Add auto level
+    levels.unshift(
+      <option key="playback-level-auto" value={-1}>
+        Auto
+      </option>
+    );
+
+    return (
+      <select
+        aria-label="Playback Level"
+        value={selected}
+        className={"video-playback-level"}
+        onChange={SetLevel}
+      >
+        { levels }
+      </select>
+    );
+  }
+
   render() {
     return (
       <div className="video video-container" key={`video-version-${this.state.videoVersion}`}>
@@ -293,6 +341,7 @@ class Video extends React.Component {
             playsInline
             controls={!!this.props.videoStore.playoutOptions}
           />
+          { this.PlaybackLevel() }
         </LoadingElement>
       </div>
     );

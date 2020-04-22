@@ -13,6 +13,9 @@ class VideoStore {
   @observable bandwidthEstimate = 0;
   @observable volume = 1;
 
+  @observable playerLevels = [];
+  @observable playerCurrentLevel;
+
   @observable protocol = "dash";
   @observable drm = "clear";
 
@@ -37,6 +40,15 @@ class VideoStore {
     this.bandwidthEstimate = 0;
     this.error = "";
     this.loading = false;
+
+    this.playerLevels = [];
+    this.playerCurrentLevel = undefined;
+  }
+
+  @action.bound
+  SetPlayerLevels({levels, currentLevel}) {
+    this.playerLevels = levels;
+    this.playerCurrentLevel = currentLevel;
   }
 
   @action.bound
@@ -72,6 +84,8 @@ class VideoStore {
     this.Reset();
 
     if(!contentId) { return; }
+
+    contentId = contentId.trim();
 
     this.loading = true;
     this.contentId = contentId;

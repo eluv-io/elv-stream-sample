@@ -92,6 +92,7 @@ class RootStore {
         urlParams.get("versionHash");
 
       if(initialContentId) {
+        this.videoStore.volume = 0;
         yield this.videoStore.LoadVideo({contentId: initialContentId});
       } else if(!this.displayAppMode && EluvioConfiguration.availableContent && EluvioConfiguration.availableContent.length > 0) {
         // Start muted for non-autoplay content
