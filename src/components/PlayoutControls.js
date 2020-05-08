@@ -8,7 +8,7 @@ import {Action} from "elv-components-js";
 class PlayoutControls extends React.Component {
   DRMS(protocol) {
     let drms = protocol === "dash" ?
-      ["clear", "widevine"] : ["clear", "aes-128"];
+      ["clear", "widevine"] : ["clear", this.props.videoStore.aesOption];
 
     if(this.props.videoStore.playoutOptions) {
       drms = Object.keys(this.props.videoStore.playoutOptions[protocol].playoutMethods)

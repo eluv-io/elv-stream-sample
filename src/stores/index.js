@@ -82,6 +82,10 @@ class RootStore {
 
     this.availableDRMs = yield client.AvailableDRMs();
 
+    if(this.availableDRMs.includes("sample-aes")) {
+      this.videoStore.aesOption = "sample-aes";
+    }
+
     this.client = client;
     this.region = region;
 
