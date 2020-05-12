@@ -65,9 +65,9 @@ class Video extends React.Component {
     const playoutOptions = this.props.videoStore.playoutOptions[this.props.videoStore.protocol].playoutMethods[this.props.videoStore.drm];
 
     // Media extensions API not supported - set up native HLS playback and skip monitoring
-    if(this.props.videoStore.protocol === "hls" && !this.props.videoStore.hlsjsSupported) {
+    if(this.props.videoStore.protocol === "hls" && (!this.props.videoStore.hlsjsSupported || this.props.videoStore.drm === "sample-aes")) {
       video.src = playoutOptions.playoutUrl;
-      this.InitializeMuxMonitoring(video, undefined, playoutOptions.playoutUrl);
+      this.InitializeMuxMonitoring(video, playoutOptions.playoutUrl);
 
       return;
     }

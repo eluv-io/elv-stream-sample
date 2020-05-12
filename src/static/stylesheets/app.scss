@@ -151,7 +151,6 @@ header {
   }
 }
 
-
 .video-container {
   background: $elv-color-black;
   display: flex;
@@ -369,6 +368,7 @@ video {
 
 .title {
   grid-area: title;
+  min-height: 3rem;
 }
 
 .video {
@@ -427,9 +427,8 @@ main {
   }
 
   main {
-    grid-template-areas: "selection" "title" "video" "controls" "segments";
-    grid-template-columns: 100%;
-    grid-template-rows: 5rem 6rem 45vh 1fr 1fr;
+    display: flex;
+    flex-direction: column;
 
     &.display-app {
       grid-template-areas: "video video" "segments controls";
@@ -439,6 +438,8 @@ main {
   }
 
   .content-info-container {
+    min-height: 4rem;
+
     .content-input {
       flex: 2 1 0;
 
@@ -464,6 +465,10 @@ main {
   }
 
   .video {
+    max-height: 100%;
+    flex: 1 1 auto;
+
+
     .video-container,
     video {
       border-radius: 0;
@@ -502,6 +507,11 @@ main {
         }
       }
     }
+  }
+
+  .segments {
+    min-height: 20rem;
+    overflow-y: hidden;
   }
 
   .segments-table {
