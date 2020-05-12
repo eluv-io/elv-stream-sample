@@ -20,7 +20,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/dashjs/3.0.2/dash.all.min.js" integrity="sha256-gmIk8d0B9FnDQ4pcQ5e9/OXc2OEbpZRPti95Lokfccc=" crossorigin="anonymous"></script>
 
   <!-- elv-client-js -->
-  <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/eluv-io/elv-client-js/dist/ElvClient-min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@eluvio/elv-client-js@2.0.11/dist/ElvClient-min.js"></script>
 
   <style>
     /*start AlwaysShowUI*/
@@ -108,6 +108,7 @@
     <div class="actions">
       <button id="load-hls">Play HLS Clear</button>
       <button id="load-hls-aes">Play HLS AES-128</button>
+      <button id="load-hls-sample-aes">Play HLS Sample AES</button>
       <button id="load-dash">Play Dash Clear</button>
       <button id="load-dash-wv">Play Dash Widevine</button>
     </div>
@@ -144,6 +145,7 @@
         "select-bitmovin",
         "load-hls",
         "load-hls-aes",
+        "load-hls-sample-aes",
         "load-dash",
         "load-dash-wv"
       ].forEach(id => document.getElementById(id).className = "");
@@ -158,6 +160,8 @@
       if(PROTOCOL === "hls") {
         if(DRM === "aes-128") {
           activeOption = "load-hls-aes";
+        } else if(DRM === "sample-aes") {
+          activeOption = "load-hls-sample-aes";
         } else {
           activeOption = "load-hls";
         }
@@ -211,6 +215,8 @@
       let playoutInfo;
       if(DRM === "aes-128") {
         playoutInfo = playoutMethods["aes-128"];
+      } else if(DRM === "sample-aes") {
+        playoutInfo = playoutMethods["sample-aes"];
       } else {
         playoutInfo = playoutMethods.clear;
       }
@@ -221,6 +227,13 @@
       }
 
       const playerElement = CreatePlayerElement();
+
+      // Use native player for sample AES
+      if(DRM === "sample-aes" && PLAYER_TYPE !== "bitmovin") {
+        playerElement.src = playoutInfo.playoutUrl;
+        return;
+      }
+
       player = new Hls();
       player.loadSource(playoutInfo.playoutUrl);
       player.attachMedia(playerElement);
@@ -358,6 +371,7 @@
 
     document.getElementById("load-hls").onclick = () => SetOptions("hls", "clear");
     document.getElementById("load-hls-aes").onclick = () => SetOptions("hls", "aes-128");
+    document.getElementById("load-hls-sample-aes").onclick = () => SetOptions("hls", "sample-aes");
     document.getElementById("load-dash").onclick = () => SetOptions("dash", "clear");
     document.getElementById("load-dash-wv").onclick = () => SetOptions("dash", "widevine");
 
