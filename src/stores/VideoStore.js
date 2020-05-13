@@ -5,6 +5,7 @@ class VideoStore {
   @observable loading = false;
   @observable error = "";
 
+  @observable dashjsSupported = typeof (window.MediaSource || window.WebKitMediaSource) === "function";
   @observable hlsjsSupported = HLSPlayer.isSupported();
   @observable contentId;
   @observable posterUrl;
@@ -16,7 +17,7 @@ class VideoStore {
   @observable playerLevels = [];
   @observable playerCurrentLevel;
 
-  @observable protocol = "dash";
+  @observable protocol = this.dashjsSupported ? "dash" : "hls";
   @observable drm = "clear";
   @observable aesOption = "aes-128";
 

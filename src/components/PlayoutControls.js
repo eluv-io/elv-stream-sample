@@ -48,6 +48,10 @@ class PlayoutControls extends React.Component {
     // Hide protocol option if no DRM options are available
     protocols = protocols.filter(protocol => this.DRMS(protocol).length > 0);
 
+    if(!this.props.videoStore.dashjsSupported) {
+      protocols = protocols.filter(protocol => protocol !== "dash");
+    }
+
     return (
       <div className="control-row">
         {
