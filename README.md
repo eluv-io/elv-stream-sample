@@ -148,7 +148,7 @@ const availableDRMs = await client.AvailableDRMs();
 
 This code uses the [Navigator.requestMediaKeySystemAccess API](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/requestMediaKeySystemAccess) to see if Widevine support is available. 
 
-Widevine is generally supported in Firefox and Chromium-based browsers. HLS with AES-128 encryption is supported by most browsers, with the exception of newer Safari browsers and on iOS devices - for those, sample AES is supported instead. Use the AvailableDRMs method to determin whether to use AES-128 or Sample AES for encrypted AES playout.
+Widevine is generally supported in Firefox and Chromium-based browsers. HLS with AES-128 encryption is supported by most browsers, with the exception of newer Safari browsers and on iOS devices - for those, sample AES is supported instead. Use the AvailableDRMs method to determine whether to use AES-128 or Sample AES for encrypted AES playout.
 
 ##### Example Playout Options
 
