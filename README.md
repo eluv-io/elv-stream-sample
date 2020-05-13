@@ -17,7 +17,7 @@ Playing video from the Fabric using the Dash and HLS adaptive bitrate streaming 
 
 ### Basic Example - Step by Step
 
-The basic process for playing video can be seen in this [example page](examples/old-basic-video-example.html). This example is a standalone HTML page that will go through the above steps and play video content from the Fabric. It allows playout of both Dash and HLS, either in the clear or with widevine or AES-128 protection, respectively, and includes three different players: [dash.js](https://github.com/Dash-Industry-Forum/dash.js), [hls.js](https://github.com/video-dev/hls.js), and [Bitmovin](https://bitmovin.com/video-player) - though any Dash and/or HLS capable players should work similarly.
+The basic process for playing video can be seen in this [example page](examples/old-basic-video-example.html). This example is a standalone HTML page that will go through the above steps and play video content from the Fabric. It allows playout of both Dash and HLS, either in the clear or with Widevine or AES-128 or Sample AES protection, respectively, and includes three different players: [dash.js](https://github.com/Dash-Industry-Forum/dash.js), [hls.js](https://github.com/video-dev/hls.js), and [Bitmovin](https://bitmovin.com/video-player) - though any Dash and/or HLS capable players should work similarly.
 
 Below is a detailed explanation of how this example page works.
 
@@ -143,12 +143,12 @@ DRM support can be determined by the client using the `AvailableDRMs` method:
 
 ```javascript
 const availableDRMs = await client.AvailableDRMs();
-> ["clear", "aes-128"] or ["clear", "aes-128", "widevine"]
+> ["clear", "aes-128"], ["clear", "aes-128", "widevine"], ["clear", "sample-aes"]
 ```
 
 This code uses the [Navigator.requestMediaKeySystemAccess API](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/requestMediaKeySystemAccess) to see if Widevine support is available. 
 
-Widevine is generally supported in Firefox and Chromium-based browsers. With hls.js, HLS with AES-128 encryption is supported by all major browsers, so there is no need to check for any support. 
+Widevine is generally supported in Firefox and Chromium-based browsers. HLS with AES-128 encryption is supported by most browsers, with the exception of newer Safari browsers and on iOS devices - for those, sample AES is supported instead. Use the AvailableDRMs method to determin whether to use AES-128 or Sample AES for encrypted AES playout.
 
 ##### Example Playout Options
 
@@ -177,6 +177,12 @@ Here is an example response from the `PlayoutOptions` method - requesting both H
   },
   "hls": {
     "playoutMethods": {
+      "sample-aes": {
+        "playoutUrl": "https://host-38-142-50-109.test.contentfabric.io/qlibs/ilibNcWqQbLKvF82XP29hPqWG45U4Ek/q/hq__2eMmqtaBp79RZPvtC6u7o1bB9aVzLtJcPfm68BakXHHoemEQnbB4V5LwgyPi33KNZ4NXFaSgH1/rep/playout/default/hls-sample-aes/playlist.m3u8?player_profile=hls-js&authorization=eyJxc3BhY2VfaWQiOiJpc3BjNFE3UmNNS0tLbkpITmk1Z2Q2WGJWV2ZVQXI0ciIsInFsaWJfaWQiOiJpbGliTmNXcVFiTEt2RjgyWFAyOWhQcVdHNDVVNEVrIiwiYWRkciI6IjB4ZkUyREFlQTU0NjQyODYwMzM3M0M1NTBmOEM2Rjg1M2NENDczOGE4NiIsInFpZCI6ImlxX19qaFFGMXkyYWp4MkI1eDd0REt4aDVUN3pqRnkiLCJncmFudCI6InJlYWQiLCJ0eF9yZXF1aXJlZCI6ZmFsc2UsImlhdCI6MTU3ODMzOTc2MSwiZXhwIjoxNTc4NDI2MTYxLCJhdXRoX3NpZyI6IkVTMjU2S19HQTJnbVRqbjZXN3ExQkdiWHF3TnNxSmhyWTdSYUMyb215OU1KMWhoMTZ6RVJ3ZTN0THNoV21laTF5VG1hbVJhMnpSTVBZY3BBZ2VvWlcxR21pcndpR0tpIiwiYWZnaF9wayI6IiJ9.RVMyNTZLXzdSQjhFcTJXZWVoa3JqcHpScEZudUhiNFdMQm8zTXQ3RlBHampZV2ZIQ0w0V2JLN2gyUmZjUVFzUmV6TUdWbXY5aVFzZGdOQURNSzE1SzFmODlrMmZqN2t2",
+        "drms": {
+          "sample-aes": {}
+        }
+      },
       "aes-128": {
         "playoutUrl": "https://host-38-142-50-109.test.contentfabric.io/qlibs/ilibNcWqQbLKvF82XP29hPqWG45U4Ek/q/hq__2eMmqtaBp79RZPvtC6u7o1bB9aVzLtJcPfm68BakXHHoemEQnbB4V5LwgyPi33KNZ4NXFaSgH1/rep/playout/default/hls-aes/playlist.m3u8?player_profile=hls-js&authorization=eyJxc3BhY2VfaWQiOiJpc3BjNFE3UmNNS0tLbkpITmk1Z2Q2WGJWV2ZVQXI0ciIsInFsaWJfaWQiOiJpbGliTmNXcVFiTEt2RjgyWFAyOWhQcVdHNDVVNEVrIiwiYWRkciI6IjB4ZkUyREFlQTU0NjQyODYwMzM3M0M1NTBmOEM2Rjg1M2NENDczOGE4NiIsInFpZCI6ImlxX19qaFFGMXkyYWp4MkI1eDd0REt4aDVUN3pqRnkiLCJncmFudCI6InJlYWQiLCJ0eF9yZXF1aXJlZCI6ZmFsc2UsImlhdCI6MTU3ODMzOTc2MSwiZXhwIjoxNTc4NDI2MTYxLCJhdXRoX3NpZyI6IkVTMjU2S19HQTJnbVRqbjZXN3ExQkdiWHF3TnNxSmhyWTdSYUMyb215OU1KMWhoMTZ6RVJ3ZTN0THNoV21laTF5VG1hbVJhMnpSTVBZY3BBZ2VvWlcxR21pcndpR0tpIiwiYWZnaF9wayI6IiJ9.RVMyNTZLXzdSQjhFcTJXZWVoa3JqcHpScEZudUhiNFdMQm8zTXQ3RlBHampZV2ZIQ0w0V2JLN2gyUmZjUVFzUmV6TUdWbXY5aVFzZGdOQURNSzE1SzFmODlrMmZqN2t2",
         "drms": {
@@ -208,6 +214,8 @@ const LoadHlsJs = (playoutOptions) => {
   let playoutInfo;
   if(DRM === "aes-128") {
     playoutInfo = playoutMethods["aes-128"];
+  } else if(DRM === "sample-aes") {
+    playoutInfo = playoutMethods["sample-aes"];
   } else {
     playoutInfo = playoutMethods.clear;
   }
@@ -218,6 +226,13 @@ const LoadHlsJs = (playoutOptions) => {
   }
 
   const playerElement = CreatePlayerElement();
+
+  // Use native player for sample AES
+  if(DRM === "sample-aes" && PLAYER_TYPE !== "bitmovin") {
+    playerElement.src = playoutInfo.playoutUrl;
+    return;
+  }
+
   player = new Hls();
   player.loadSource(playoutInfo.playoutUrl);
   player.attachMedia(playerElement);
@@ -259,7 +274,7 @@ const LoadDash = (playoutOptions) => {
 };
 ```
 
-Both cases are straightforward - determine the playout url, then set up the corresponding player. 
+Both cases are relatively straightforward - determine the playout url, then set up the corresponding player. Note that HLS.js does not support HLS playout with Sample AES encryption. You can instead use native Apple HLS playback instead by setting the `src` attribute of the video element.
 
 To set up Widevine in the Dash case, an additional step must be done to indicate the license server to use. With dashjs, this is done using the `setProtectionData` method. The list of valid license servers is specified in `drms.widevine.licenseServers` of the Dash/Widevine playout methods.
 
