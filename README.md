@@ -4,7 +4,7 @@
 
 This small application is designed to demonstrate the video serving capabilities of the Eluvio Content Fabric. 
 
-Feel free to look at the code to learn how to serve video from the Fabric in your own application, or keep reading for a detailed explanation of the [basic example page](examples/old-basic-video-example.html)
+Feel free to look at the code to learn how to serve video from the Fabric in your own application, or keep reading for a detailed explanation of the [basic example page](examples/basic-video-example.html)
 
 ## Quick Start - Serving video from the Eluvio Content Fabric
 
@@ -17,7 +17,7 @@ Playing video from the Fabric using the Dash and HLS adaptive bitrate streaming 
 
 ### Basic Example - Step by Step
 
-The basic process for playing video can be seen in this [example page](examples/old-basic-video-example.html). This example is a standalone HTML page that will go through the above steps and play video content from the Fabric. It allows playout of both Dash and HLS, either in the clear or with Widevine or AES-128 or Sample AES protection, respectively, and includes three different players: [dash.js](https://github.com/Dash-Industry-Forum/dash.js), [hls.js](https://github.com/video-dev/hls.js), and [Bitmovin](https://bitmovin.com/video-player) - though any Dash and/or HLS capable players should work similarly.
+The basic process for playing video can be seen in this [example page](examples/basic-video-example.html). This example is a standalone HTML page that will go through the above steps and play video content from the Fabric. It allows playout of both Dash and HLS, either in the clear or with Widevine or AES-128 or Sample AES protection, respectively, and includes three different players: [dash.js](https://github.com/Dash-Industry-Forum/dash.js), [hls.js](https://github.com/video-dev/hls.js), and [Bitmovin](https://bitmovin.com/video-player) - though any Dash and/or HLS capable players should work similarly.
 
 Below is a detailed explanation of how this example page works.
 
