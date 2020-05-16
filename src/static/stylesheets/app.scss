@@ -39,6 +39,7 @@ header {
   padding: $elv-spacing-xs $elv-spacing-s;
 
   .logo {
+    cursor: pointer;
     display: flex;
     height: 100%;
     max-width: 8rem;

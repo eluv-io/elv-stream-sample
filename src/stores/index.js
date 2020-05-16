@@ -114,6 +114,11 @@ class RootStore {
   ToggleDevMode(enable) {
     this.devMode = enable;
   }
+
+  @action.bound
+  ReturnToApps() {
+    this.client.SendMessage({options: {operation: "ShowAppsPage"}, noResponse: true});
+  }
 }
 
 const root = new RootStore();

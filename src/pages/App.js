@@ -2,7 +2,7 @@ import "../static/stylesheets/app.scss";
 
 import React from "react";
 import {inject, observer} from "mobx-react";
-import {IconLink, ImageIcon, LoadingElement} from "elv-components-js";
+import {ImageIcon, LoadingElement} from "elv-components-js";
 
 import Logo from "../static/images/Logo.png";
 import GithubIcon from "../static/icons/github.svg";
@@ -58,7 +58,7 @@ class App extends React.Component {
       <div className="app-container">
         <header>
           <div className="header-logo">
-            <IconLink href="https://eluv.io" className="logo" icon={Logo} label="Eluvio"/>
+            <ImageIcon className="logo" icon={Logo} label="Eluvio" onClick={this.props.rootStore.ReturnToApps}/>
             <h1>
               Video Streaming Sample
             </h1>
