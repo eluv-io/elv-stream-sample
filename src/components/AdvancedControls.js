@@ -56,7 +56,9 @@ class AdvancedControls extends React.Component {
       ["NA Southwest", "na-west-south"],
       ["NA East", "na-east"],
       ["EU West", "eu-west"],
-      ["AU East", "au-east"]
+      ["EU East", "eu-east"],
+      ["AU East", "au-east"],
+      ["AS East", "as-east"]
     ];
 
     return (
