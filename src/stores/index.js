@@ -91,13 +91,17 @@ class RootStore {
 
     if(!this.initialLoadComplete) {
       const urlParams = new URLSearchParams(window.location.search);
+      const pathParams = (window.location.hash || "").replace(/^#/, "").replace(/^\//, "").split("/");
       const initialContentId =
         urlParams.get("objectId") ||
-        urlParams.get("versionHash");
+        urlParams.get("versionHash") ||
+        pathParams[0];
+
+      const initialOffering = urlParams.get("offering") || pathParams[1];
 
       if(initialContentId) {
         this.videoStore.volume = 0;
-        yield this.videoStore.LoadVideo({contentId: initialContentId});
+        yield this.videoStore.LoadVideo({contentId: initialContentId, offering: initialOffering});
       } else if(!this.displayAppMode && EluvioConfiguration.availableContent && EluvioConfiguration.availableContent.length > 0) {
         // Start muted for non-autoplay content
         this.videoStore.volume = 0;

@@ -21,6 +21,9 @@ class VideoStore {
   @observable drm = "clear";
   @observable aesOption = "aes-128";
 
+  @observable offering = "default";
+  @observable availableOfferings = ["default"];
+
   constructor(rootStore) {
     this.rootStore = rootStore;
 
@@ -43,6 +46,7 @@ class VideoStore {
     this.bandwidthEstimate = 0;
     this.error = "";
     this.loading = false;
+    this.offering = "default";
 
     this.playerLevels = [];
     this.playerCurrentLevel = undefined;
@@ -83,8 +87,19 @@ class VideoStore {
   }
 
   @action.bound
-  LoadVideo = flow(function * ({contentId}) {
+  SetOffering(offering) {
+    this.offering = offering;
+
+    if(this.contentId) {
+      this.LoadVideo({contentId: this.contentId, offering});
+    }
+  }
+
+  @action.bound
+  LoadVideo = flow(function * ({contentId, offering="default"}) {
     this.Reset();
+
+    if(offering) { this.offering = offering; }
 
     if(!contentId) { return; }
 
@@ -120,6 +135,13 @@ class VideoStore {
           versionHash,
           metadataSubtree: "public/name"
         }));
+
+      this.availableOfferings = Object.keys(yield client.ContentObjectMetadata({
+        libraryId,
+        objectId,
+        versionHash,
+        metadataSubtree: "offerings"
+      }));
       yield this.LoadVideoPlayout({libraryId, objectId, versionHash});
     } catch(error) {
       // eslint-disable-next-line no-console
@@ -148,7 +170,8 @@ class VideoStore {
     const playoutOptions = yield this.rootStore.client.PlayoutOptions({
       objectId,
       versionHash,
-      linkPath: defaultSource ? "public/asset_metadata/sources/default" : ""
+      linkPath: defaultSource ? "public/asset_metadata/sources/default" : "",
+      offering: this.offering
     });
 
     this.posterUrl = yield this.rootStore.client.Rep({

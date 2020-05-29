@@ -5,6 +5,10 @@ import * as Stores from "./stores";
 import DisplayApp from "./pages/DisplayApp";
 import App from "./pages/App";
 
+if(typeof EluvioConfiguration === "undefined") {
+  global.EluvioConfiguration = {};
+}
+
 render(
   (
     <React.Fragment>

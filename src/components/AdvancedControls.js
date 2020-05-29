@@ -3,6 +3,7 @@ import {inject, observer} from "mobx-react";
 import {Action} from "elv-components-js";
 
 @inject("rootStore")
+@inject("videoStore")
 @observer
 class AdvancedControls extends React.Component {
   constructor(props) {
@@ -77,6 +78,23 @@ class AdvancedControls extends React.Component {
     );
   }
 
+  Offerings() {
+    return (
+      <div className="controls-container">
+        <h3 className="controls-header">Offering</h3>
+        <select
+          value={this.props.videoStore.offering}
+          onChange={event => this.props.videoStore.SetOffering(event.target.value)}
+        >
+          {
+            this.props.videoStore.availableOfferings.map(offering =>
+              <option value={offering} key={`offering-${offering}`}>{ offering }</option> )
+          }
+        </select>
+      </div>
+    );
+  }
+
   render() {
     const toggleButton = (
       <div className="controls-container advanced-controls-toggle">
@@ -100,6 +118,7 @@ class AdvancedControls extends React.Component {
     return (
       <React.Fragment>
         { toggleButton }
+        { this.Offerings() }
         { this.Region() }
         { this.FabricNodes() }
         { this.BlockchainNodes() }
