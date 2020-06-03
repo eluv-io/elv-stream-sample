@@ -136,12 +136,14 @@ class VideoStore {
           metadataSubtree: "public/name"
         }));
 
-      this.availableOfferings = Object.keys(yield client.ContentObjectMetadata({
+      const offerings = yield client.ContentObjectMetadata({
         libraryId,
         objectId,
         versionHash,
         metadataSubtree: "offerings"
-      }));
+      });
+
+      this.availableOfferings = Object.keys(offerings || {});
       yield this.LoadVideoPlayout({libraryId, objectId, versionHash});
     } catch(error) {
       // eslint-disable-next-line no-console
