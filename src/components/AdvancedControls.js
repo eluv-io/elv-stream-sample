@@ -79,6 +79,9 @@ class AdvancedControls extends React.Component {
   }
 
   Offerings() {
+    const offerings = this.props.videoStore.availableOfferings;
+    if(!offerings || Object.keys(offerings).length === 0) { return null; }
+
     return (
       <div className="controls-container">
         <h3 className="controls-header">Offering</h3>
@@ -87,8 +90,8 @@ class AdvancedControls extends React.Component {
           onChange={event => this.props.videoStore.SetOffering(event.target.value)}
         >
           {
-            this.props.videoStore.availableOfferings.map(offering =>
-              <option value={offering} key={`offering-${offering}`}>{ offering }</option> )
+            Object.keys(offerings).map(offeringKey =>
+              <option value={offeringKey} key={`offering-${offeringKey}`}>{ offerings[offeringKey].display_name || offeringKey }</option> )
           }
         </select>
       </div>

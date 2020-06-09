@@ -26,7 +26,7 @@
     ]
   },
   "dependencies": {
-    "@eluvio/elv-client-js": "^2.0.11",
+    "@eluvio/elv-client-js": "^2.0.19",
     "chart.js": "^2.9.3",
     "dashjs": "^2.9.3",
     "elv-components-js": "git+https://github.com/eluv-io/elv-components-js.git#645165da87ec42845a908a9ce0817db202523866",

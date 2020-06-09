@@ -150,6 +150,50 @@ This code uses the [Navigator.requestMediaKeySystemAccess API](https://developer
 
 Widevine is generally supported in Firefox and Chromium-based browsers. HLS with AES-128 encryption is supported by most browsers, with the exception of newer Safari browsers and on iOS devices - for those, sample AES is supported instead. Use the AvailableDRMs method to determine whether to use AES-128 or Sample AES for encrypted AES playout.
 
+##### Offerings
+
+By default, PlayoutOptions retrieves the default offering, but some content may have multiple offerings. To determine the offerings available in the content, you can use the AvailableOfferings method in the client:
+
+```javascript
+const availableOfferings = await client.AvailableOfferings({objectId});
+
+{
+  "default": {
+    "display_name": "default"
+  },
+  "special_offering": {
+    "display_name": "Special Offering"
+  }
+}
+```
+
+To retrieve available offerings via a link, you can specify the `linkPath` parameter in the same way you would specify it in `PlayoutOptions`:
+
+```javascript
+const availableOfferings = await client.AvailableOfferings({
+  objectId,
+  linkPath: "public/asset_metadata/titles/0/sources/default"
+});
+
+{
+  "default": {
+    "display_name": "default"
+  }
+}
+```
+
+To retrieve options for a non-default offering, simply specify it in the offering parameter of PlayoutOptions:
+
+```javascript
+await client.PlayoutOptions({
+  objectId,
+  versionHash,
+  offering: "special_offering",
+  protocols: [PROTOCOL],
+  drms: [DRM]
+});
+```
+
 ##### Example Playout Options
 
 Here is an example response from the `PlayoutOptions` method - requesting both HLS and Dash, and supporting clear playout as well as AES-128 and Widevine:

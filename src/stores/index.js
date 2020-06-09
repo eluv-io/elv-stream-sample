@@ -100,11 +100,11 @@ class RootStore {
       const initialOffering = urlParams.get("offering") || pathParams[1];
 
       if(initialContentId) {
-        this.videoStore.volume = 0;
+        this.videoStore.muted = true;
         yield this.videoStore.LoadVideo({contentId: initialContentId, offering: initialOffering});
       } else if(!this.displayAppMode && EluvioConfiguration.availableContent && EluvioConfiguration.availableContent.length > 0) {
         // Start muted for non-autoplay content
-        this.videoStore.volume = 0;
+        this.videoStore.muted = true;
         yield this.videoStore.LoadVideo({contentId: EluvioConfiguration.availableContent[0].versionHash});
       }
     } else if(this.videoStore.contentId) {

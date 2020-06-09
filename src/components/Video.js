@@ -57,7 +57,6 @@ class Video extends React.Component {
     if(!video || !this.props.videoStore.playoutOptions) { return; }
 
     video.volume = this.props.videoStore.volume;
-    video.muted = this.props.videoStore.volume === 0;
 
     this.props.metricsStore.Reset();
     this.DestroyPlayer();
@@ -336,7 +335,7 @@ class Video extends React.Component {
             crossOrigin="anonymous"
             ref={this.InitializeVideo}
             autoPlay
-            muted={true}
+            muted={this.props.videoStore.muted}
             onVolumeChange={this.props.videoStore.UpdateVolume}
             playsInline
             controls={!!this.props.videoStore.playoutOptions}

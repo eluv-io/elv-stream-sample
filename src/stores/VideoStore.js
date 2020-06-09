@@ -12,6 +12,8 @@ class VideoStore {
   @observable playoutOptions;
   @observable title;
   @observable bandwidthEstimate = 0;
+
+  @observable muted = false;
   @observable volume = 1;
 
   @observable playerLevels = [];
@@ -60,7 +62,8 @@ class VideoStore {
 
   @action.bound
   UpdateVolume(event) {
-    this.volume = event.target.muted ? 0 : event.target.volume;
+    this.volume = event.target.volume;
+    this.muted = event.target.muted;
   }
 
   @action.bound
@@ -136,14 +139,7 @@ class VideoStore {
           metadataSubtree: "public/name"
         }));
 
-      const offerings = yield client.ContentObjectMetadata({
-        libraryId,
-        objectId,
-        versionHash,
-        metadataSubtree: "offerings"
-      });
-
-      this.availableOfferings = Object.keys(offerings || {});
+      this.availableOfferings = yield client.AvailableOfferings({objectId, versionHash});
       yield this.LoadVideoPlayout({libraryId, objectId, versionHash});
     } catch(error) {
       // eslint-disable-next-line no-console
@@ -161,18 +157,9 @@ class VideoStore {
 
   @action.bound
   LoadVideoPlayout = flow(function * ({libraryId, objectId, versionHash}) {
-    // Check for default source link
-    const defaultSource = yield this.rootStore.client.ContentObjectMetadata({
-      libraryId,
-      objectId,
-      versionHash,
-      metadataSubtree: "public/asset_metadata/sources/default"
-    });
-
     const playoutOptions = yield this.rootStore.client.PlayoutOptions({
       objectId,
       versionHash,
-      linkPath: defaultSource ? "public/asset_metadata/sources/default" : "",
       offering: this.offering
     });
 
