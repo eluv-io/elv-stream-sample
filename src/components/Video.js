@@ -19,6 +19,7 @@ class Video extends React.Component {
       initialTime: undefined,
       video: undefined,
       videoVersion: 1,
+      qualityLevel: -1,
       hlsOptions: JSON.stringify({
         maxBufferLength: 30,
         maxBufferSize: 300,
@@ -55,6 +56,8 @@ class Video extends React.Component {
 
   InitializeVideo(video) {
     if(!video || !this.props.videoStore.playoutOptions) { return; }
+
+    this.setState({qualityLevel: -1});
 
     video.volume = this.props.videoStore.volume;
 
@@ -278,12 +281,14 @@ class Video extends React.Component {
   }
 
   PlaybackLevel() {
-    if(!this.props.rootStore.devMode) { return null; }
-    let SetLevel, selected;
+    let SetLevel;
     if(this.props.videoStore.protocol === "hls") {
       SetLevel = event => {
         this.player.currentLevel = parseInt(event.target.value);
-        selected = this.player.autoLevelEnabled ? -1 : this.props.videoStore.playerCurrentLevel;
+        this.state.video.currentTime = Math.max(this.state.video.currentTime - 0.1, 0);
+        this.setState({
+          qualityLevel: parseInt(event.target.value)
+        });
       };
     } else {
       SetLevel = event => {
@@ -291,7 +296,8 @@ class Video extends React.Component {
         this.player.setFastSwitchEnabled(true);
         this.player.setQualityFor("video", parseInt(event.target.value));
         this.player.setAutoSwitchQualityFor("video", parseInt(event.target.value) < 0);
-        this.player.seek(Math.max(this.player.getVideoElement().currentTime - 0.1, 0));
+        this.state.video.currentTime = Math.max(this.state.video.currentTime - 0.1, 0);
+        this.setState({qualityLevel: event.target.value >= 0 ? this.player.getQualityFor("video") : -1});
       };
     }
 
@@ -316,7 +322,7 @@ class Video extends React.Component {
     return (
       <select
         aria-label="Playback Level"
-        value={selected}
+        value={this.state.qualityLevel}
         className={"video-playback-level"}
         onChange={SetLevel}
       >

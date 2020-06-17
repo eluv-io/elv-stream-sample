@@ -27,7 +27,7 @@ class MetricsStore {
     this.segmentData = [
       { id, quality, size, duration, latency, downloadTime, downloadRate, fullDownloadRate },
       ...this.segmentData
-    ];
+    ].slice(0, 100);
   }
 
   @action.bound

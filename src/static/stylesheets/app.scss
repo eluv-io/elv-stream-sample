@@ -12,7 +12,8 @@ body,
   display: flex;
   flex-direction: column;
   flex-grow: 1;
-  min-height: 100%;
+  max-height: 100vh;
+  min-height: 100vh;
 }
 
 .app-container {
@@ -176,9 +177,12 @@ header {
 
   .video-playback-level {
     background-color: $elv-color-bg-white;
+    bottom: -2.45rem;
+    font-size: $elv-font-l;
+    height: 2.1rem;
     position: absolute;
     right: 0;
-    top: 0;
+    width: 15rem;
   }
 }
 
@@ -196,8 +200,12 @@ video {
   width: 100%;
 
   .controls-header {
-    justify-content: space-between;
+    justify-content: flex-start;
     padding: $elv-spacing-s $elv-spacing-xs $elv-spacing-xxs;
+
+    span {
+      margin-right: $elv-spacing-xxl;
+    }
   }
 
   .bandwidth-estimate {
@@ -394,7 +402,7 @@ main {
   grid-template-areas: "selection selection" "title empty" "video controls" "segments controls";
   grid-template-columns: 3fr minmax(25%, 1fr);
   grid-template-rows: 3rem 4rem 3fr 2fr;
-  max-height: calc(100% - #{$header-height});
+  max-height: calc(100vh - #{$header-height});
   padding-bottom: $elv-spacing-m;
 
   &.display-app {
