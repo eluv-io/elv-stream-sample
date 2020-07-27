@@ -18,6 +18,8 @@ class VideoStore {
 
   @observable playerLevels = [];
   @observable playerCurrentLevel;
+  @observable playerAudioTracks;
+  @observable playerCurrentAudioTrack;
 
   @observable protocol = this.dashjsSupported ? "dash" : "hls";
   @observable drm = "clear";
@@ -52,6 +54,8 @@ class VideoStore {
 
     this.playerLevels = [];
     this.playerCurrentLevel = undefined;
+    this.playerAudioTracks = [];
+    this.playerCurrentAudioTrack = undefined;
   }
 
   @action.bound
@@ -59,6 +63,13 @@ class VideoStore {
     this.playerLevels = levels;
     this.playerCurrentLevel = currentLevel;
   }
+
+  @action.bound
+  SetAudioTracks({tracks, currentTrack}) {
+    this.playerAudioTracks = tracks;
+    this.playerCurrentAudioTrack = currentTrack;
+  }
+
 
   @action.bound
   UpdateVolume(event) {

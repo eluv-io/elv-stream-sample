@@ -93,6 +93,8 @@ class Video extends React.Component {
         this.props.onMediaEnded();
       }
     });
+
+    window.player = this.player;
   }
 
   InitializeHLS(video, playoutUrl) {
@@ -106,6 +108,18 @@ class Video extends React.Component {
 
     this.player.loadSource(playoutUrl);
     this.player.attachMedia(video);
+
+    this.player.on(HLSPlayer.Events.AUDIO_TRACKS_UPDATED, () => {
+      this.props.videoStore.SetAudioTracks({
+        tracks: this.player.audioTrackController.tracks.map(audioTrack =>
+          ({
+            index: audioTrack.id,
+            label: audioTrack.name
+          })
+        ),
+        currentTrack: this.player.audioTrack
+      });
+    });
 
     this.player.on(HLSPlayer.Events.LEVEL_SWITCHED, () =>
       this.props.videoStore.SetPlayerLevels({
@@ -180,6 +194,20 @@ class Video extends React.Component {
             .map(level => ({resolution: `${level.width}x${level.height}`, bitrate: level.bitrate, qualityIndex: level.qualityIndex})),
           currentLevel: 1
         });
+
+        this.props.videoStore.SetAudioTracks({
+          tracks: this.player.getTracksFor("audio").map(audioTrack =>
+            ({
+              index: audioTrack.index,
+              label: audioTrack.labels && audioTrack.labels.length > 0 ? audioTrack.labels[0].text : audioTrack.lang
+            })
+          ),
+          currentTrack: this.player.getCurrentTrackFor("audio").index
+        });
+
+        this.setState({
+          audioTrack: this.player.getCurrentTrackFor("audio").index
+        });
       }
     );
 
@@ -224,8 +252,6 @@ class Video extends React.Component {
     );
 
     this.player.initialize(video, playoutUrl);
-
-    window.player = this.player;
   }
 
   InitializeMuxMonitoring(video, playoutUrl) {
@@ -280,6 +306,47 @@ class Video extends React.Component {
     }, samplePeriod);
   }
 
+  AudioTrack() {
+    if(this.props.videoStore.playerAudioTracks.length <= 1) {
+      return null;
+    }
+
+    let SetAudioTrack;
+    if(this.props.videoStore.protocol === "hls") {
+      SetAudioTrack = (event) => {
+        const index = parseInt(event.target.value);
+        this.player.audioTrack = index;
+
+        this.setState({audioTrack: index});
+      };
+    } else {
+      SetAudioTrack = (event) => {
+        const index = parseInt(event.target.value);
+
+        const track = this.player.getTracksFor("audio").find(track => track.index === index);
+
+        this.player.setCurrentTrack(track);
+
+        this.setState({audioTrack: index});
+      };
+    }
+
+    return (
+      <select
+        aria-label="Audio Track"
+        value={this.state.audioTrack}
+        className="video-playback-control"
+        onChange={SetAudioTrack}
+      >
+        {
+          this.props.videoStore.playerAudioTracks.map(({index, label}) =>
+            <option value={index} key={`audio-track-${index}`}>{label}</option>
+          )
+        }
+      </select>
+    );
+  }
+
   PlaybackLevel() {
     let SetLevel;
     if(this.props.videoStore.protocol === "hls") {
@@ -293,9 +360,18 @@ class Video extends React.Component {
     } else {
       SetLevel = event => {
         // Set quality, disable or enable auto level, and seek a bit to make it reload segments
-        this.player.setFastSwitchEnabled(true);
         this.player.setQualityFor("video", parseInt(event.target.value));
-        this.player.setAutoSwitchQualityFor("video", parseInt(event.target.value) < 0);
+        this.player.updateSettings({
+          streaming: {
+            fastSwitchEnabled: true,
+            abr: {
+              autoSwitchBitrate: {
+                video: true
+              }
+            }
+          }
+        });
+
         this.state.video.currentTime = Math.max(this.state.video.currentTime - 0.1, 0);
         this.setState({qualityLevel: event.target.value >= 0 ? this.player.getQualityFor("video") : -1});
       };
@@ -323,8 +399,8 @@ class Video extends React.Component {
       <select
         aria-label="Playback Level"
         value={this.state.qualityLevel}
-        className={"video-playback-level"}
         onChange={SetLevel}
+        className="video-playback-control"
       >
         { levels }
       </select>
@@ -346,7 +422,10 @@ class Video extends React.Component {
             playsInline
             controls={!!this.props.videoStore.playoutOptions}
           />
-          { this.PlaybackLevel() }
+          <div className="video-playback-controls">
+            { this.AudioTrack() }
+            { this.PlaybackLevel() }
+          </div>
         </LoadingElement>
       </div>
     );
