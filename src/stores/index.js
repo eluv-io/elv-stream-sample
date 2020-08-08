@@ -111,6 +111,8 @@ class RootStore {
       yield this.videoStore.LoadVideo({contentId: this.videoStore.contentId});
     }
 
+    window.client = this.client;
+
     this.initialLoadComplete = true;
   });
 

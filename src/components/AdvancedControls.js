@@ -1,6 +1,6 @@
 import React from "react";
 import {inject, observer} from "mobx-react";
-import {Action} from "elv-components-js";
+import {Action, JsonInput} from "elv-components-js";
 
 @inject("rootStore")
 @inject("videoStore")
@@ -10,8 +10,37 @@ class AdvancedControls extends React.Component {
     super(props);
 
     this.state = {
-      visible: props.rootStore.manualNodeSelection
+      visible: props.rootStore.manualNodeSelection,
+      authContext: "{}"
     };
+  }
+
+  AuthContext() {
+    return (
+      <div className="controls-container">
+        <h3 className="controls-header">Auth Context</h3>
+        <JsonInput
+          className="control-auth-context"
+          name="authContext"
+          value={this.state.authContext}
+          onChange={async event => {
+            this.setState({
+              authContext: event.target.value
+            });
+
+            let context;
+            try {
+              context = event.target.value ? JSON.parse(event.target.value) : undefined;
+              // eslint-disable-next-line no-empty
+            } catch(error) {}
+
+            if(context) {
+              await this.props.videoStore.SetAuthContext(context);
+            }
+          }}
+        />
+      </div>
+    );
   }
 
   BlockchainNodes() {
@@ -125,6 +154,7 @@ class AdvancedControls extends React.Component {
         { this.Region() }
         { this.FabricNodes() }
         { this.BlockchainNodes() }
+        { this.AuthContext() }
       </React.Fragment>
     );
   }

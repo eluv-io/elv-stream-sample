@@ -1,4 +1,4 @@
-import {observable, action, flow} from "mobx";
+import {observable, action, flow, runInAction} from "mobx";
 import HLSPlayer from "hls.js/dist/hls";
 
 class VideoStore {
@@ -56,6 +56,29 @@ class VideoStore {
     this.playerCurrentLevel = undefined;
     this.playerAudioTracks = [];
     this.playerCurrentAudioTrack = undefined;
+
+    this.rootStore.client.ClearCache();
+  }
+
+  @action.bound
+  async SetAuthContext(context) {
+    try {
+      await this.rootStore.client.SetAuthContext({context});
+
+      // eslint-disable-next-line no-console
+      console.log("Set auth context:");
+      // eslint-disable-next-line no-console
+      console.log(JSON.stringify(context, null, 2));
+    } catch(error) {
+      const message = `Error setting auth context: ${error.message}`;
+      this.error = message;
+
+      setTimeout(() => {
+        if(this.error === message) {
+          runInAction(() => this.error = "");
+        }
+      }, 5000);
+    }
   }
 
   @action.bound

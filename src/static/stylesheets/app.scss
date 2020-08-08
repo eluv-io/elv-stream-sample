@@ -364,6 +364,12 @@ video {
     text-align: center;
     width: 100%;
   }
+
+  .control-auth-context {
+    font-size: $elv-font-l;
+    height: 10rem;
+    padding: $elv-spacing-s;
+  }
 }
 
 .graph-container {
