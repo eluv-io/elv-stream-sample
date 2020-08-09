@@ -18,14 +18,16 @@ class VideoStore {
 
   @observable playerLevels = [];
   @observable playerCurrentLevel;
-  @observable playerAudioTracks;
+  @observable playerAudioTracks = [];
   @observable playerCurrentAudioTrack;
 
   @observable protocol = this.dashjsSupported ? "dash" : "hls";
   @observable drm = "clear";
   @observable aesOption = "aes-128";
 
+  @observable playoutHandler = "playout";
   @observable offering = "default";
+  @observable playoutType;
   @observable availableOfferings = ["default"];
 
   constructor(rootStore) {
@@ -50,7 +52,9 @@ class VideoStore {
     this.bandwidthEstimate = 0;
     this.error = "";
     this.loading = false;
+    this.playoutHandler = "playout";
     this.offering = "default";
+    this.playoutType = undefined;
 
     this.playerLevels = [];
     this.playerCurrentLevel = undefined;
@@ -124,19 +128,27 @@ class VideoStore {
   }
 
   @action.bound
-  SetOffering(offering) {
-    this.offering = offering;
-
-    if(this.contentId) {
-      this.LoadVideo({contentId: this.contentId, offering});
-    }
+  SetPlayoutHandler(handler) {
+    this.playoutHandler = handler;
   }
 
   @action.bound
-  LoadVideo = flow(function * ({contentId, offering="default"}) {
-    this.Reset();
+  SetOffering(offering) {
+    this.offering = offering;
+  }
 
-    if(offering) { this.offering = offering; }
+  @action.bound
+  SetPlayoutType(playoutType) {
+    this.playoutType = playoutType;
+  }
+
+  @action.bound
+  LoadVideo = flow(function * ({contentId}) {
+    if(this.contentId && this.contentId !== contentId) {
+      this.Reset();
+    }
+
+    this.error = "";
 
     if(!contentId) { return; }
 
@@ -194,7 +206,9 @@ class VideoStore {
     const playoutOptions = yield this.rootStore.client.PlayoutOptions({
       objectId,
       versionHash,
-      offering: this.offering
+      handler: this.playoutHandler,
+      offering: this.offering,
+      playoutType: this.playoutType
     });
 
     this.posterUrl = yield this.rootStore.client.Rep({

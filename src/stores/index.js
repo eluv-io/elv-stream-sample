@@ -101,7 +101,12 @@ class RootStore {
 
       if(initialContentId) {
         this.videoStore.muted = true;
-        yield this.videoStore.LoadVideo({contentId: initialContentId, offering: initialOffering});
+
+        if(initialOffering) {
+          this.videoStore.SetOffering(initialOffering);
+        }
+
+        yield this.videoStore.LoadVideo({contentId: initialContentId});
       } else if(!this.displayAppMode && EluvioConfiguration.availableContent && EluvioConfiguration.availableContent.length > 0) {
         // Start muted for non-autoplay content
         this.videoStore.muted = true;
