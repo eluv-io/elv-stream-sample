@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import HLSPlayer from "../../node_modules/hls.js/dist/hls";
+import HLSPlayer from "hls-fix";
 import DashJS from "dashjs";
 import URI from "urijs";
 import Mux from "mux-embed";
