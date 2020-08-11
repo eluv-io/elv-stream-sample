@@ -32,8 +32,6 @@ class RootStore {
 
   @action.bound
   InitializeClient = flow(function * (region="", fabricNode="", ethNode) {
-    this.client = undefined;
-
     if(region || fabricNode || ethNode) {
       this.manualNodeSelection = true;
     } else {
@@ -67,7 +65,9 @@ class RootStore {
       }
 
       // Hide header if in frame
-      client.SendMessage({options: {operation: "HideHeader"}, noResponse: true});
+      if(!this.initialLoadComplete) {
+        client.SendMessage({options: {operation: "HideHeader"}, noResponse: true});
+      }
     }
 
     // Record available nodes
@@ -112,8 +112,6 @@ class RootStore {
         this.videoStore.muted = true;
         yield this.videoStore.LoadVideo({contentId: EluvioConfiguration.availableContent[0].versionHash});
       }
-    } else if(this.videoStore.contentId) {
-      yield this.videoStore.LoadVideo({contentId: this.videoStore.contentId});
     }
 
     window.client = this.client;

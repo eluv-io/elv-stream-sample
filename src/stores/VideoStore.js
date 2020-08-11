@@ -60,8 +60,6 @@ class VideoStore {
     this.playerCurrentLevel = undefined;
     this.playerAudioTracks = [];
     this.playerCurrentAudioTrack = undefined;
-
-    this.rootStore.client.ClearCache();
   }
 
   @action.bound
@@ -144,9 +142,12 @@ class VideoStore {
 
   @action.bound
   LoadVideo = flow(function * ({contentId}) {
+    // Reset state if new video is loaded
     if(this.contentId && this.contentId !== contentId) {
       this.Reset();
     }
+
+    this.rootStore.client.ClearCache();
 
     this.error = "";
 
