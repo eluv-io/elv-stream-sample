@@ -5,6 +5,7 @@ class VideoStore {
   @observable loading = false;
   @observable error = "";
 
+  @observable loadId = 1;
   @observable dashjsSupported = typeof (window.MediaSource || window.WebKitMediaSource) === "function";
   @observable hlsjsSupported = HLSPlayer.isSupported();
   @observable contentId;
@@ -141,12 +142,13 @@ class VideoStore {
   }
 
   @action.bound
-  LoadVideo = flow(function * ({contentId}) {
+  LoadVideo = flow(function * ({contentId, retry=true}) {
     // Reset state if new video is loaded
-    if(this.contentId && this.contentId !== contentId) {
+    if(retry && this.contentId && this.contentId !== contentId) {
       this.Reset();
     }
 
+    // TODO: Create more surgical cache clearing
     this.rootStore.client.ClearCache();
 
     this.error = "";
@@ -188,7 +190,14 @@ class VideoStore {
 
       this.availableOfferings = yield client.AvailableOfferings({objectId, versionHash});
       yield this.LoadVideoPlayout({libraryId, objectId, versionHash});
+
+      this.loadId += 1;
     } catch(error) {
+      if(retry) {
+        yield new Promise(resolve => setTimeout(resolve, 2000));
+        return this.LoadVideo({contentId, retry: false});
+      }
+
       // eslint-disable-next-line no-console
       console.error("Failed to load content:");
       // eslint-disable-next-line no-console

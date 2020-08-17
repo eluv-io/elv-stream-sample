@@ -412,7 +412,7 @@ class Video extends React.Component {
       <div className="video video-container" key={`video-version-${this.state.videoVersion}`}>
         <LoadingElement loadingClassname="video-loading" loading={this.props.videoStore.loading}>
           <video
-            key={`video-${this.props.videoStore.contentId}-${this.props.videoStore.protocol}-${this.props.videoStore.drm}`}
+            key={`video-${this.props.videoStore.loadId}-${this.props.videoStore.contentId}-${this.props.videoStore.protocol}-${this.props.videoStore.drm}`}
             poster={this.props.videoStore.posterUrl}
             crossOrigin="anonymous"
             ref={this.InitializeVideo}
