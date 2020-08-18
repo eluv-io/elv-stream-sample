@@ -171,6 +171,18 @@ class AdvancedControls extends React.Component {
       </div>
     );
 
+    const reloadButton = (
+      <div className="controls-container">
+        <div className="control-row">
+          <Action
+            onClick={() => this.props.videoStore.LoadVideo({contentId: this.props.videoStore.contentId})}
+          >
+            Reload
+          </Action>
+        </div>
+      </div>
+    );
+
     if(!this.state.visible) {
       return (
         toggleButton
@@ -187,6 +199,7 @@ class AdvancedControls extends React.Component {
         { this.FabricNodes() }
         { this.BlockchainNodes() }
         { this.AuthContext() }
+        { reloadButton }
       </React.Fragment>
     );
   }
