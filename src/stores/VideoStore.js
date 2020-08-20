@@ -188,7 +188,7 @@ class VideoStore {
           metadataSubtree: "public/name"
         }));
 
-      this.availableOfferings = yield client.AvailableOfferings({objectId, versionHash});
+      this.availableOfferings = yield client.AvailableOfferings({objectId, versionHash, handler: this.playoutHandler});
       yield this.LoadVideoPlayout({libraryId, objectId, versionHash});
 
       this.loadId += 1;
