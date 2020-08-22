@@ -13,6 +13,7 @@ import PlayoutControls from "../components/PlayoutControls";
 import BufferGraph from "../components/Graph";
 import PlayoutInfo from "../components/PlayoutInfo";
 import AdvancedControls from "../components/AdvancedControls";
+import Profiles from "../components/Profiles";
 
 @inject("rootStore")
 @observer
@@ -40,6 +41,7 @@ class App extends React.Component {
         <Video />
         <Segments />
         <div className="controls controls-section">
+          <Profiles />
           <PlayoutControls />
           <BufferGraph />
           <PlayoutInfo />

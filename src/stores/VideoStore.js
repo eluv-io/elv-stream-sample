@@ -1,6 +1,18 @@
 import {observable, action, flow, runInAction} from "mobx";
 import HLSPlayer from "hls-fix";
 
+const profileSettings = {
+  alice: {
+    email: "alice@example.com"
+  },
+  bob: {
+    email: "bob@example.com"
+  },
+  carol: {
+    email: "carol@example.com"
+  }
+};
+
 class VideoStore {
   @observable loading = false;
   @observable error = "";
@@ -26,10 +38,13 @@ class VideoStore {
   @observable drm = "clear";
   @observable aesOption = "aes-128";
 
-  @observable playoutHandler = "playout";
+  @observable playoutHandler = "playout_scte";
   @observable offering = "default";
   @observable playoutType;
   @observable availableOfferings = ["default"];
+
+  @observable authContext = {};
+  @observable profile = "alice";
 
   constructor(rootStore) {
     this.rootStore = rootStore;
@@ -53,7 +68,7 @@ class VideoStore {
     this.bandwidthEstimate = 0;
     this.error = "";
     this.loading = false;
-    this.playoutHandler = "playout";
+    this.playoutHandler = "playout_scte";
     this.offering = "default";
     this.playoutType = undefined;
 
@@ -64,14 +79,29 @@ class VideoStore {
   }
 
   @action.bound
+  async SetProfile(profile) {
+    if(!Object.keys(profileSettings).includes(profile)) {
+      throw Error("Unknown profile: " + profile);
+    }
+
+    this.profile = profile;
+
+    await this.SetAuthContext(this.authContext);
+
+    if(this.contentId) {
+      this.LoadVideo({contentId: this.contentId});
+    }
+  }
+
+  @action.bound
   async SetAuthContext(context) {
     try {
-      await this.rootStore.client.SetAuthContext({context});
-
-      // eslint-disable-next-line no-console
-      console.log("Set auth context:");
-      // eslint-disable-next-line no-console
-      console.log(JSON.stringify(context, null, 2));
+      await this.rootStore.client.SetAuthContext({
+        context: {
+          ...(context || {}),
+          ...(profileSettings[this.profile])
+        }
+      });
     } catch(error) {
       const message = `Error setting auth context: ${error.message}`;
       this.error = message;

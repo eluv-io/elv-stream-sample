@@ -18,8 +18,8 @@ class ContentInfo extends React.Component {
 
     if(!content || content.length === 0) { return null; }
 
-    const options = content.map(({title, versionHash}) =>
-      <option key={`available-content-${versionHash}`} value={versionHash}>{title}</option>
+    const options = content.map(({title, versionHash, objectId}) =>
+      <option key={`available-content-${versionHash || objectId}`} value={versionHash || objectId}>{title}</option>
     );
 
     return (

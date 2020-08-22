@@ -110,7 +110,10 @@ class RootStore {
       } else if(!this.displayAppMode && EluvioConfiguration.availableContent && EluvioConfiguration.availableContent.length > 0) {
         // Start muted for non-autoplay content
         this.videoStore.muted = true;
-        yield this.videoStore.LoadVideo({contentId: EluvioConfiguration.availableContent[0].versionHash});
+        yield this.videoStore.LoadVideo({
+          contentId: EluvioConfiguration.availableContent[0].versionHash ||
+            EluvioConfiguration.availableContent[0].objectId
+        });
       }
     }
 

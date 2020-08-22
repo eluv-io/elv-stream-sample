@@ -365,6 +365,10 @@ video {
     width: 100%;
   }
 
+  .profile-select {
+    height: $elv-spacing-l;
+  }
+
   .control-auth-context {
     font-size: $elv-font-l;
     height: 10rem;
@@ -556,4 +560,3 @@ main {
     font-size: 16px;
   }
 }
-
