@@ -23,6 +23,7 @@ class VideoStore {
   @observable contentId;
   @observable posterUrl;
   @observable playoutOptions;
+  @observable bitmovinPlayoutOptions;
   @observable title;
   @observable bandwidthEstimate = 0;
 
@@ -45,6 +46,7 @@ class VideoStore {
 
   @observable authContext = {};
   @observable profile = "alice";
+  @observable useBitmovin = true;
 
   constructor(rootStore) {
     this.rootStore = rootStore;
@@ -125,7 +127,6 @@ class VideoStore {
     this.playerAudioTracks = tracks;
     this.playerCurrentAudioTrack = currentTrack;
   }
-
 
   @action.bound
   UpdateVolume(event) {
@@ -269,7 +270,18 @@ class VideoStore {
       this.drm = playoutMethods.clear ? "clear" : (playoutMethods[this.aesOption] ? this.aesOption : "widevine");
     }
 
+    const bitmovinPlayoutOptions = yield this.rootStore.client.BitmovinPlayoutOptions({
+      objectId,
+      versionHash,
+      protocols: [this.protocol],
+      drms: [this.drm],
+      handler: this.playoutHandler,
+      offering: this.offering,
+      playoutType: this.playoutType
+    });
+
     this.playoutOptions = playoutOptions;
+    this.bitmovinPlayoutOptions = bitmovinPlayoutOptions;
   });
 }
 

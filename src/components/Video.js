@@ -1,5 +1,4 @@
 import React from "react";
-import PropTypes from "prop-types";
 import HLSPlayer from "hls-fix";
 import DashJS from "dashjs";
 import URI from "urijs";
@@ -28,6 +27,7 @@ class Video extends React.Component {
     };
 
     this.InitializeVideo = this.InitializeVideo.bind(this);
+    this.InitializeBitmovin = this.InitializeBitmovin.bind(this);
     this.StartSampling = this.StartSampling.bind(this);
     this.StopSampling = this.StopSampling.bind(this);
   }
@@ -88,10 +88,6 @@ class Video extends React.Component {
     video.addEventListener("ended", () => {
       // Stop sampling when video has ended
       this.StopSampling();
-
-      if(this.props.onMediaEnded) {
-        this.props.onMediaEnded();
-      }
     });
 
     window.player = this.player;
@@ -254,6 +250,56 @@ class Video extends React.Component {
     this.player.initialize(video, playoutUrl);
   }
 
+  InitializeBitmovin(video) {
+    if(!video || !this.props.videoStore.bitmovinPlayoutOptions) { return; }
+
+    const config = {
+      key: EluvioConfiguration["bitmovin-license"],
+      playback: {
+        autoplay: true,
+        muted: true
+      },
+      events: {
+        //[bitmovin.player.PlayerEvent.SourceLoaded]: args => console.log(JSON.stringify(args, null, 2))
+      }
+    };
+
+    // API 8
+    this.player = new bitmovin.player.Player(video, config);
+
+    this.player.load(this.props.videoStore.bitmovinPlayoutOptions).then(
+      async () => {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        const video = document.querySelector("#bitmovin-player-container video");
+
+        if(video) {
+          this.setState({
+            initialTime: performance.now(),
+            video
+          }, this.StartSampling);
+
+          video.addEventListener("ended", () => {
+            // Stop sampling when video has ended
+            this.StopSampling();
+          });
+        }
+      },
+      (error) => {
+        DestroyPlayer();
+        if(error.name === "SOURCE_NO_SUPPORTED_TECHNOLOGY") {
+          SetErrorMessage(`${PROTOCOL} ${DRM} playout not supported for this content`);
+        } else {
+          SetErrorMessage(`Bitmovin error: ${error.name}`);
+          // eslint-disable-next-line no-console
+          console.error(error);
+        }
+      }
+    );
+
+    window.player = this.player;
+  }
+
   InitializeMuxMonitoring(video, playoutUrl) {
     const options = {
       debug: false,
@@ -407,21 +453,37 @@ class Video extends React.Component {
     );
   }
 
+  VideoElement() {
+    if(this.props.videoStore.useBitmovin) {
+      return (
+        <div
+          id="bitmovin-player-container"
+          key={`video-bitmovin-${this.props.videoStore.loadId}-${this.props.videoStore.contentId}-${this.props.videoStore.protocol}-${this.props.videoStore.drm}`}
+          ref={this.InitializeBitmovin}
+        />
+      );
+    } else {
+      return (
+        <video
+          key={`video-${this.props.videoStore.loadId}-${this.props.videoStore.contentId}-${this.props.videoStore.protocol}-${this.props.videoStore.drm}`}
+          poster={this.props.videoStore.posterUrl}
+          crossOrigin="anonymous"
+          ref={this.InitializeVideo}
+          autoPlay
+          muted={this.props.videoStore.muted}
+          onVolumeChange={this.props.videoStore.UpdateVolume}
+          playsinline
+          controls={!!this.props.videoStore.playoutOptions}
+        />
+      );
+    }
+  }
+
   render() {
     return (
       <div className="video video-container" key={`video-version-${this.state.videoVersion}`}>
         <LoadingElement loadingClassname="video-loading" loading={this.props.videoStore.loading}>
-          <video
-            key={`video-${this.props.videoStore.loadId}-${this.props.videoStore.contentId}-${this.props.videoStore.protocol}-${this.props.videoStore.drm}`}
-            poster={this.props.videoStore.posterUrl}
-            crossOrigin="anonymous"
-            ref={this.InitializeVideo}
-            autoPlay
-            muted={this.props.videoStore.muted}
-            onVolumeChange={this.props.videoStore.UpdateVolume}
-            playsInline
-            controls={!!this.props.videoStore.playoutOptions}
-          />
+          { this.VideoElement() }
           <div className="video-playback-controls">
             { this.AudioTrack() }
             { this.PlaybackLevel() }
@@ -431,9 +493,5 @@ class Video extends React.Component {
     );
   }
 }
-
-Video.propTypes = {
-  onMediaEnded: PropTypes.func
-};
 
 export default Video;
