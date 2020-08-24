@@ -10,7 +10,7 @@ class AdvancedControls extends React.Component {
     super(props);
 
     this.state = {
-      visible: props.rootStore.manualNodeSelection,
+      visible: false,
       authContext: "{}"
     };
   }

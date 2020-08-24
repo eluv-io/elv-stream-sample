@@ -5,6 +5,7 @@ import URI from "urijs";
 import Mux from "mux-embed";
 import {inject, observer} from "mobx-react";
 import {LoadingElement} from "elv-components-js";
+import {toJS} from "mobx";
 
 @inject("rootStore")
 @inject("videoStore")
@@ -50,8 +51,17 @@ class Video extends React.Component {
     }
 
     if(this.player) {
-      this.player.destroy ? this.player.destroy() : this.player.reset();
+      try {
+        this.player.destroy ? this.player.destroy() : this.player.reset();
+      } catch(error) {
+        // eslint-disable-next-line no-console
+        console.error("Failed to destroy player:");
+        // eslint-disable-next-line no-console
+        console.error(error);
+      }
     }
+
+    this.props.metricsStore.Reset();
   }
 
   InitializeVideo(video) {
@@ -253,6 +263,8 @@ class Video extends React.Component {
   InitializeBitmovin(video) {
     if(!video || !this.props.videoStore.bitmovinPlayoutOptions) { return; }
 
+    this.DestroyPlayer();
+
     const config = {
       key: EluvioConfiguration["bitmovin-license"],
       playback: {
@@ -260,14 +272,52 @@ class Video extends React.Component {
         muted: true
       },
       events: {
-        //[bitmovin.player.PlayerEvent.SourceLoaded]: args => console.log(JSON.stringify(args, null, 2))
+        [bitmovin.player.PlayerEvent.SourceLoaded]: () => {
+          const levels = this.player.getAvailableVideoQualities();
+
+          this.props.videoStore.SetPlayerLevels({
+            levels: levels.map((level, index) => ({resolution: `${level.width}x${level.height}`, bitrate: level.bitrate, qualityIndex: index, bmId: level.id})),
+            currentLevel: -1
+          });
+        },
+        [bitmovin.player.PlayerEvent.VideoDownloadQualityChanged]: () => {
+          const currentQuality = this.player.getVideoQuality();
+          const index = this.props.videoStore.playerLevels.findIndex(level => level.bmId === currentQuality.id) || -1;
+          this.setState({qualityLevel: index});
+        },
+        [bitmovin.player.PlayerEvent.DownloadFinished]: info => {
+          if(info.downloadType !== "media/video") { return; }
+
+          // eslint-disable-next-line no-unused-vars
+          const [_, width, height, bitrate] = info.url.match(/(\d+)x(\d+)@(\d+)/);
+          const id = (info.url.match(/(\d+).m4s/) || [])[1];
+
+          if(!id) { return; }
+
+          const size = info.size / (1024 * 1024);
+
+          // Bits per second
+          const downloadRate = (8 * info.size) / info.downloadTime;
+          const fullDownloadRate = (8 * info.size) / (info.downloadTime + info.timeToFirstByte);
+
+          this.props.metricsStore.LogSegment({
+            id: parseInt(id),
+            quality: `${width}x${height} (${parseInt(bitrate) / 1000} kbps)`,
+            size,
+            duration: 2,
+            latency: info.timeToFirstByte,
+            downloadTime: info.downloadTime,
+            downloadRate,
+            fullDownloadRate
+          });
+        }
       }
     };
 
     // API 8
     this.player = new bitmovin.player.Player(video, config);
 
-    this.player.load(this.props.videoStore.bitmovinPlayoutOptions).then(
+    this.player.load(toJS(this.props.videoStore.bitmovinPlayoutOptions)).then(
       async () => {
         await new Promise(resolve => setTimeout(resolve, 1000));
 
@@ -286,14 +336,9 @@ class Video extends React.Component {
         }
       },
       (error) => {
-        DestroyPlayer();
-        if(error.name === "SOURCE_NO_SUPPORTED_TECHNOLOGY") {
-          SetErrorMessage(`${PROTOCOL} ${DRM} playout not supported for this content`);
-        } else {
-          SetErrorMessage(`Bitmovin error: ${error.name}`);
-          // eslint-disable-next-line no-console
-          console.error(error);
-        }
+        this.DestroyPlayer();
+        // eslint-disable-next-line no-console
+        console.log(error);
       }
     );
 
@@ -353,7 +398,11 @@ class Video extends React.Component {
   }
 
   AudioTrack() {
-    if(!this.props.videoStore.playerAudioTracks || this.props.videoStore.playerAudioTracks.length <= 1) {
+    if(
+      this.props.videoStore.useBitmovin ||
+      !this.props.videoStore.playerAudioTracks ||
+      this.props.videoStore.playerAudioTracks.length <= 1
+    ) {
       return null;
     }
 
@@ -395,32 +444,44 @@ class Video extends React.Component {
 
   PlaybackLevel() {
     let SetLevel;
-    if(this.props.videoStore.protocol === "hls") {
+    if(this.props.videoStore.useBitmovin) {
       SetLevel = event => {
-        this.player.currentLevel = parseInt(event.target.value);
+        const index = parseInt(event.target.value);
+        const level = index >= 0 ? this.props.videoStore.playerLevels[index] : { bmId: "auto" };
+        this.player.setVideoQuality(level.bmId);
         this.state.video.currentTime = Math.max(this.state.video.currentTime - 0.1, 0);
         this.setState({
-          qualityLevel: parseInt(event.target.value)
+          qualityLevel: index
         });
       };
     } else {
-      SetLevel = event => {
-        // Set quality, disable or enable auto level, and seek a bit to make it reload segments
-        this.player.setQualityFor("video", parseInt(event.target.value));
-        this.player.updateSettings({
-          streaming: {
-            fastSwitchEnabled: true,
-            abr: {
-              autoSwitchBitrate: {
-                video: true
+      if(this.props.videoStore.protocol === "hls") {
+        SetLevel = event => {
+          this.player.currentLevel = parseInt(event.target.value);
+          this.state.video.currentTime = Math.max(this.state.video.currentTime - 0.1, 0);
+          this.setState({
+            qualityLevel: parseInt(event.target.value)
+          });
+        };
+      } else {
+        SetLevel = event => {
+          // Set quality, disable or enable auto level, and seek a bit to make it reload segments
+          this.player.setQualityFor("video", parseInt(event.target.value));
+          this.player.updateSettings({
+            streaming: {
+              fastSwitchEnabled: true,
+              abr: {
+                autoSwitchBitrate: {
+                  video: true
+                }
               }
             }
-          }
-        });
+          });
 
-        this.state.video.currentTime = Math.max(this.state.video.currentTime - 0.1, 0);
-        this.setState({qualityLevel: event.target.value >= 0 ? this.player.getQualityFor("video") : -1});
-      };
+          this.state.video.currentTime = Math.max(this.state.video.currentTime - 0.1, 0);
+          this.setState({qualityLevel: event.target.value >= 0 ? this.player.getQualityFor("video") : -1});
+        };
+      }
     }
 
     let levels = Object.keys(this.props.videoStore.playerLevels).map(levelIndex => {
