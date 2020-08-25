@@ -80,7 +80,7 @@ class VideoStore {
 
   @action.bound
   async SetProfile(profile) {
-    if(!Object.keys(profileSettings).includes(profile)) {
+    if(!Object.keys(this.profileSettings).includes(profile)) {
       throw Error("Unknown profile: " + profile);
     }
 
@@ -99,7 +99,7 @@ class VideoStore {
       await this.rootStore.client.SetAuthContext({
         context: {
           ...(context || {}),
-          ...(profileSettings[this.profile])
+          ...(this.profileSettings[this.profile])
         }
       });
     } catch(error) {
