@@ -272,6 +272,20 @@ class Video extends React.Component {
             levels: levels.map((level, index) => ({resolution: `${level.width}x${level.height}`, bitrate: level.bitrate, qualityIndex: index, bmId: level.id})),
             currentLevel: -1
           });
+
+          const video = document.querySelector("#bitmovin-player-container video");
+
+          if(video) {
+            this.setState({
+              initialTime: performance.now(),
+              video
+            }, this.StartSampling);
+
+            video.addEventListener("ended", () => {
+              // Stop sampling when video has ended
+              this.StopSampling();
+            });
+          }
         },
         [bitmovin.player.PlayerEvent.VideoDownloadQualityChanged]: () => {
           const currentQuality = this.player.getVideoQuality();
@@ -320,30 +334,7 @@ class Video extends React.Component {
 
     // API 8
     this.player = new bitmovin.player.Player(video, config);
-    this.player.load(toJS(this.props.videoStore.bitmovinPlayoutOptions)).then(
-      async () => {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
-        const video = document.querySelector("#bitmovin-player-container video");
-
-        if(video) {
-          this.setState({
-            initialTime: performance.now(),
-            video
-          }, this.StartSampling);
-
-          video.addEventListener("ended", () => {
-            // Stop sampling when video has ended
-            this.StopSampling();
-          });
-        }
-      },
-      (error) => {
-        this.DestroyPlayer();
-        // eslint-disable-next-line no-console
-        console.log(error);
-      }
-    );
+    this.player.load(toJS(this.props.videoStore.bitmovinPlayoutOptions));
 
     window.player = this.player;
   }
