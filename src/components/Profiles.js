@@ -13,9 +13,11 @@ class Profiles extends React.Component {
           className="profile-select"
           onChange={event => this.props.videoStore.SetProfile(event.target.value)}
         >
-          <option value="alice">Alice</option>
-          <option value="bob">Bob</option>
-          <option value="carol">Carol</option>
+          {
+            Object.keys(this.props.videoStore.profileSettings).map(name =>
+              <option value={name} key={`profile-${name}`}>{ name }</option>
+            )
+          }
         </select>
       </div>
 

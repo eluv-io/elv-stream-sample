@@ -14,7 +14,6 @@ class PlayoutInfo extends React.Component {
       this.props.videoStore.drm !== "widevine"
     ) { return; }
 
-
     const playoutMethods = this.props.videoStore.playoutOptions[this.props.videoStore.protocol]
       .playoutMethods[this.props.videoStore.drm];
 
@@ -36,7 +35,13 @@ class PlayoutInfo extends React.Component {
   }
 
   PlayoutUrl() {
-    if(!this.props.videoStore.playoutOptions) { return; }
+    const playoutOptions = this.props.videoStore.playoutOptions;
+
+    if(
+      !playoutOptions ||
+      !playoutOptions[this.props.videoStore.protocol] ||
+      !playoutOptions[this.props.videoStore.protocol].playoutMethods[this.props.videoStore.drm]
+    ) { return; }
 
     const playoutUrl = this.props.videoStore.playoutOptions[this.props.videoStore.protocol]
       .playoutMethods[this.props.videoStore.drm].playoutUrl;

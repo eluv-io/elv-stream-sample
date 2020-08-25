@@ -1,18 +1,6 @@
 import {observable, action, flow, runInAction} from "mobx";
 import HLSPlayer from "hls-fix";
 
-const profileSettings = {
-  alice: {
-    email: "alice@example.com"
-  },
-  bob: {
-    email: "bob@example.com"
-  },
-  carol: {
-    email: "carol@example.com"
-  }
-};
-
 class VideoStore {
   @observable loading = false;
   @observable error = "";
@@ -45,8 +33,20 @@ class VideoStore {
   @observable availableOfferings = ["default"];
 
   @observable authContext = {};
-  @observable profile = "alice";
+  @observable profile = "Benedict";
   @observable useBitmovin = true;
+
+  @observable profileSettings = {
+    Benedict: {
+      email: "Benedict@demo.io"
+    },
+    Gary: {
+      email: "gary@demo.io"
+    },
+    Laura: {
+      email: "Laura@demo.io"
+    }
+  };
 
   constructor(rootStore) {
     this.rootStore = rootStore;
@@ -70,9 +70,7 @@ class VideoStore {
     this.bandwidthEstimate = 0;
     this.error = "";
     this.loading = false;
-    this.playoutHandler = "playout_scte";
     this.offering = "default";
-    this.playoutType = undefined;
 
     this.playerLevels = [];
     this.playerCurrentLevel = undefined;

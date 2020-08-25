@@ -166,12 +166,12 @@ header {
     width: 100%;
   }
 
-  video {
+  .video-element {
     background: $elv-color-black;
     cursor: pointer;
+    height: 100%;
     max-height: 100%;
     max-width: 100%;
-    min-height: 100%;
     width: 100%;
   }
 
@@ -194,7 +194,7 @@ header {
 }
 
 .video-container,
-video {
+.video-element {
   border-radius: $elv-spacing-xxs;
 }
 
@@ -397,10 +397,25 @@ video {
   min-height: 3rem;
 }
 
-.video {
+.video,
+.video-element {
   grid-area: video;
   max-height: calc(60vh - 7rem);
   min-height: calc(60vh - 7rem);
+}
+
+.video-element {
+  * {
+    max-height: calc(60vh - 7rem);
+  }
+}
+
+.bitmovinplayer-container {
+  &.aspect-16x9 {
+    &:before {
+      padding-bottom: 0;
+    }
+  }
 }
 
 .segments {
@@ -432,13 +447,20 @@ main {
     }
 
     .video-container,
-    video {
+    .video-element {
       border-radius: $elv-spacing-xs;
     }
 
-    .video {
+    .video,
+    .video-element {
       max-height: 60vh;
       min-height: 60vh;
+    }
+
+    .video-element {
+      * {
+        max-height: calc(60vh - 7rem);
+      }
     }
   }
 
@@ -495,9 +517,9 @@ main {
     max-height: 100%;
 
     .video-container,
-    video {
+    .video-element {
       border-radius: 0;
-      min-height: 100%;
+      height: 100%;
     }
   }
 

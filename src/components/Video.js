@@ -50,15 +50,8 @@ class Video extends React.Component {
       this.bandwidthInterval = undefined;
     }
 
-    if(this.player) {
-      try {
-        this.player.destroy ? this.player.destroy() : this.player.reset();
-      } catch(error) {
-        // eslint-disable-next-line no-console
-        console.error("Failed to destroy player:");
-        // eslint-disable-next-line no-console
-        console.error(error);
-      }
+    if(this.player && !this.props.videoStore.useBitmovin) {
+      this.player.destroy ? this.player.destroy() : this.player.reset();
     }
 
     this.props.metricsStore.Reset();
@@ -286,37 +279,47 @@ class Video extends React.Component {
           this.setState({qualityLevel: index});
         },
         [bitmovin.player.PlayerEvent.DownloadFinished]: info => {
-          if(info.downloadType !== "media/video") { return; }
+          try {
+            if(info.downloadType !== "media/video") {
+              return;
+            }
 
-          // eslint-disable-next-line no-unused-vars
-          const [_, width, height, bitrate] = info.url.match(/(\d+)x(\d+)@(\d+)/);
-          const id = (info.url.match(/(\d+).m4s/) || [])[1];
+            // eslint-disable-next-line no-unused-vars
+            const [_, width, height, bitrate] = info.url.match(/(\d+)x(\d+)@(\d+)/);
+            const id = (info.url.match(/(\d+)([-\d]*).m4s/) || [])[1];
 
-          if(!id) { return; }
+            if(!id) {
+              return;
+            }
 
-          const size = info.size / (1024 * 1024);
+            const size = info.size / (1024 * 1024);
 
-          // Bits per second
-          const downloadRate = (8 * info.size) / info.downloadTime;
-          const fullDownloadRate = (8 * info.size) / (info.downloadTime + info.timeToFirstByte);
+            // Bits per second
+            const downloadRate = (8 * info.size) / info.downloadTime;
+            const fullDownloadRate = (8 * info.size) / (info.downloadTime + info.timeToFirstByte);
 
-          this.props.metricsStore.LogSegment({
-            id: parseInt(id),
-            quality: `${width}x${height} (${parseInt(bitrate) / 1000} kbps)`,
-            size,
-            duration: 2,
-            latency: info.timeToFirstByte,
-            downloadTime: info.downloadTime,
-            downloadRate,
-            fullDownloadRate
-          });
+            this.props.metricsStore.LogSegment({
+              id: parseInt(id),
+              quality: `${width}x${height} (${parseInt(bitrate) / 1000} kbps)`,
+              size,
+              duration: 2,
+              latency: info.timeToFirstByte,
+              downloadTime: info.downloadTime,
+              downloadRate,
+              fullDownloadRate
+            });
+          } catch(error) {
+            // eslint-disable-next-line no-console
+            console.error("Error logging segment:");
+            // eslint-disable-next-line no-console
+            console.error(error);
+          }
         }
       }
     };
 
     // API 8
     this.player = new bitmovin.player.Player(video, config);
-
     this.player.load(toJS(this.props.videoStore.bitmovinPlayoutOptions)).then(
       async () => {
         await new Promise(resolve => setTimeout(resolve, 1000));
@@ -519,6 +522,7 @@ class Video extends React.Component {
       return (
         <div
           id="bitmovin-player-container"
+          className="video-element"
           key={`video-bitmovin-${this.props.videoStore.loadId}-${this.props.videoStore.contentId}-${this.props.videoStore.protocol}-${this.props.videoStore.drm}`}
           ref={this.InitializeBitmovin}
         />
@@ -527,6 +531,7 @@ class Video extends React.Component {
       return (
         <video
           key={`video-${this.props.videoStore.loadId}-${this.props.videoStore.contentId}-${this.props.videoStore.protocol}-${this.props.videoStore.drm}`}
+          className="video-element"
           poster={this.props.videoStore.posterUrl}
           crossOrigin="anonymous"
           ref={this.InitializeVideo}

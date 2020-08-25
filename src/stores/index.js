@@ -32,7 +32,7 @@ class RootStore {
 
   @action.bound
   InitializeClient = flow(function * (region="", fabricNode="", ethNode) {
-    fabricNode = "https://host-38-142-50-110.contentfabric.io";
+    //fabricNode = "https://host-38-142-50-110.contentfabric.io";
     if(region || fabricNode || ethNode) {
       this.manualNodeSelection = true;
     } else {
