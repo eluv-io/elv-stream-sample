@@ -32,24 +32,28 @@ class VideoStore {
   @observable playoutType;
   @observable availableOfferings = ["default"];
 
-  @observable profile = "Benedict";
+  @observable profile = "Default";
   @observable useBitmovin = true;
 
   @observable profileSettings = {
+    Default: {
+      offerings: [{default: {display_name: "default"}, male1: {display_name: "male1"}, male2: {display_name: "male2"}, female: {display_name: "female"}}],
+      context: {}
+    },
     Benedict: {
-      offerings: ["male1"],
+      offerings: [{male1: {display_name: "male1"}, default: {display_name: "default"}}],
       context: {
         email: "Benedict@demo.io"
       }
     },
     Gary: {
-      offerings: ["male2"],
+      offerings: [{male2: {display_name: "male2"}, default: {display_name: "default"}}],
       context: {
         email: "gary@demo.io"
       }
     },
     Laura: {
-      offerings: ["female"],
+      offerings: [{female: {display_name: "female"}, default: {display_name: "default"}}],
       context: {
         email: "Laura@demo.io"
       }
@@ -244,7 +248,7 @@ class VideoStore {
         (this.contentId.startsWith("hq__") && client.utils.DecodeVersionHash(this.contentId).objectId === "iq__3cf6jxvbLdjVzY6Dgv7SFtvBi5m3")
       ) {
         this.availableOfferings = this.profileSettings[this.profile].offerings;
-        this.offering = this.availableOfferings[0];
+        this.offering = Object.keys(this.availableOfferings)[0];
       }
 
       yield this.LoadVideoPlayout({libraryId, objectId, versionHash});
