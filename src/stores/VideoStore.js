@@ -32,21 +32,32 @@ class VideoStore {
   @observable playoutType;
   @observable availableOfferings = ["default"];
 
-  @observable authContext = {};
   @observable profile = "Benedict";
   @observable useBitmovin = true;
 
   @observable profileSettings = {
     Benedict: {
-      email: "Benedict@demo.io"
+      offerings: ["male1"],
+      context: {
+        email: "Benedict@demo.io"
+      }
     },
     Gary: {
-      email: "gary@demo.io"
+      offerings: ["male2"],
+      context: {
+        email: "gary@demo.io"
+      }
     },
     Laura: {
-      email: "Laura@demo.io"
+      offerings: ["female"],
+      context: {
+        email: "Laura@demo.io"
+      }
     }
   };
+
+  @observable authContext = this.profileSettings[this.profile].context;
+  @observable authContextInput = JSON.stringify(this.authContext, null, 2);
 
   constructor(rootStore) {
     this.rootStore = rootStore;
@@ -86,7 +97,12 @@ class VideoStore {
 
     this.profile = profile;
 
-    await this.SetAuthContext(this.authContext);
+    const authContext = {
+      ...this.authContext,
+      ...this.profileSettings[profile].context
+    };
+
+    await this.SetAuthContext(authContext);
 
     if(this.contentId) {
       this.LoadVideo({contentId: this.contentId});
@@ -94,14 +110,18 @@ class VideoStore {
   }
 
   @action.bound
-  async SetAuthContext(context) {
+  SetAuthContextInput(contextInput) {
+    this.authContextInput = contextInput;
+  }
+
+  @action.bound
+  SetAuthContext = flow(function * (context) {
     try {
-      await this.rootStore.client.SetAuthContext({
-        context: {
-          ...(context || {}),
-          ...(this.profileSettings[this.profile])
-        }
-      });
+      yield this.rootStore.client.SetAuthContext({context});
+
+      this.authContext = context;
+
+      this.SetAuthContextInput(JSON.stringify(context, null, 2));
     } catch(error) {
       const message = `Error setting auth context: ${error.message}`;
       this.error = message;
@@ -112,7 +132,7 @@ class VideoStore {
         }
       }, 5000);
     }
-  }
+  });
 
   @action.bound
   SetPlayerLevels({levels, currentLevel}) {
@@ -218,6 +238,15 @@ class VideoStore {
         }));
 
       this.availableOfferings = yield client.AvailableOfferings({objectId, versionHash, handler: this.playoutHandler});
+
+      if(
+        this.contentId === "iq__3cf6jxvbLdjVzY6Dgv7SFtvBi5m3" ||
+        (this.contentId.startsWith("hq__") && client.utils.DecodeVersionHash(this.contentId).objectId === "iq__3cf6jxvbLdjVzY6Dgv7SFtvBi5m3")
+      ) {
+        this.availableOfferings = this.profileSettings[this.profile].offerings;
+        this.offering = this.availableOfferings[0];
+      }
+
       yield this.LoadVideoPlayout({libraryId, objectId, versionHash});
 
       this.loadId += 1;

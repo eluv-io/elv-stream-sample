@@ -10,8 +10,7 @@ class AdvancedControls extends React.Component {
     super(props);
 
     this.state = {
-      visible: false,
-      authContext: "{}"
+      visible: false
     };
   }
 
@@ -20,13 +19,12 @@ class AdvancedControls extends React.Component {
       <div className="controls-container">
         <h3 className="controls-header">Auth Context</h3>
         <JsonInput
+          key={`auth-context-${this.props.videoStore.loadId}`}
           className="control-auth-context"
           name="authContext"
-          value={this.state.authContext}
+          value={this.props.videoStore.authContextInput}
           onChange={async event => {
-            this.setState({
-              authContext: event.target.value
-            });
+            this.props.videoStore.SetAuthContextInput(event.target.value);
 
             let context;
             try {
