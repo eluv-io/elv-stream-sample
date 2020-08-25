@@ -37,23 +37,23 @@ class VideoStore {
 
   @observable profileSettings = {
     Default: {
-      offerings: [{default: {display_name: "default"}, male1: {display_name: "male1"}, male2: {display_name: "male2"}, female: {display_name: "female"}}],
+      offerings: {default: {display_name: "default"}, male1: {display_name: "male1"}, male2: {display_name: "male2"}, female: {display_name: "female"}},
       context: {}
     },
     Benedict: {
-      offerings: [{male1: {display_name: "male1"}, default: {display_name: "default"}}],
+      offerings: {male1: {display_name: "male1"}, default: {display_name: "default"}},
       context: {
         email: "Benedict@demo.io"
       }
     },
     Gary: {
-      offerings: [{male2: {display_name: "male2"}, default: {display_name: "default"}}],
+      offerings: {male2: {display_name: "male2"}, default: {display_name: "default"}},
       context: {
         email: "gary@demo.io"
       }
     },
     Laura: {
-      offerings: [{female: {display_name: "female"}, default: {display_name: "default"}}],
+      offerings: {female: {display_name: "female"}, default: {display_name: "default"}},
       context: {
         email: "Laura@demo.io"
       }
@@ -100,6 +100,7 @@ class VideoStore {
     }
 
     this.profile = profile;
+    this.offering = Object.keys(this.profileSettings[profile].offerings)[0];
 
     const authContext = {
       ...this.authContext,
@@ -242,13 +243,16 @@ class VideoStore {
         }));
 
       this.availableOfferings = yield client.AvailableOfferings({objectId, versionHash, handler: this.playoutHandler});
-
       if(
-        this.contentId === "iq__3cf6jxvbLdjVzY6Dgv7SFtvBi5m3" ||
-        (this.contentId.startsWith("hq__") && client.utils.DecodeVersionHash(this.contentId).objectId === "iq__3cf6jxvbLdjVzY6Dgv7SFtvBi5m3")
+        this.profile !== "Default" &&
+        (this.contentId === "iq__3cf6jxvbLdjVzY6Dgv7SFtvBi5m3" ||
+        (this.contentId.startsWith("hq__") && client.utils.DecodeVersionHash(this.contentId).objectId === "iq__3cf6jxvbLdjVzY6Dgv7SFtvBi5m3"))
       ) {
         this.availableOfferings = this.profileSettings[this.profile].offerings;
-        this.offering = Object.keys(this.availableOfferings)[0];
+
+        if(!this.availableOfferings[this.offering]) {
+          this.offering = Object.keys(this.availableOfferings)[0];
+        }
       }
 
       yield this.LoadVideoPlayout({libraryId, objectId, versionHash});
