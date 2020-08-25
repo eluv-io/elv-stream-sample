@@ -94,7 +94,7 @@ class VideoStore {
   }
 
   @action.bound
-  async SetProfile(profile) {
+  async SetProfile(profile, load=true) {
     if(!Object.keys(this.profileSettings).includes(profile)) {
       throw Error("Unknown profile: " + profile);
     }
@@ -109,7 +109,7 @@ class VideoStore {
 
     await this.SetAuthContext(authContext);
 
-    if(this.contentId) {
+    if(this.contentId && load) {
       this.LoadVideo({contentId: this.contentId});
     }
   }
