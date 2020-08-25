@@ -272,7 +272,8 @@ class Video extends React.Component {
             levels: levels.map((level, index) => ({resolution: `${level.width}x${level.height}`, bitrate: level.bitrate, qualityIndex: index, bmId: level.id})),
             currentLevel: -1
           });
-
+        },
+        [bitmovin.player.PlayerEvent.Ready]: () => {
           const video = document.querySelector("#bitmovin-player-container video");
 
           if(video) {
