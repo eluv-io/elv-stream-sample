@@ -50,8 +50,12 @@ class Video extends React.Component {
       this.bandwidthInterval = undefined;
     }
 
-    if(this.player && !this.props.videoStore.useBitmovin) {
-      this.player.destroy ? this.player.destroy() : this.player.reset();
+    if(this.player) {
+      if(this.props.videoStore.useBitmovin) {
+        this.player.unload();
+      } else {
+        this.player.destroy ? this.player.destroy() : this.player.reset();
+      }
     }
 
     this.props.metricsStore.Reset();
