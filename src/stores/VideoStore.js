@@ -32,14 +32,10 @@ class VideoStore {
   @observable playoutType;
   @observable availableOfferings = ["default"];
 
-  @observable profile = "Default";
+  @observable profile;
   @observable useBitmovin = true;
 
   @observable profileSettings = {
-    Default: {
-      offerings: {default: {display_name: "default"}, male1: {display_name: "male1"}, male2: {display_name: "male2"}, female: {display_name: "female"}},
-      context: {}
-    },
     Benedict: {
       offerings: {male1: {display_name: "male1"}, default: {display_name: "default"}},
       context: {
@@ -57,11 +53,15 @@ class VideoStore {
       context: {
         email: "Laura@demo.io"
       }
-    }
+    },
+    Default: {
+      offerings: {default: {display_name: "default"}, male1: {display_name: "male1"}, male2: {display_name: "male2"}, female: {display_name: "female"}},
+      context: {}
+    },
   };
 
-  @observable authContext = this.profileSettings[this.profile].context;
-  @observable authContextInput = JSON.stringify(this.authContext, null, 2);
+  @observable authContext = {};
+  @observable authContextInput = "{}";
 
   constructor(rootStore) {
     this.rootStore = rootStore;

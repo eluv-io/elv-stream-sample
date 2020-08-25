@@ -90,6 +90,8 @@ class RootStore {
     this.client = client;
     this.region = region;
 
+    yield this.videoStore.SetProfile(Object.keys(this.videoStore.profileSettings)[0]);
+
     if(!this.initialLoadComplete) {
       const urlParams = new URLSearchParams(window.location.search);
       const pathParams = (window.location.hash || "").replace(/^#/, "").replace(/^\//, "").split("/");
