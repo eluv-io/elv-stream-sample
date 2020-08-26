@@ -137,6 +137,7 @@ class AdvancedControls extends React.Component {
 
   Offerings() {
     const offerings = this.props.videoStore.availableOfferings;
+
     if(!offerings || Object.keys(offerings).length === 0) { return null; }
 
     return (

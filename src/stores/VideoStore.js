@@ -30,7 +30,7 @@ class VideoStore {
   @observable playoutHandler = "playout_scte";
   @observable offering = "default";
   @observable playoutType;
-  @observable availableOfferings = ["default"];
+  @observable availableOfferings = {default: {display_name: "default"}};
 
   @observable profile;
   @observable useBitmovin = true;

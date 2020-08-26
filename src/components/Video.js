@@ -303,8 +303,15 @@ class Video extends React.Component {
               return;
             }
 
+            let match = info.url.match(/(\d+)x(\d+)@(\d+)/) || info.url.match(/(\d+)@(\d+)/);
+            if(!match) {
+              return;
+            } else if(match.length === 3) {
+              match.splice(1, 0, "");
+            }
+
             // eslint-disable-next-line no-unused-vars
-            const [_, width, height, bitrate] = info.url.match(/(\d+)x(\d+)@(\d+)/);
+            const [_, width, height, bitrate] = match;
             const id = (info.url.match(/(\d+)([-\d]*).m4s/) || [])[1];
 
             if(!id) {
@@ -319,7 +326,7 @@ class Video extends React.Component {
 
             this.props.metricsStore.LogSegment({
               id: parseInt(id),
-              quality: `${width}x${height} (${parseInt(bitrate) / 1000} kbps)`,
+              quality: `${width ? width + "x" : ""}${width ? height : height + "p"} (${parseInt(bitrate) / 1000} kbps)`,
               size,
               duration: 2,
               latency: info.timeToFirstByte,
