@@ -107,10 +107,7 @@ class VideoStore {
     this.profile = profile;
     this.offering = Object.keys(this.profileSettings[profile].offerings)[0];
 
-    const authContext = {
-      ...this.authContext,
-      ...this.profileSettings[profile].context
-    };
+    const authContext = this.profileSettings[profile].context;
 
     await this.SetAuthContext(authContext);
 
