@@ -54,6 +54,10 @@ class VideoStore {
         email: "Laura@demo.io"
       }
     },
+    Flag: {
+      offerings: {flag: {display_name: "flag"}, default: {display_name: "default"}},
+      context: {}
+    },
     Default: {
       offerings: {default: {display_name: "default"}, male1: {display_name: "male1"}, male2: {display_name: "male2"}, female: {display_name: "female"}},
       context: {}
@@ -79,6 +83,7 @@ class VideoStore {
   @action.bound
   Reset() {
     this.playoutOptions = undefined;
+    this.bitmovinPlayoutOptions = undefined;
     this.posterUrl = "";
     this.title = "";
     this.contentId = "";
