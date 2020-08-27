@@ -89,7 +89,9 @@ class RootStore {
     this.client = client;
     this.region = region;
 
-    yield this.videoStore.SetProfile(Object.keys(this.videoStore.profileSettings)[0], false);
+    if(!this.videoStore.profile) {
+      yield this.videoStore.SetProfile(EluvioConfiguration.profile || Object.keys(this.videoStore.profileSettings)[0], false);
+    }
 
     if(!this.initialLoadComplete) {
       const urlParams = new URLSearchParams(window.location.search);
