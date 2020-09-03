@@ -366,7 +366,7 @@ class Video extends React.Component {
             fastSwitchEnabled: true,
             abr: {
               autoSwitchBitrate: {
-                video: true
+                video: parseInt(event.target.value) === -1
               }
             }
           }
