@@ -27,7 +27,7 @@ class VideoStore {
   @observable drm = "clear";
   @observable aesOption = "aes-128";
 
-  @observable playoutHandler = "playout_scte";
+  @observable playoutHandler;
   @observable offering = "default";
   @observable playoutType;
   @observable availableOfferings = {default: {display_name: "default"}};
@@ -35,34 +35,7 @@ class VideoStore {
   @observable profile;
   @observable useBitmovin = true;
 
-  @observable profileSettings = {
-    Benedict: {
-      offerings: {male1: {display_name: "male1"}, default: {display_name: "default"}},
-      context: {
-        email: "Benedict@demo.io"
-      }
-    },
-    Gary: {
-      offerings: {male2: {display_name: "male2"}, default: {display_name: "default"}},
-      context: {
-        email: "gary@demo.io"
-      }
-    },
-    Laura: {
-      offerings: {female: {display_name: "female"}, default: {display_name: "default"}},
-      context: {
-        email: "Laura@demo.io"
-      }
-    },
-    Flag: {
-      offerings: {flag: {display_name: "flag"}, default: {display_name: "default"}},
-      context: {}
-    },
-    Default: {
-      offerings: {default: {display_name: "default"}, male1: {display_name: "male1"}, male2: {display_name: "male2"}, female: {display_name: "female"}},
-      context: {}
-    },
-  };
+  @observable profileSettings = EluvioConfiguration.profiles || {};
 
   @observable authContext = {};
   @observable authContextInput = "{}";
@@ -106,6 +79,8 @@ class VideoStore {
 
     this.profile = profile;
     this.offering = Object.keys(this.profileSettings[profile].offerings)[0];
+    this.playoutHandler = this.profileSettings[profile].playoutHandler || "playout_scte";
+    this.playoutType = this.profileSettings[profile].playoutType || "";
 
     const authContext = this.profileSettings[profile].context;
 
