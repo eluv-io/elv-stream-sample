@@ -62,6 +62,8 @@ class RootStore {
 
       if(region) {
         yield client.UseRegion({region});
+      } else {
+        yield client.ResetRegion();
       }
 
       // Hide header if in frame
@@ -72,6 +74,9 @@ class RootStore {
 
     // Record available nodes
     this.nodes = yield client.Nodes();
+
+    this.fabricNode = this.nodes.fabricURIs[0];
+    this.ethNode = this.nodes.ethereumURIs[0];
 
     if(this.manualNodeSelection) {
       this.fabricNode = fabricNode || this.nodes.fabricURIs[0];
