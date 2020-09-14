@@ -120,7 +120,7 @@ class RootStore {
         });
       }
     }
-    
+
     if(this.videoStore.authContext && Object.keys(this.videoStore.authContext).length > 0) {
       yield this.client.SetAuthContext({context: this.videoStore.authContext});
     }

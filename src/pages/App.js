@@ -68,7 +68,7 @@ class App extends React.Component {
           { this.SourceLink() }
         </header>
         <LoadingElement
-          loading={!this.props.rootStore.client}
+          loading={!this.props.rootStore.initialLoadComplete}
           fullPage={true}
           render={this.App}
         />
