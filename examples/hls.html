@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Eluvio Test Page</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css?family=Dosis" rel="stylesheet" type="text/css" />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+        crossorigin="anonymous" />
+
+  <!-- hls.js -->
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+  <!-- elv-client-js -->
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@eluvio/elv-client-js@3.1.3/dist/ElvClient-min.js"></script>
+
+  <style>
+    html,
+    body,
+    video {
+      height: 100%;
+      width: 100%;
+      background: black;
+      overflow: hidden;
+    }
+
+    video {
+      cursor: pointer;
+      max-height: 99vh;
+    }
+  </style>
+</head>
+
+<body>
+
+  <video id="video" autoplay controls />
+
+
+  <script type="text/javascript">
+    const contentId = "iq__2uEpaJYfY1atMfqWtodDhufGLG3K";
+    const configUrl = "https://main.net955305.contentfabric.io/config";
+
+    const LoadHlsJs = (playoutOptions, availableDRMs) => {
+      const playoutMethods = playoutOptions.hls.playoutMethods;
+
+      let drm = "aes-128";
+      if(availableDRMs.includes("sample-aes")) {
+        drm = "sample-aes";
+      }
+
+      let playoutInfo = playoutMethods[drm] || playoutMethods.clear;
+
+      const playerElement = document.getElementById("video");
+
+      // Use native player for sample AES
+      if(drm === "sample-aes") {
+        playerElement.src = playoutInfo.playoutUrl;
+        return;
+      }
+
+      player = new Hls();
+      player.loadSource(playoutInfo.playoutUrl);
+      player.attachMedia(playerElement);
+    };
+
+    const Load = async () => {
+      try {
+        const client = await ElvClient.FromConfigurationUrl({configUrl});
+
+        const wallet = client.GenerateWallet();
+        const signer = wallet.AddAccountFromMnemonic({
+          mnemonic: wallet.GenerateMnemonic()
+        });
+
+        await client.SetSigner({signer});
+
+        const availableDRMs = await client.AvailableDRMs();
+        const playoutOptions = await client.PlayoutOptions({
+          objectId: contentId,
+          protocols: ["hls"],
+          drms: availableDRMs
+        });
+
+        LoadHlsJs(playoutOptions, availableDRMs);
+      } catch(error) {
+        console.error(error);
+      }
+    };
+
+    Load();
+  </script>
+</body>
+
+</html>

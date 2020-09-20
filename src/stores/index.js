@@ -12,7 +12,6 @@ configure({
 
 class RootStore {
   @observable initialLoadComplete = false;
-  @observable manualNodeSelection = false;
 
   @observable client;
   @observable region;
@@ -32,12 +31,6 @@ class RootStore {
 
   @action.bound
   InitializeClient = flow(function * (region="", fabricNode="", ethNode) {
-    if(region || fabricNode || ethNode) {
-      this.manualNodeSelection = true;
-    } else {
-      this.manualNodeSelection = false;
-    }
-
     let client;
     // Initialize ElvClient or FrameClient
     if(window.self === window.top) {
@@ -75,14 +68,17 @@ class RootStore {
     // Record available nodes
     this.nodes = yield client.Nodes();
 
-    this.fabricNode = this.nodes.fabricURIs[0];
-    this.ethNode = this.nodes.ethereumURIs[0];
+    this.fabricNode = fabricNode;
+    this.ethNode = ethNode;
 
-    if(this.manualNodeSelection) {
-      this.fabricNode = fabricNode || this.nodes.fabricURIs[0];
-      this.ethNode = ethNode || this.nodes.ethereumURIs[0];
+    if(fabricNode) {
+      this.fabricNode = fabricNode;
+      yield client.SetNodes({fabricURIs: [this.fabricNode]});
+    }
 
-      yield client.SetNodes({fabricURIs: [this.fabricNode], ethereumURIs: [this.ethNode]});
+    if(this.ethNode) {
+      this.ethNode = ethNode;
+      yield client.SetNodes({ethereumURIs: [this.ethNode]});
     }
 
     this.availableDRMs = yield client.AvailableDRMs();

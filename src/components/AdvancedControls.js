@@ -10,7 +10,6 @@ class AdvancedControls extends React.Component {
     super(props);
 
     this.state = {
-      visible: props.rootStore.manualNodeSelection,
       authContext: "{}"
     };
   }
@@ -53,6 +52,7 @@ class AdvancedControls extends React.Component {
           value={this.props.rootStore.ethNode}
           onChange={event => this.props.rootStore.InitializeClient(this.props.rootStore.region, this.props.rootStore.fabricNode, event.target.value)}
         >
+          <option value="">Automatic</option>
           {
             this.props.rootStore.nodes.ethereumURIs.map(ethNode =>
               <option value={ethNode} key={`eth-node-${ethNode}`}>{ ethNode }</option> )
@@ -70,6 +70,7 @@ class AdvancedControls extends React.Component {
           value={this.props.rootStore.fabricNode}
           onChange={event => this.props.rootStore.InitializeClient(this.props.rootStore.region, event.target.value, this.props.rootStore.ethNode)}
         >
+          <option value="">Automatic</option>
           {
             this.props.rootStore.nodes.fabricURIs.map(fabricNode =>
               <option value={fabricNode} key={`fabric-node-${fabricNode}`}>{ fabricNode }</option> )
