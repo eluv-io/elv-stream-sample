@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Eluvio FPS Example</title>
+    <script>
+    /*
+        This example was adapter from Apple's FPS_in_Safari_Example.html, found
+        in "FairPlay Streaming Test Content v1.0."
+    */
+
+    // ADAPT: Use curl to make an offerings request and paste it here
+    // e.g. http://localhost:8008/q/hq__xx/rep/playout/default/options.json
+    var optionsRequest = {
+        "hls-fairplay": {
+            "properties": {
+                "cert": "MIIExzCCA6+gAwIBAgIIHyfkXhxLHC4wDQYJKoZIhvcNAQEFBQAwfzELMAkGA1UEBhMCVVMxEzARBgNVBAoMCkFwcGxlIEluYy4xJjAkBgNVBAsMHUFwcGxlIENlcnRpZmljYXRpb24gQXV0aG9yaXR5MTMwMQYDVQQDDCpBcHBsZSBLZXkgU2VydmljZXMgQ2VydGlmaWNhdGlvbiBBdXRob3JpdHkwHhcNMjAwOTEyMDMzMjI0WhcNMjIwOTEzMDMzMjI0WjBgMQswCQYDVQQGEwJVUzETMBEGA1UECgwKRWx1dmlvIEluYzETMBEGA1UECwwKMktIOEtDM01NWDEnMCUGA1UEAwweRmFpclBsYXkgU3RyZWFtaW5nOiBFbHV2aW8gSW5jMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDslbBURB6gj07g7VrS7Ojixe7FNZOupomcZt+mtMvyavjg7X7/T4RccmKUQxOoMLKCJcQ6WrdHhIpN8+bciq7lr0mNzaN467zREiUNYOpkVPi13sJLieY2m2MEPOQTbIl52Cu1YyH+4/g1dKPmeguSnzZRo36jsCGHlJBjHq0jkQIDAQABo4IB6DCCAeQwDAYDVR0TAQH/BAIwADAfBgNVHSMEGDAWgBRj5EdUy4VxWUYsg6zMRDFkZwMsvjCB4gYDVR0gBIHaMIHXMIHUBgkqhkiG92NkBQEwgcYwgcMGCCsGAQUFBwICMIG2DIGzUmVsaWFuY2Ugb24gdGhpcyBjZXJ0aWZpY2F0ZSBieSBhbnkgcGFydHkgYXNzdW1lcyBhY2NlcHRhbmNlIG9mIHRoZSB0aGVuIGFwcGxpY2FibGUgc3RhbmRhcmQgdGVybXMgYW5kIGNvbmRpdGlvbnMgb2YgdXNlLCBjZXJ0aWZpY2F0ZSBwb2xpY3kgYW5kIGNlcnRpZmljYXRpb24gcHJhY3RpY2Ugc3RhdGVtZW50cy4wNQYDVR0fBC4wLDAqoCigJoYkaHR0cDovL2NybC5hcHBsZS5jb20va2V5c2VydmljZXMuY3JsMB0GA1UdDgQWBBR4jerseBHEUDC7mU+NQuIzZqHRFDAOBgNVHQ8BAf8EBAMCBSAwOAYLKoZIhvdjZAYNAQMBAf8EJgFuNnNkbHQ2OXFuc3l6eXp5bWFzdmdudGthbWd2bGE1Y212YzdpMC4GCyqGSIb3Y2QGDQEEAQH/BBwBd252bHhlbGV1Y3Vpb2JyZW4yeHZlZmV6N2Y5MA0GCSqGSIb3DQEBBQUAA4IBAQBM17YYquw0soDPAadr1aIM6iC6BQ/kOGYu3y/6AlrwYgAQNFy8DjsQUoqlQWFuA0sigp57bTUymkXEBf9yhUmXXiPafGjbxzsPF5SPFLIciolWbxRCB153L1a/Vh2wg3rhf4IvAZuJpnml6SSg5SjD19bN+gD7zrtp3yWKBKuarLSjDvVIB1SoxEToBs3glAEqoBiA2eZjikBA0aBlbvjUF2gqOmZjZJ7dmG1Tos2Zd4SdGL6ltSpKUeSGSxyv41aqF83vNpymNJmey2t2kPPtC7mt0LM32Ift3AkAl8Za9JbV/pOnc95oAfPhVTOGOI+u2BuB2qaKWjqHwkfqCz4A",
+                "drm": "fairplay",
+                "license_servers": [
+                    "http://localhost:6545/fps/"
+                ],
+                "protocol": "hls"
+            },
+            "uri": "hls-fairplay/playlist.m3u8"
+        },
+    }
+
+    // ADAPT: Set a valid authorization token
+    var authToken = 'eyJxc3BhY2VfaWQiOiJpc3BjMzZzM3V3WTl2b1R4NmdYY1hFTm40S2ZZMjlmQyIsInFsaWJfaWQiOiJpbGliMnRmTGpvdlc4ek1OOVloNmVMbXd5blgxQ2JpcCIsImFkZHIiOiIweEJCMTAzOTAxNTMwNmU0MjM5Yzg0NEY0N0NlMDY1NWYyN0I2NzQ0YWUiLCJxaWQiOiJpcV9fZktkUEhVdzhkR1gyOFpobmRDRFN2N2dXQlhlIiwiZ3JhbnQiOiJyZWFkIiwidHhfcmVxdWlyZWQiOmZhbHNlLCJpYXQiOjE2MDA3Mjc4MzQsImV4cCI6MTYwMDgxNDIzNCwiYXV0aF9zaWciOiJFUzI1NktfS0FkYTJpdXg1R3lvdVB0Z1A5clhtZFBoa1lYMzJxY3dUbWpIR2RpNVdWTUtBdnJYbnpHYUdIcGhXdkJKaHFxRVdyUng1MnVlazVEOWhXNDc2R3JuQWZjYjEiLCJhZmdoX3BrIjoia3Rwa0FVNXo2VWRuVEhUMXJxUmZXN0tHS0YxQnRhSExvOU5aVWhKTjlZSEc2cXhON1UybTR2MlhDQVoxMXdQU3hMOVdSQnZpUlQ2ckx2MndoZWhNSFZpTFdQcHF6UGhOdWNtd0Z4blNXN21vaWhNb1BRM1A1NjlZamF0OUVEa3BzZzlrdVRMTmRjb2N4YnFrRmVFTGc3aXpCVTJlS1Mzd283bnF2TERRRFdtRWVBYnd6RnNIQ3kydzNodkMxZkR1aVEyVGVDbjlVNlkyRVZ2cExWelY0cWNWdDRRbWZZdXp1Z0FUMUNDcHRnMk1NbWlUNHhGZFlqTTdaRGd2dVdxd1FGNXFUSmppUnJoIn0=.RVMyNTZLXzJ5bzZpdm9oNjhMcmNldzFUd1J5ZE5DSlJqOW1vQ2o1VXVUVTg0d1R1YTVhcDJBNFFCUVZGMTRnWGJqUGVmckQxZzVFeU1zUVNpM2hiQ21yQnd4MURXcVl0';
+
+    // ADAPT: Set the playlist URL
+    var playlistURL = 'http://localhost:8008/q/hq__LKjRUN4QpJ5UUHXfhG9uAN97NtrczBHsonCkfDFaT6CRTaX1fxnjdHJLieQNzcHFoeJh6S25yz/rep/playout/default/hls-fairplay/playlist.m3u8?authorization=';
+
+    /*
+        The EME specification (https://dvcs.w3.org/hg/html-media/raw-file/tip/encrypted-media/encrypted-media.html) 
+        is supported starting OSX 10.10 and greater. 
+    */
+    var keySystem;
+    var certificate;
+    // This is the path to the fps certificate on your server.
+    // var serverCertificatePath = 'fairplay.cer';
+    // This is the path/URL to the keyserver module that processes the SPC and returns a CKC
+    var serverProcessSPCPath  = optionsRequest["hls-fairplay"].properties.license_servers[0];
+
+    function stringToArray(string) {
+        var buffer = new ArrayBuffer(string.length*2); // 2 bytes for each char
+        var array = new Uint16Array(buffer);
+        for (var i=0, strLen=string.length; i<strLen; i++) {
+            array[i] = string.charCodeAt(i);
+        }
+        return array;
+    }
+
+    function arrayToString(array) {
+        var uint16array = new Uint16Array(array.buffer);
+        return String.fromCharCode.apply(null, uint16array);
+    }
+
+    function base64DecodeUint8Array(input) {
+        var raw = window.atob(input);
+        var rawLength = raw.length;
+        var array = new Uint8Array(new ArrayBuffer(rawLength));
+
+        for(i = 0; i < rawLength; i++)
+            array[i] = raw.charCodeAt(i);
+
+        return array;
+    }
+
+    function base64EncodeUint8Array(input) {
+        var keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+        var output = "";
+        var chr1, chr2, chr3, enc1, enc2, enc3, enc4;
+        var i = 0;
+
+        while (i < input.length) {
+            chr1 = input[i++];
+            chr2 = i < input.length ? input[i++] : Number.NaN; // Not sure if the index
+            chr3 = i < input.length ? input[i++] : Number.NaN; // checks are needed here
+
+            enc1 = chr1 >> 2;
+            enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
+            enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
+            enc4 = chr3 & 63;
+
+            if (isNaN(chr2)) {
+                enc3 = enc4 = 64;
+            } else if (isNaN(chr3)) {
+                enc4 = 64;
+            }
+            output += keyStr.charAt(enc1) + keyStr.charAt(enc2) +
+                keyStr.charAt(enc3) + keyStr.charAt(enc4);
+        }
+        return output;
+    }
+
+    function waitForEvent(name, action, target) {
+        target.addEventListener(name, function() {
+                action(arguments[0]);
+                }, false);
+    }
+
+    function loadCertificate() 
+    {
+        var c = optionsRequest["hls-fairplay"].properties.cert;
+        certificate = base64DecodeUint8Array(c)
+        startVideo();
+        
+        // var request = new XMLHttpRequest();
+        // request.responseType = 'arraybuffer';
+        // request.addEventListener('load', onCertificateLoaded, false);
+        // request.addEventListener('error', onCertificateError, false);
+        // request.open('GET', serverCertificatePath, true);
+        // request.setRequestHeader('Pragma', 'Cache-Control: no-cache');
+        // request.setRequestHeader("Cache-Control", "max-age=0");
+        // request.send();
+    }
+
+    function onCertificateLoaded(event) {
+        var request = event.target;
+        certificate = new Uint8Array(request.response);
+        startVideo();
+    }
+
+    function onCertificateError(event) {
+        window.console.error('Failed to retrieve the server certificate.')
+    }
+
+    // https://github.com/google/shaka-player/blob/master/lib/util/fairplay_utils.js
+    function extractContentId(initData) {
+        // The first part is a 4 byte little-endian int, which is the length of the second part.
+        var contentId = arrayToString(initData).slice(2);
+        // contentId is passed up as a URI, from which the host must be extracted:
+        var link = document.createElement('a');
+        link.href = contentId;
+        return link.hostname;
+    }
+
+    function concatInitDataIdAndCertificate(initData, id, cert) {
+        if (typeof id == "string")
+            id = stringToArray(id);
+        // layout is [initData][4 byte: idLength][idLength byte: id][4 byte:certLength][certLength byte: cert]
+        var offset = 0;
+        var buffer = new ArrayBuffer(initData.byteLength + 4 + id.byteLength + 4 + cert.byteLength);
+        var dataView = new DataView(buffer);
+
+        var initDataArray = new Uint8Array(buffer, offset, initData.byteLength);
+        initDataArray.set(initData);
+        offset += initData.byteLength;
+
+        dataView.setUint32(offset, id.byteLength, true);
+        offset += 4;
+
+        var idArray = new Uint16Array(buffer, offset, id.length);
+        idArray.set(id);
+        offset += idArray.byteLength;
+
+        dataView.setUint32(offset, cert.byteLength, true);
+        offset += 4;
+
+        var certArray = new Uint8Array(buffer, offset, cert.byteLength);
+        certArray.set(cert);
+
+        return new Uint8Array(buffer, 0, buffer.byteLength);
+    }
+
+    function selectKeySystem()
+    {
+        if (WebKitMediaKeys.isTypeSupported("com.apple.fps.1_0", "video/mp4")) 
+        {
+            keySystem = "com.apple.fps.1_0";
+        } 
+        else 
+        {
+            throw "Key System not supported";
+        }
+    }
+
+    function startVideo()
+    {
+        var video = document.getElementsByTagName('video')[0];
+        video.addEventListener('webkitneedkey', onneedkey, false);
+        video.addEventListener('error', onerror, false);
+        video.src = playlistURL + authToken;
+    }
+
+    function onerror(event) {
+        window.console.error('A video playback error occurred')
+    }
+
+    function onneedkey(event) 
+    {
+        var video = event.target;
+        var initData = event.initData;
+        var contentId = extractContentId(initData);
+        initData = concatInitDataIdAndCertificate(initData, contentId, certificate);
+
+        if (!video.webkitKeys)
+        {
+            selectKeySystem();
+            video.webkitSetMediaKeys(new WebKitMediaKeys(keySystem));
+        }
+
+        if (!video.webkitKeys)
+            throw "Could not create MediaKeys";
+
+        var keySession = video.webkitKeys.createSession("video/mp4", initData);
+        if (!keySession)
+            throw "Could not create key session";
+
+        keySession.contentId = contentId;
+        waitForEvent('webkitkeymessage', licenseRequestReady, keySession);
+        waitForEvent('webkitkeyadded', onkeyadded, keySession);
+        waitForEvent('webkitkeyerror', onkeyerror, keySession);
+    }
+
+    function licenseRequestReady(event) 
+    {
+        var session = event.target;
+        var message = event.message;
+        var request = new XMLHttpRequest();
+        var sessionId = event.sessionId;
+        request.responseType = 'text';
+        request.session = session;
+        request.addEventListener('load', licenseRequestLoaded, false);
+        request.addEventListener('error', licenseRequestFailed, false);
+        // var params = 'spc='+base64EncodeUint8Array(message)+'&assetId='+encodeURIComponent(session.contentId);
+        var params = '{"spc":"'+base64EncodeUint8Array(message)+'","assetId":"'+encodeURIComponent(session.contentId)+'"}';
+        request.open('POST', serverProcessSPCPath, true);
+        request.setRequestHeader("Content-type", "application/json"); //"application/x-www-form-urlencoded");
+        request.setRequestHeader("Authorization", "Bearer " + authToken);
+        request.send(params);
+    }
+
+    function licenseRequestLoaded(event)
+    {
+        var request = event.target;
+        var session = request.session;
+        // response can be of the form: '\n<ckc>base64encoded</ckc>\n'
+        // so trim the excess:
+        var keyText = request.responseText.trim();
+        // keyText = JSON.parse(keyText);
+        // keyText = keyText.ckc
+        if (keyText.substr(0, 5) === '<ckc>' && keyText.substr(-6) === '</ckc>') 
+            keyText = keyText.slice(5,-6);
+        key = base64DecodeUint8Array(keyText);
+        session.update(key);
+    }
+
+    function licenseRequestFailed(event)
+    {
+        window.console.error('The license request failed.');
+    }
+
+    function onkeyerror(event) {
+        window.console.error('A decryption key error was encountered');
+    }
+
+    function onkeyadded(event) {
+        window.console.log('Decryption key was added to session.');
+    }
+
+    </script>
+</head>
+<body onload="loadCertificate()">
+    <video controls autoplay preload="auto" width=960></video>
+</body>
+</html>
