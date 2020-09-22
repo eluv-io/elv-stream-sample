@@ -233,6 +233,12 @@ class VideoStore {
       this.protocol = Object.keys(playoutOptions)[0] || "hls";
     }
 
+    // If no suitable DRMs in current protocol, switch to other protocol
+    if(!Object.keys(playoutOptions[this.protocol].playoutMethods).find(drm => this.rootStore.availableDRMs.includes(drm))) {
+      this.SetProtocol(this.protocol === "hls" ? "dash" : "hls");
+    }
+
+    // If current DRM is not suitable, switch
     if(!playoutOptions[this.protocol].playoutMethods[this.drm]) {
       // Prefer DRM
       const playoutMethods = playoutOptions[this.protocol].playoutMethods;
