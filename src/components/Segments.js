@@ -104,7 +104,7 @@ class Segments extends React.Component {
   }
 
   render() {
-    if(!this.props.videoStore.playoutOptions) { return null; }
+    if(!this.props.videoStore.playoutOptions || !this.props.videoStore.metricsSupported) { return null; }
 
     return (
       <div className="segments segments-container">

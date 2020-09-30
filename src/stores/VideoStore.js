@@ -1,4 +1,4 @@
-import {observable, action, flow, runInAction} from "mobx";
+import {observable, action, flow, runInAction, computed} from "mobx";
 import HLSPlayer from "hls-fix";
 
 class VideoStore {
@@ -11,6 +11,7 @@ class VideoStore {
   @observable contentId;
   @observable posterUrl;
   @observable playoutOptions;
+  @observable authToken;
   @observable title;
   @observable bandwidthEstimate = 0;
 
@@ -40,8 +41,19 @@ class VideoStore {
       "dash": "Dash",
       "hls": "HLS",
       "sample-aes": "Sample AES",
-      "widevine": "Widevine"
+      "widevine": "Widevine",
+      "fairplay": "FairPlay"
     };
+  }
+
+  @computed get metricsSupported() {
+    // Cases for which segment metrics cannot be determined
+    return !["fairplay"].includes(this.drm);
+  }
+
+  @action.bound
+  SetError(message) {
+    this.error = message;
   }
 
   @action.bound
@@ -51,7 +63,6 @@ class VideoStore {
     this.title = "";
     this.contentId = "";
     this.bandwidthEstimate = 0;
-    this.error = "";
     this.loading = false;
     this.playoutHandler = "playout";
     this.offering = "default";
@@ -61,6 +72,8 @@ class VideoStore {
     this.playerCurrentLevel = undefined;
     this.playerAudioTracks = [];
     this.playerCurrentAudioTrack = undefined;
+
+    this.SetError("");
   }
 
   @action.bound
@@ -74,7 +87,7 @@ class VideoStore {
       console.log(JSON.stringify(context, null, 2));
     } catch(error) {
       const message = `Error setting auth context: ${error.message}`;
-      this.error = message;
+      this.SetError(message);
 
       setTimeout(() => {
         if(this.error === message) {
@@ -151,7 +164,7 @@ class VideoStore {
     // TODO: Create more surgical cache clearing
     this.rootStore.client.ClearCache();
 
-    this.error = "";
+    this.SetError("");
 
     if(!contentId) { return; }
 
@@ -170,7 +183,7 @@ class VideoStore {
       } else if(contentId.startsWith("hq")) {
         versionHash = contentId;
       } else {
-        this.error = `Invalid content ID: ${contentId}`;
+        this.SetError(`Invalid content ID: ${contentId}`);
         return;
       }
 
@@ -189,7 +202,7 @@ class VideoStore {
         }));
 
       this.availableOfferings = yield client.AvailableOfferings({objectId, versionHash, handler: this.playoutHandler});
-      yield this.LoadVideoPlayout({libraryId, objectId, versionHash});
+      yield this.LoadVideoPlayout({objectId, versionHash});
 
       this.loadId += 1;
     } catch(error) {
@@ -205,14 +218,14 @@ class VideoStore {
 
       this.Reset();
 
-      this.error = "Failed to load content";
+      this.SetError("Failed to load content");
     } finally {
       this.loading = false;
     }
   });
 
   @action.bound
-  LoadVideoPlayout = flow(function * ({libraryId, objectId, versionHash}) {
+  LoadVideoPlayout = flow(function * ({objectId, versionHash}) {
     const playoutOptions = yield this.rootStore.client.PlayoutOptions({
       objectId,
       versionHash,
@@ -221,18 +234,13 @@ class VideoStore {
       playoutType: this.playoutType
     });
 
-    this.posterUrl = yield this.rootStore.client.Rep({
-      libraryId,
-      objectId,
-      versionHash,
-      rep: "player_background",
-      channelAuth: true
-    });
-
     if(!playoutOptions[this.protocol]) {
       this.protocol = Object.keys(playoutOptions)[0] || "hls";
     }
 
+    this.authToken = yield this.rootStore.client.GenerateStateChannelToken({objectId, versionHash});
+
+    /*
     // If no suitable DRMs in current protocol, switch to other protocol
     if(!Object.keys(playoutOptions[this.protocol].playoutMethods).find(drm => this.rootStore.availableDRMs.includes(drm))) {
       this.SetProtocol(this.protocol === "hls" ? "dash" : "hls");
@@ -244,6 +252,8 @@ class VideoStore {
       const playoutMethods = playoutOptions[this.protocol].playoutMethods;
       this.drm = playoutMethods.clear ? "clear" : (playoutMethods[this.aesOption] ? this.aesOption : "widevine");
     }
+
+     */
 
     this.playoutOptions = playoutOptions;
   });
