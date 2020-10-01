@@ -240,7 +240,6 @@ class VideoStore {
 
     this.authToken = yield this.rootStore.client.GenerateStateChannelToken({objectId, versionHash});
 
-    /*
     // If no suitable DRMs in current protocol, switch to other protocol
     if(!Object.keys(playoutOptions[this.protocol].playoutMethods).find(drm => this.rootStore.availableDRMs.includes(drm))) {
       this.SetProtocol(this.protocol === "hls" ? "dash" : "hls");
@@ -252,8 +251,6 @@ class VideoStore {
       const playoutMethods = playoutOptions[this.protocol].playoutMethods;
       this.drm = playoutMethods.clear ? "clear" : (playoutMethods[this.aesOption] ? this.aesOption : "widevine");
     }
-
-     */
 
     this.playoutOptions = playoutOptions;
   });

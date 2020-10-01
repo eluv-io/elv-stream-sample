@@ -27,6 +27,8 @@ class RootStore {
     this.metricsStore = new MetricsStore(this);
 
     this.InitializeClient();
+
+    window.rootStore = this;
   }
 
   @action.bound
