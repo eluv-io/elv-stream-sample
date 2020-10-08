@@ -20,7 +20,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/dashjs/3.0.2/dash.all.min.js" integrity="sha256-gmIk8d0B9FnDQ4pcQ5e9/OXc2OEbpZRPti95Lokfccc=" crossorigin="anonymous"></script>
 
   <!-- elv-client-js -->
-  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@eluvio/elv-client-js@3.1.3/dist/ElvClient-min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@eluvio/elv-client-js@3.1.7/dist/ElvClient-min.js"></script>
 
   <style>
     /*start AlwaysShowUI*/
@@ -35,6 +35,8 @@
 
     video {
       width: 100%;
+      max-height: 100vh;
+      background: black;
     }
 
     #error-message {
@@ -109,6 +111,7 @@
       <button id="load-hls">Play HLS Clear</button>
       <button id="load-hls-aes">Play HLS AES-128</button>
       <button id="load-hls-sample-aes">Play HLS Sample AES</button>
+      <button id="load-hls-fairplay">Play HLS FairPlay</button>
       <button id="load-dash">Play Dash Clear</button>
       <button id="load-dash-wv">Play Dash Widevine</button>
     </div>
@@ -129,7 +132,9 @@
     </div>
   </div>
 
-  <script type="text/javascript">
+  <script type="module">
+    import {InitializeFairPlayStream} from "../FairPlay.js";
+
     let PROTOCOL = "hls";
     let DRM = "clear";
     let PLAYER_TYPE = "hls-dash";
@@ -146,6 +151,7 @@
         "load-hls",
         "load-hls-aes",
         "load-hls-sample-aes",
+        "load-hls-fairplay",
         "load-dash",
         "load-dash-wv"
       ].forEach(id => document.getElementById(id).className = "");
@@ -162,6 +168,8 @@
           activeOption = "load-hls-aes";
         } else if(DRM === "sample-aes") {
           activeOption = "load-hls-sample-aes";
+        } else if(DRM === "fairplay") {
+          activeOption = "load-hls-fairplay";
         } else {
           activeOption = "load-hls";
         }
@@ -228,9 +236,12 @@
 
       const playerElement = CreatePlayerElement();
 
-      // Use native player for sample AES
+      // Use native player for Sample AES and FairPlay
       if(DRM === "sample-aes" && PLAYER_TYPE !== "bitmovin") {
         playerElement.src = playoutInfo.playoutUrl;
+        return;
+      } else if(DRM === "fairplay" && PLAYER_TYPE !== "bitmovin") {
+        InitializeFairPlayStream({playoutOptions, video: playerElement});
         return;
       }
 
@@ -370,6 +381,7 @@
     document.getElementById("load-hls").onclick = () => SetOptions("hls", "clear");
     document.getElementById("load-hls-aes").onclick = () => SetOptions("hls", "aes-128");
     document.getElementById("load-hls-sample-aes").onclick = () => SetOptions("hls", "sample-aes");
+    document.getElementById("load-hls-fairplay").onclick = () => SetOptions("hls", "fairplay");
     document.getElementById("load-dash").onclick = () => SetOptions("dash", "clear");
     document.getElementById("load-dash-wv").onclick = () => SetOptions("dash", "widevine");
 

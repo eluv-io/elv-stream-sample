@@ -17,7 +17,7 @@ Playing video from the Fabric using the Dash and HLS adaptive bitrate streaming 
 
 ### Basic Example - Step by Step
 
-The basic process for playing video can be seen in this [example page](examples/basic-video-example.html). This example is a standalone HTML page that will go through the above steps and play video content from the Fabric. It allows playout of both Dash and HLS, either in the clear or with Widevine or AES-128 or Sample AES protection, respectively, and includes three different players: [dash.js](https://github.com/Dash-Industry-Forum/dash.js), [hls.js](https://github.com/video-dev/hls.js), and [Bitmovin](https://bitmovin.com/video-player) - though any Dash and/or HLS capable players should work similarly.
+The basic process for playing video can be seen in this [example page](examples/basic-video-example.html). This example is a standalone HTML page that will go through the above steps and play video content from the Fabric. It allows playout of both Dash and HLS, either in the clear or with Widevine, AES-128, Sample AES or FairPlay protection, respectively, and includes three different players: [dash.js](https://github.com/Dash-Industry-Forum/dash.js), [hls.js](https://github.com/video-dev/hls.js), and [Bitmovin](https://bitmovin.com/video-player) - though any Dash and/or HLS capable players should work similarly.
 
 Below is a detailed explanation of how this example page works.
 
@@ -143,12 +143,12 @@ DRM support can be determined by the client using the `AvailableDRMs` method:
 
 ```javascript
 const availableDRMs = await client.AvailableDRMs();
-> ["clear", "aes-128"], ["clear", "aes-128", "widevine"], ["clear", "sample-aes"]
+> ["clear", "aes-128"], ["clear", "aes-128", "widevine"], ["clear", "sample-aes", "fairplay"]
 ```
 
 This code uses the [Navigator.requestMediaKeySystemAccess API](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/requestMediaKeySystemAccess) to see if Widevine support is available. 
 
-Widevine is generally supported in Firefox and Chromium-based browsers. HLS with AES-128 encryption is supported by most browsers, with the exception of newer Safari browsers and on iOS devices - for those, sample AES is supported instead. Use the AvailableDRMs method to determine whether to use AES-128 or Sample AES for encrypted AES playout.
+Widevine is generally supported in Firefox and Chromium-based browsers. HLS with AES-128 encryption is supported by most browsers, with the exception of newer Safari browsers and on iOS devices - for those, sample AES (and potentially FairPlay) is supported instead. Use the AvailableDRMs method to determine whether to use AES-128 or Sample AES for encrypted AES playout.
 
 ##### Offerings
 
@@ -320,7 +320,27 @@ const LoadDash = (playoutOptions) => {
 
 Both cases are relatively straightforward - determine the playout url, then set up the corresponding player. Note that HLS.js does not support HLS playout with Sample AES encryption. You can instead use native Apple HLS playback instead by setting the `src` attribute of the video element.
 
+##### Widevine
+
 To set up Widevine in the Dash case, an additional step must be done to indicate the license server to use. With dashjs, this is done using the `setProtectionData` method. The list of valid license servers is specified in `drms.widevine.licenseServers` of the Dash/Widevine playout methods.
+
+##### FairPlay
+
+Setting up a stream with FairPlay support is a bit more involved than other methods, but we have included a module to make it easy. Simply import `InitializeFairPlayStream` from `FairPlay.js` at the root of this repository, and pass your playout options and the HTML video element for the stream, and it will take care of the rest.
+
+```javascript
+  import {InitializeFairPlayStream} from "./FairPlay";
+
+  const video = document.getElementById("video");
+  const playoutOptions = await client.BitmovinPlayoutOptions({
+    objectId,
+    versionHash,
+    protocols: ["hls"],
+    drms: ["fairplay"]
+  });
+
+  InitializeFairPlayStream({playoutOptions, video});
+```    
 
 ##### Bitmovin
 

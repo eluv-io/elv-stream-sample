@@ -6,7 +6,7 @@ import URI from "urijs";
 import Mux from "mux-embed";
 import {inject, observer} from "mobx-react";
 import {LoadingElement} from "elv-components-js";
-import {onNeedKey} from "./FairPlay";
+import {InitializeFairPlayStream} from "../../FairPlay";
 
 @inject("rootStore")
 @inject("videoStore")
@@ -73,32 +73,7 @@ class Video extends React.Component {
       (!this.props.videoStore.hlsjsSupported || this.props.videoStore.drm === "sample-aes" || this.props.videoStore.drm === "fairplay")
     ) {
       if(this.props.videoStore.drm === "fairplay") {
-        const cert = playoutOptions.drms.fairplay.cert;
-        const licenseURLs = playoutOptions.drms.fairplay.licenseServers;
-
-        new Promise((resolve, reject) => {
-          video.addEventListener(
-            "webkitneedkey",
-            async event => {
-              try {
-                await onNeedKey(event, cert, licenseURLs, this.props.videoStore.authToken);
-                resolve();
-              } catch(error) {
-                reject(error);
-              }
-            },
-            false
-          );
-        }).catch(error => {
-          // eslint-disable-next-line no-console
-          console.log("Error initializing FairPlay video:");
-          // eslint-disable-next-line no-console
-          console.log(error);
-          video.src = "";
-          this.props.videoStore.SetError("Failed to initialize FairPlay DRM");
-        });
-
-
+        InitializeFairPlayStream({playoutOptions: this.props.videoStore.playoutOptions, video});
       }
 
       video.src = playoutOptions.playoutUrl;
