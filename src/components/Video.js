@@ -117,7 +117,7 @@ class Video extends React.Component {
     this.player.loadSource(playoutUrl);
     this.player.attachMedia(video);
 
-    this.player.on(HLSPlayer.Events.AUDIO_TRACKS_UPDATED, () => {
+    this.player.on(HLSPlayer.Events.AUDIO_TRACK_SWITCHED, () => {
       this.props.videoStore.SetAudioTracks({
         tracks: this.player.audioTrackController.tracks.map(audioTrack =>
           ({
@@ -342,7 +342,7 @@ class Video extends React.Component {
     return (
       <select
         aria-label="Audio Track"
-        value={this.state.audioTrack}
+        value={this.props.videoStore.playerCurrentAudioTrack}
         className="video-playback-control"
         onChange={SetAudioTrack}
       >

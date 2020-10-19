@@ -48,7 +48,7 @@ class VideoStore {
 
   @computed get metricsSupported() {
     // Cases for which segment metrics cannot be determined
-    return !["fairplay"].includes(this.drm);
+    return !["sample-aes", "fairplay"].includes(this.drm);
   }
 
   @action.bound
@@ -105,7 +105,10 @@ class VideoStore {
 
   @action.bound
   SetAudioTracks({tracks, currentTrack}) {
-    this.playerAudioTracks = tracks;
+    if(tracks) {
+      this.playerAudioTracks = tracks;
+    }
+
     this.playerCurrentAudioTrack = currentTrack;
   }
 
