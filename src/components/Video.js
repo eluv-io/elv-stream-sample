@@ -58,6 +58,8 @@ class Video extends React.Component {
   InitializeVideo(video) {
     if(!video || !this.props.videoStore.playoutOptions) { return; }
 
+    this.video = video;
+
     this.setState({qualityLevel: -1});
 
     video.volume = this.props.videoStore.volume;
@@ -126,6 +128,19 @@ class Video extends React.Component {
           })
         ),
         currentTrack: this.player.audioTrack
+      });
+    });
+
+    this.player.on(HLSPlayer.Events.SUBTITLE_TRACK_LOADED, () => {
+      this.props.videoStore.SetTextTracks({
+        tracks: Array.from(this.video.textTracks),
+        currentTrack: this.player.subtitleTrack
+      });
+    });
+
+    this.player.on(HLSPlayer.Events.SUBTITLE_TRACK_SWITCH, () => {
+      this.props.videoStore.SetTextTracks({
+        currentTrack: this.player.subtitleTrack
       });
     });
 
@@ -215,6 +230,16 @@ class Video extends React.Component {
 
         this.setState({
           audioTrack: this.player.getCurrentTrackFor("audio").index
+        });
+      }
+    );
+
+    this.player.on(
+      DashJS.MediaPlayer.events.TEXT_TRACK_ADDED,
+      () => {
+        this.props.videoStore.SetTextTracks({
+          tracks: Array.from(this.video.textTracks),
+          currentTrack: Array.from(this.video.textTracks).find(track => track.mode === "showing") || 0
         });
       }
     );
@@ -314,7 +339,7 @@ class Video extends React.Component {
     }, samplePeriod);
   }
 
-  AudioTrack() {
+  Tracks() {
     if(!this.props.videoStore.playerAudioTracks || this.props.videoStore.playerAudioTracks.length <= 1) {
       return null;
     }
@@ -322,10 +347,7 @@ class Video extends React.Component {
     let SetAudioTrack;
     if(this.props.videoStore.protocol === "hls") {
       SetAudioTrack = (event) => {
-        const index = parseInt(event.target.value);
-        this.player.audioTrack = index;
-
-        this.setState({audioTrack: index});
+        this.player.audioTrack = parseInt(event.target.value);
       };
     } else {
       SetAudioTrack = (event) => {
@@ -335,23 +357,66 @@ class Video extends React.Component {
 
         this.player.setCurrentTrack(track);
 
-        this.setState({audioTrack: index});
+        this.props.videoStore.SetAudioTracks({currentTrack: index});
       };
     }
 
+    const SetTextTrack = event => {
+      const index = parseInt(event.target.value);
+
+      Array.from(this.video.textTracks).forEach(track => track.mode = "hidden");
+
+      if(parseInt(index) >= 0) {
+        this.video.textTracks[index].mode = "showing";
+      }
+
+      this.props.videoStore.SetTextTracks({currentTrack: index});
+    };
+
+    let textTrackSelection;
+    if(this.props.videoStore.playerTextTracks.length > 0) {
+      textTrackSelection = (
+        <select
+          aria-label="Subtitle Track"
+          value={this.props.videoStore.playerCurrentTextTrack}
+          className="video-playback-control"
+          onChange={SetTextTrack}
+        >
+          <option value={-1}>Subtitles: None</option>
+          {
+            this.props.videoStore.playerTextTracks.map((track, index) =>
+              <option value={index} key={`audio-track-${index}`}>
+                Subtitles: { `${parseInt(track.label)}` === track.label ? track.language : track.label /* Dash.js puts index in label for some reason */ }
+              </option>
+            )
+          }
+        </select>
+      );
+    }
+
+    let audioTrackSelection;
+    if(this.props.videoStore.playerAudioTracks.length > 1) {
+      audioTrackSelection = (
+        <select
+          aria-label="Audio Track"
+          value={this.props.videoStore.playerCurrentAudioTrack}
+          className="video-playback-control"
+          onChange={SetAudioTrack}
+        >
+          {
+            this.props.videoStore.playerAudioTracks.map(({index, label}) =>
+              <option value={index} key={`audio-track-${index}`}>Audio: {label}</option>
+            )
+          }
+        </select>
+      );
+    }
+
     return (
-      <select
-        aria-label="Audio Track"
-        value={this.props.videoStore.playerCurrentAudioTrack}
-        className="video-playback-control"
-        onChange={SetAudioTrack}
-      >
-        {
-          this.props.videoStore.playerAudioTracks.map(({index, label}) =>
-            <option value={index} key={`audio-track-${index}`}>{label}</option>
-          )
-        }
-      </select>
+      <React.Fragment>
+        { textTrackSelection }
+        { audioTrackSelection }
+      </React.Fragment>
     );
   }
 
@@ -431,7 +496,7 @@ class Video extends React.Component {
             controls={!!this.props.videoStore.playoutOptions}
           />
           <div className="video-playback-controls">
-            { this.AudioTrack() }
+            { this.Tracks() }
             { this.PlaybackLevel() }
           </div>
         </LoadingElement>
