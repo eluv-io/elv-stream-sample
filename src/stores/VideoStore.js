@@ -23,7 +23,7 @@ class VideoStore {
   @observable playerAudioTracks = [];
   @observable playerCurrentAudioTrack;
   @observable playerTextTracks = [];
-  @observable playerCurrentTextTrack;
+  @observable playerCurrentTextTrack = -1;
 
   @observable protocol = this.dashjsSupported ? "dash" : "hls";
   @observable drm = "clear";
@@ -74,6 +74,7 @@ class VideoStore {
     this.playerCurrentLevel = undefined;
     this.playerAudioTracks = [];
     this.playerCurrentAudioTrack = undefined;
+    this.playerCurrentTextTrack = -1;
 
     this.SetError("");
   }

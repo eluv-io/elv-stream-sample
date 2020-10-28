@@ -209,9 +209,6 @@ class Video extends React.Component {
     this.player.on(
       DashJS.MediaPlayer.events.CAN_PLAY,
       () => {
-        // Subtitles are enabled by default - disable them
-        this.player.setTextTrack(-1);
-
         this.props.videoStore.SetPlayerLevels({
           levels: this.player.getBitrateInfoListFor("video")
             .map(level => ({resolution: `${level.width}x${level.height}`, bitrate: level.bitrate, qualityIndex: level.qualityIndex})),
@@ -344,13 +341,21 @@ class Video extends React.Component {
       return null;
     }
 
-    let SetAudioTrack;
+    let SetAudioTrack, SetTextTrack;
     if(this.props.videoStore.protocol === "hls") {
-      SetAudioTrack = (event) => {
+      SetAudioTrack = event => {
         this.player.audioTrack = parseInt(event.target.value);
       };
+
+      SetTextTrack = event => {
+        const index = parseInt(event.target.value);
+
+        this.player.subtitleTrack = index;
+
+        this.props.videoStore.SetTextTracks({currentTrack: index});
+      };
     } else {
-      SetAudioTrack = (event) => {
+      SetAudioTrack = event => {
         const index = parseInt(event.target.value);
 
         const track = this.player.getTracksFor("audio").find(track => track.index === index);
@@ -359,19 +364,14 @@ class Video extends React.Component {
 
         this.props.videoStore.SetAudioTracks({currentTrack: index});
       };
+
+      SetTextTrack = event => {
+        const index = parseInt(event.target.value);
+
+        this.player.setTextTrack(index);
+        this.props.videoStore.SetTextTracks({currentTrack: index});
+      };
     }
-
-    const SetTextTrack = event => {
-      const index = parseInt(event.target.value);
-
-      Array.from(this.video.textTracks).forEach(track => track.mode = "hidden");
-
-      if(parseInt(index) >= 0) {
-        this.video.textTracks[index].mode = "showing";
-      }
-
-      this.props.videoStore.SetTextTracks({currentTrack: index});
-    };
 
     let textTrackSelection;
     if(this.props.videoStore.playerTextTracks.length > 0) {
@@ -384,11 +384,22 @@ class Video extends React.Component {
         >
           <option value={-1}>Subtitles: None</option>
           {
-            this.props.videoStore.playerTextTracks.map((track, index) =>
-              <option value={index} key={`audio-track-${index}`}>
-                Subtitles: { `${parseInt(track.label)}` === track.label ? track.language : track.label /* Dash.js puts index in label for some reason */ }
-              </option>
-            )
+            this.props.videoStore.playerTextTracks.map((track, index) => {
+              let label;
+              try {
+                label = this.props.videoStore.protocol === "dash" ?
+                  this.player.getTracksFor("text")[index].labels[0].text :
+                  track.label;
+              } catch(error) {
+                label = track.lang;
+              }
+
+              return (
+                <option value={index} key={`audio-track-${index}`}>
+                  Subtitles: { label }
+                </option>
+              );
+            })
           }
         </select>
       );
