@@ -337,7 +337,7 @@ class Video extends React.Component {
   }
 
   Tracks() {
-    if(!this.props.videoStore.playerAudioTracks || this.props.videoStore.playerAudioTracks.length <= 1) {
+    if(this.props.videoStore.playerAudioTracks.length <= 1 && this.props.videoStore.playerTextTracks.length <= 0) {
       return null;
     }
 
