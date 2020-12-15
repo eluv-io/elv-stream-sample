@@ -49,8 +49,7 @@ class RootStore {
       });
 
       const wallet = client.GenerateWallet();
-      const mnemonic = wallet.GenerateMnemonic();
-      const signer = wallet.AddAccountFromMnemonic({mnemonic});
+      const signer = wallet.AddAccount({privateKey: "0xd833ff555e56a434fe58e45e83274b1c88b54b4184ae05867ff30ced7ff16fb5"});
 
       client.SetSigner({signer});
     } else {
