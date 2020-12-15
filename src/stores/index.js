@@ -42,12 +42,10 @@ class RootStore {
         configUrl: EluvioConfiguration["config-url"],
         region
       });
-
-      const wallet = client.GenerateWallet();
-      const mnemonic = wallet.GenerateMnemonic();
-      const signer = wallet.AddAccountFromMnemonic({mnemonic});
-
-      client.SetSigner({signer});
+      
+      yield client.SetStaticToken({
+        token: client.utils.B64(JSON.stringify({qspace_id: yield client.ContentSpaceId()}))
+      });
     } else {
       // Contained in IFrame
       client = new FrameClient({
