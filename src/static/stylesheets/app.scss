@@ -404,15 +404,9 @@ header {
   min-height: calc(60vh - 7rem);
 }
 
-.video-element {
-  * {
-    max-height: calc(60vh - 7rem);
-  }
-}
-
 .bitmovinplayer-container {
   &.aspect-16x9 {
-    &:before {
+    &::before {
       padding-bottom: 0;
     }
   }
@@ -455,12 +449,6 @@ main {
     .video-element {
       max-height: 60vh;
       min-height: 60vh;
-    }
-
-    .video-element {
-      * {
-        max-height: calc(60vh - 7rem);
-      }
     }
   }
 

@@ -7,7 +7,7 @@
   "homepage": "https://github.com/eluv-io/elv-stream-sample",
   "scripts": {
     "bump-version": "npm --git-tag-version --no-commit-hooks version patch",
-    "serve": "webpack-dev-server --hot --port 8084",
+    "serve": "webpack-dev-server --hot --port 8084 --host 0.0.0.0",
     "serve-display-app": "webpack-dev-server --entry ./src/pages/DisplayApp.js --hot --port 8084",
     "build": "rm -rf dist/* && NODE_ENV=production node ./node_modules/webpack-cli/bin/cli.js --output-path ./dist/ -p --progress --colors --devtool none",
     "add-build": "git add dist",
