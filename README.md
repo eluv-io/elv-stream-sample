@@ -46,16 +46,20 @@ This line imports the minified Eluvio JavaScript client from [GitHub](https://gi
 Moving down to the `Load` method (~line 300):
 
 ```javascript
+// Create client with the configuration URL of the network
 const client = await ElvClient.FromConfigurationUrl({
-  configUrl: document.getElementById("config-url").value
+  configUrl: "https://main.net955305.contentfabric.io/config"
 });
 
+// Initialize client with private key
 const wallet = client.GenerateWallet();
-const signer = wallet.AddAccountFromMnemonic({
-  mnemonic: wallet.GenerateMnemonic()
-});
-
+const signer = wallet.AddAccount({privateKey: (private-key)});
 await client.SetSigner({signer});
+
+// Or initialize client with static token
+await client.SetStaticToken({
+  token: client.utils.B64(JSON.stringify({qspace_id: await client.ContentSpaceId()}))
+});
 ```
 
 This is the basic process of intitializing the client. 

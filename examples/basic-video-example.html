@@ -20,7 +20,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/dashjs/3.0.2/dash.all.min.js" integrity="sha256-gmIk8d0B9FnDQ4pcQ5e9/OXc2OEbpZRPti95Lokfccc=" crossorigin="anonymous"></script>
 
   <!-- elv-client-js -->
-  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@eluvio/elv-client-js@3.1.7/dist/ElvClient-min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@eluvio/elv-client-js@3.1.40/dist/ElvClient-min.js"></script>
 
   <style>
     /*start AlwaysShowUI*/
@@ -325,12 +325,9 @@
           configUrl: document.getElementById("config-url").value
         });
 
-        const wallet = client.GenerateWallet();
-        const signer = wallet.AddAccountFromMnemonic({
-          mnemonic: wallet.GenerateMnemonic()
+        await client.SetStaticToken({
+          token: client.utils.B64(JSON.stringify({qspace_id: await client.ContentSpaceId()}))
         });
-
-        await client.SetSigner({signer});
 
         let playoutOptions;
         if(PLAYER_TYPE === "bitmovin") {
