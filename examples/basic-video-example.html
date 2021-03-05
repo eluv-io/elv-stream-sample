@@ -11,7 +11,7 @@
         crossorigin="anonymous" />
 
   <!-- Bitmovin -->
-  <script type="text/javascript" src="https://cdn.bitmovin.com/player/web/8.7.0/bitmovinplayer.js"></script>
+  <script type="text/javascript" src="https://cdn.bitmovin.com/player/web/8/bitmovinplayer.js"></script>
 
   <!-- hls.js -->
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
@@ -20,7 +20,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/dashjs/3.0.2/dash.all.min.js" integrity="sha256-gmIk8d0B9FnDQ4pcQ5e9/OXc2OEbpZRPti95Lokfccc=" crossorigin="anonymous"></script>
 
   <!-- elv-client-js -->
-  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@eluvio/elv-client-js@3.1.40/dist/ElvClient-min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@eluvio/elv-client-js@latest/dist/ElvClient-min.js"></script>
 
   <style>
     /*start AlwaysShowUI*/
@@ -47,6 +47,14 @@
 
     #error-message:empty {
       padding: 0;
+    }
+
+    #bitrate {
+      width: 100%;
+      text-align: center;
+      font-weight: bold;
+      margin-bottom: 20px;
+      height: 2rem;
     }
 
     .controls {
@@ -89,12 +97,18 @@
       padding: 10px 0;
     }
 
-    .input-container input {
+    .input-container input,
+    .input-container textarea {
       width: 75rem;
       padding: 0 0.5rem;
       height: 3rem;
       font-family: monospace;
       margin-bottom: 5px;
+      border: 1px solid gray;
+    }
+
+    .input-container textarea {
+      height: 20rem;
     }
   </style>
 </head>
@@ -102,6 +116,7 @@
 <body>
   <div id="error-message"></div>
   <div class="controls">
+    <div id="bitrate"></div>
     <div class="actions">
       <button id="select-hls-dash">hls.js / dashjs</button>
       <button id="select-bitmovin">Bitmovin</button>
@@ -122,9 +137,18 @@
         value="https://demov3.net955210.contentfabric.io/config"
         placeholder="Config URL">
       <input
+        id="private-key"
+        value=""
+        placeholder="Private Key">
+      <input
         id="content-id"
         value=""
         placeholder="Object ID or Version Hash">
+    </div>
+
+    <div class="input-container">
+      <label for="player-configuration">Player Configuration</label>
+      <textarea id="player-configuration" placeholder="Player Configuration"></textarea>
     </div>
 
     <div class="actions">
@@ -133,7 +157,7 @@
   </div>
 
   <script type="module">
-    import {InitializeFairPlayStream} from "../FairPlay.js";
+    import {InitializeFairPlayStream} from "./FairPlay.js";
 
     let PROTOCOL = "hls";
     let DRM = "clear";
@@ -142,6 +166,19 @@
 
     const SetErrorMessage = (message) => {
       document.getElementById("error-message").innerText = message;
+    };
+
+    const PlayerConfiguration = () => {
+      try {
+        const configuration = document.getElementById("player-configuration").value.trim();
+
+        if(!configuration) { return {}; }
+
+        return JSON.parse(configuration);
+      } catch(error) {
+        SetErrorMessage("Unable to parse player configuration");
+        return {};
+      }
     };
 
     const UpdateButtons = () => {
@@ -195,6 +232,8 @@
       if(existingElement) {
         document.body.removeChild(existingElement);
       }
+
+      document.getElementById("bitrate").innerHTML = "";
     };
 
     const CreatePlayerElement = () => {
@@ -245,9 +284,15 @@
         return;
       }
 
-      player = new Hls();
+      player = new Hls(PlayerConfiguration());
       player.loadSource(playoutInfo.playoutUrl);
       player.attachMedia(playerElement);
+
+      player.on(Hls.Events.LEVEL_SWITCHED, () => {
+        const currentLevel = player.levels[player.currentLevel];
+
+        document.getElementById("bitrate").innerHTML = `${currentLevel.attrs.RESOLUTION} | ${currentLevel.bitrate / 1000 / 1000} Mbps`;
+      });
     };
 
     const LoadDash = (playoutOptions) => {
@@ -279,25 +324,36 @@
       });
 
       player.initialize(playerElement, playoutInfo.playoutUrl);
+
+      player.updateSettings(PlayerConfiguration());
+
+      player.on(dashjs.MediaPlayer.events.QUALITY_CHANGE_RENDERED, () => {
+        const currentLevel = player.getBitrateInfoListFor("video")[player.getQualityFor("video")];
+
+        document.getElementById("bitrate").innerHTML = `${currentLevel.width}x${currentLevel.height} | ${currentLevel.bitrate / 1000 / 1000} Mbps`;
+      });
     };
 
     const LoadBitmovin = (playoutOptions) => {
       const playerElement = CreatePlayerElement();
 
       const config = {
-        key: "<bitmovin-key>",
+        key: "532a4784-591a-4039-8497-5feb80e5dd66",
         playback: {
           autoplay: true
-        }
+        },
+        events: {
+          [bitmovin.player.PlayerEvent.VideoPlaybackQualityChanged]: ({targetQuality}) => {
+            document.getElementById("bitrate").innerHTML =
+              `${targetQuality.width}x${targetQuality.height} | ${targetQuality.bitrate / 1000 / 1000} Mbps`;
+          }
+        },
+        ...PlayerConfiguration()
       };
 
-      // API 8
       player = new bitmovin.player.Player(playerElement, config);
 
-      player.load(playoutOptions).then(
-        () => {
-          console.log('Successfully created Bitmovin Player instance');
-        },
+      player.load(playoutOptions).catch(
         (error) => {
           DestroyPlayer();
           if(error.name === "SOURCE_NO_SUPPORTED_TECHNOLOGY") {
@@ -325,9 +381,16 @@
           configUrl: document.getElementById("config-url").value
         });
 
-        await client.SetStaticToken({
-          token: client.utils.B64(JSON.stringify({qspace_id: await client.ContentSpaceId()}))
-        });
+        const privateKey = document.getElementById("private-key").value;
+        if(privateKey) {
+          const wallet = client.GenerateWallet();
+          const signer = wallet.AddAccount({privateKey});
+          client.SetSigner({signer});
+        } else {
+          await client.SetStaticToken({
+            token: client.utils.B64(JSON.stringify({qspace_id: await client.ContentSpaceId()}))
+          });
+        }
 
         let playoutOptions;
         if(PLAYER_TYPE === "bitmovin") {
@@ -368,6 +431,28 @@
 
     const SetPlayer = (playerType) => {
       PLAYER_TYPE = playerType;
+
+      if(playerType === "bitmovin") {
+        document.getElementById("player-configuration").value = JSON.stringify({
+          "live": {
+            "lowLatency": {
+              "targetLatency": 7,
+              "catchup": {
+                "playbackRateThreshold": 0.075,
+                "seekThreshold": 5,
+                "playbackRate": 1.2
+              },
+              "fallback": {
+                "playbackRateThreshold": 0.075,
+                "seekThreshold": 5,
+                "playbackRate": 0.95
+              }
+            }
+          }
+        }, null, 2);
+      } else {
+        document.getElementById("player-configuration").value = "{}";
+      }
 
       UpdateButtons();
     };
