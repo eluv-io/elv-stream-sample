@@ -216,7 +216,18 @@ class VideoStore {
           metadataSubtree: "public/name"
         }));
 
-      this.availableOfferings = yield client.AvailableOfferings({objectId, versionHash, handler: this.playoutHandler});
+      const isChannel = yield this.rootStore.client.ContentObjectMetadata({
+        libraryId,
+        objectId,
+        versionHash,
+        metadataSubtree: "public/channel"
+      });
+
+      this.availableOfferings = yield client.AvailableOfferings({
+        objectId,
+        versionHash,
+        handler: isChannel ? "channel" : this.playoutHandler
+      });
       yield this.LoadVideoPlayout({objectId, versionHash});
 
       this.loadId += 1;
@@ -241,13 +252,24 @@ class VideoStore {
 
   @action.bound
   LoadVideoPlayout = flow(function * ({objectId, versionHash}) {
+    const isChannel = yield this.rootStore.client.ContentObjectMetadata({
+      libraryId: yield this.rootStore.client.ContentObjectLibraryId({objectId, versionHash}),
+      objectId,
+      versionHash,
+      metadataSubtree: "public/channel"
+    });
+
     const playoutOptions = yield this.rootStore.client.PlayoutOptions({
       objectId,
       versionHash,
-      handler: this.playoutHandler,
+      handler: isChannel ? "channel" : this.playoutHandler,
       offering: this.offering,
       playoutType: this.playoutType
     });
+
+    if(isChannel) {
+      this.protocol = "hls";
+    }
 
     if(!playoutOptions[this.protocol]) {
       this.protocol = Object.keys(playoutOptions)[0] || "hls";
