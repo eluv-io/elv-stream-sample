@@ -284,14 +284,15 @@ class Video extends React.Component {
     this.player.initialize(video, playoutUrl);
   }
 
-  InitializeMuxMonitoring(video, playoutUrl) {
+  async InitializeMuxMonitoring(video, playoutUrl) {
     const options = {
       debug: false,
       data: {
         env_key: "2i5480sms8vdgj0sv9bv6lpk5",
         video_id: this.props.videoStore.contentId,
         video_title: this.props.videoStore.title,
-        video_cdn: URI(playoutUrl).hostname()
+        video_cdn: URI(playoutUrl).hostname(),
+        viewer_user_id: await this.props.videoStore.rootStore.client.CurrentAccountAddress()
       }
     };
 
