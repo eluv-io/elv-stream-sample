@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Eluvio Test Page</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css?family=Dosis" rel="stylesheet" type="text/css" />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+        crossorigin="anonymous" />
+
+  <!-- Bitmovin -->
+  <script type="text/javascript" src="https://cdn.bitmovin.com/player/web/8/bitmovinplayer.js"></script>
+
+  <!-- hls.js -->
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+  <!-- dashjs -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dashjs/3.0.2/dash.all.min.js" integrity="sha256-gmIk8d0B9FnDQ4pcQ5e9/OXc2OEbpZRPti95Lokfccc=" crossorigin="anonymous"></script>
+
+  <!-- elv-client-js -->
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@eluvio/elv-client-js@latest/dist/ElvClient-min.js"></script>
+
+  <script src="https://src.litix.io/core/4/mux.js"></script>
+
+  <style>
+    /*start AlwaysShowUI*/
+    .bmpui-ui-skin-modern .bmpui-ui-controlbar.bmpui-hidden {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    body {
+      overflow-y: scroll;
+    }
+
+    video {
+      width: 100%;
+      max-height: 100vh;
+      background: black;
+    }
+
+    #error-message {
+      padding: 20px 0 10px;
+      text-align: center;
+      color: #bb0000;
+    }
+
+    #error-message:empty {
+      padding: 0;
+    }
+
+    #bitrate {
+      width: 100%;
+      text-align: center;
+      font-weight: bold;
+      margin-bottom: 20px;
+      height: 2rem;
+    }
+
+    .controls {
+      margin: 20px 0 50px;
+    }
+
+    .actions {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 5px 0;
+    }
+
+    .actions button {
+      background: white;
+      border: 1px solid #1b73e8;
+      color: #1b73e8;
+
+      height: 30px;
+      width: 200px;
+      margin-right: 5px;
+    }
+
+    .actions button.active {
+      background: #1b73e8;
+      color: white;
+    }
+
+    .actions button:hover {
+      background: #1b7bff;
+      color: white;
+    }
+
+    .input-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 10px 0;
+    }
+
+    .input-container input,
+    .input-container textarea {
+      width: 75rem;
+      padding: 0 0.5rem;
+      height: 3rem;
+      font-family: monospace;
+      margin-bottom: 5px;
+      border: 1px solid gray;
+    }
+
+    .input-container textarea {
+      height: 20rem;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="error-message"></div>
+  <div class="controls">
+    <div id="bitrate"></div>
+    <div class="actions">
+      <button id="select-hls-dash">hls.js / dashjs</button>
+      <button id="select-bitmovin">Bitmovin</button>
+    </div>
+
+    <div class="actions">
+      <button id="load-hls">Play HLS Clear</button>
+      <button id="load-hls-aes">Play HLS AES-128</button>
+      <button id="load-hls-sample-aes">Play HLS Sample AES</button>
+      <button id="load-hls-fairplay">Play HLS FairPlay</button>
+      <button id="load-dash">Play Dash Clear</button>
+      <button id="load-dash-wv">Play Dash Widevine</button>
+    </div>
+
+    <div class="input-container">
+      <input
+        id="config-url"
+        value="https://demov3.net955210.contentfabric.io/config"
+        placeholder="Config URL">
+      <input
+        id="private-key"
+        value=""
+        placeholder="Private Key">
+      <input
+        id="content-id"
+        value=""
+        placeholder="Object ID or Version Hash">
+    </div>
+
+    <div class="input-container">
+      <label for="player-configuration">Player Configuration</label>
+      <textarea id="player-configuration" placeholder="Player Configuration"></textarea>
+    </div>
+
+    <div class="actions">
+      <button class="active" id="load-button">Load</button>
+      <button class="active" id="destroy-button">Destroy</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import {InitializeFairPlayStream} from "./FairPlay.js";
+
+    let PROTOCOL = "hls";
+    let DRM = "clear";
+    let PLAYER_TYPE = "hls-dash";
+    let player;
+    let muxPlayerInitTime;
+
+    const SetErrorMessage = (message) => {
+      document.getElementById("error-message").innerText = message;
+    };
+
+    const PlayerConfiguration = () => {
+      try {
+        const configuration = document.getElementById("player-configuration").value.trim();
+
+        if(!configuration) { return {}; }
+
+        return JSON.parse(configuration);
+      } catch(error) {
+        SetErrorMessage("Unable to parse player configuration");
+        return {};
+      }
+    };
+
+    const UpdateButtons = () => {
+      [
+        "select-hls-dash",
+        "select-bitmovin",
+        "load-hls",
+        "load-hls-aes",
+        "load-hls-sample-aes",
+        "load-hls-fairplay",
+        "load-dash",
+        "load-dash-wv"
+      ].forEach(id => document.getElementById(id).className = "");
+
+      if(PLAYER_TYPE === "bitmovin") {
+        document.getElementById("select-bitmovin").className = "active";
+      } else {
+        document.getElementById("select-hls-dash").className = "active";
+      }
+
+      let activeOption;
+      if(PROTOCOL === "hls") {
+        if(DRM === "aes-128") {
+          activeOption = "load-hls-aes";
+        } else if(DRM === "sample-aes") {
+          activeOption = "load-hls-sample-aes";
+        } else if(DRM === "fairplay") {
+          activeOption = "load-hls-fairplay";
+        } else {
+          activeOption = "load-hls";
+        }
+      } else {
+        if(DRM === "widevine") {
+          activeOption = "load-dash-wv";
+        } else {
+          activeOption = "load-dash";
+        }
+      }
+
+      document.getElementById(activeOption).className = "active";
+    };
+
+    const DestroyPlayer = () => {
+      // Stop current player
+      if(player) {
+        player.unload ? player.unload() : (player.destroy ? player.destroy() : player.reset());
+      }
+
+      // Remove video element
+      const existingElement = document.getElementById("video-element");
+      if(existingElement) {
+        document.body.removeChild(existingElement);
+      }
+
+      document.getElementById("bitrate").innerHTML = "";
+    };
+
+    const CreatePlayerElement = () => {
+      DestroyPlayer();
+
+      muxPlayerInitTime = Date.now();
+
+      let playerElement;
+      if(PLAYER_TYPE === "bitmovin") {
+        // Bitmovin is attached to a 'div' element, not a 'video' element
+        playerElement = document.createElement("div");
+      } else {
+        playerElement = document.createElement("video");
+        playerElement.controls = true;
+        playerElement.autoplay = true;
+      }
+
+      playerElement.id = "video-element";
+
+      document.body.prepend(playerElement);
+
+      return playerElement
+    };
+
+    const Monitor = async (client) => {
+      const contentId = document.getElementById("content-id").value;
+      const objectId = contentId.startsWith("iq__") ? contentId : "";
+      const versionHash = contentId.startsWith("hq__") ? contentId : "";
+
+      const publicMeta = await client.ContentObjectMetadata({
+        objectId,
+        versionHash,
+        metadataSubtree: "public"
+      });
+
+      const conf = {
+        debug: false,
+        data: {
+          env_key: '2i5480sms8vdgj0sv9bv6lpk5',
+          viewer_user_id: client.signer.signingKey.address,
+          player_name: PLAYER_TYPE,
+          player_init_time: muxPlayerInitTime,
+          //player_version:
+          video_id: contentId,
+          video_title: publicMeta.name,
+          video_cdn: 'Eluvio',
+          video_variant_name: PROTOCOL + '-' + DRM
+        }
+      };
+
+      if(PLAYER_TYPE === "bitmovin") {
+        initBitmovinMux(player, conf)
+      } else {
+        if(PROTOCOL === "hls") {
+          if(DRM !== "sample-aes" && DRM !== "fairplay") {
+            conf.hlsjs = player;
+            conf.Hls = Hls;
+          }
+        } else {
+          conf.dashjs = player;
+        }
+        const playerElement = document.querySelector("#video-element")
+        mux.monitor(playerElement, conf);
+      }
+    }
+
+    const LoadHlsJs = (playoutOptions) => {
+      const playoutMethods = playoutOptions.hls.playoutMethods;
+
+      let playoutInfo;
+      if(DRM === "aes-128") {
+        playoutInfo = playoutMethods["aes-128"];
+      } else if(DRM === "sample-aes") {
+        playoutInfo = playoutMethods["sample-aes"];
+      } else {
+        playoutInfo = playoutMethods.clear;
+      }
+
+      if(!playoutInfo) {
+        SetErrorMessage(`HLS ${DRM} playout not supported for this content`);
+        return;
+      }
+
+      const playerElement = CreatePlayerElement();
+
+      // Use native player for Sample AES and FairPlay
+      if(DRM === "sample-aes" && PLAYER_TYPE !== "bitmovin") {
+        playerElement.src = playoutInfo.playoutUrl;
+        return;
+      } else if(DRM === "fairplay" && PLAYER_TYPE !== "bitmovin") {
+        InitializeFairPlayStream({playoutOptions, video: playerElement});
+        return;
+      }
+
+      player = new Hls(PlayerConfiguration());
+      player.loadSource(playoutInfo.playoutUrl);
+      player.attachMedia(playerElement);
+
+      player.on(Hls.Events.LEVEL_SWITCHED, () => {
+        const currentLevel = player.levels[player.currentLevel];
+
+        document.getElementById("bitrate").innerHTML = `${currentLevel.attrs.RESOLUTION} | ${currentLevel.bitrate / 1000 / 1000} Mbps`;
+      });
+    };
+
+    const LoadDash = (playoutOptions) => {
+      const playoutMethods = playoutOptions.dash.playoutMethods;
+
+      let playoutInfo, licenseServer;
+      if(DRM === "widevine") {
+        playoutInfo = playoutMethods.widevine;
+
+        if(playoutInfo) {
+          licenseServer = playoutMethods.widevine.drms.widevine.licenseServers[0];
+        }
+      } else {
+        // Play clear
+        playoutInfo = playoutMethods.clear;
+      }
+
+      if(!playoutInfo) {
+        SetErrorMessage(`Dash ${DRM} playout not supported for this content`);
+        return;
+      }
+
+      const playerElement = CreatePlayerElement();
+      player = dashjs.MediaPlayer().create();
+      player.setProtectionData({
+        "com.widevine.alpha": {
+          "serverURL": licenseServer
+        }
+      });
+
+      player.initialize(playerElement, playoutInfo.playoutUrl);
+
+      player.updateSettings(PlayerConfiguration());
+
+      player.on(dashjs.MediaPlayer.events.QUALITY_CHANGE_RENDERED, () => {
+        const currentLevel = player.getBitrateInfoListFor("video")[player.getQualityFor("video")];
+
+        document.getElementById("bitrate").innerHTML = `${currentLevel.width}x${currentLevel.height} | ${currentLevel.bitrate / 1000 / 1000} Mbps`;
+      });
+    };
+
+    const LoadBitmovin = (playoutOptions) => {
+      const playerElement = CreatePlayerElement();
+
+      const config = {
+        key: "532a4784-591a-4039-8497-5feb80e5dd66",
+        playback: {
+          autoplay: true
+        },
+        events: {
+          [bitmovin.player.PlayerEvent.VideoPlaybackQualityChanged]: ({targetQuality}) => {
+            document.getElementById("bitrate").innerHTML =
+              `${targetQuality.width}x${targetQuality.height} | ${targetQuality.bitrate / 1000 / 1000} Mbps`;
+          }
+        },
+        ...PlayerConfiguration()
+      };
+
+      player = new bitmovin.player.Player(playerElement, config);
+
+      player.load(playoutOptions).catch(
+        (error) => {
+          DestroyPlayer();
+          if(error.name === "SOURCE_NO_SUPPORTED_TECHNOLOGY") {
+            SetErrorMessage(`${PROTOCOL} ${DRM} playout not supported for this content`);
+          } else {
+            SetErrorMessage(`Bitmovin error: ${error.name}`);
+            console.error(error);
+          }
+        }
+      );
+    };
+
+    const Load = async () => {
+      SetErrorMessage("");
+
+      try {
+        const contentId = document.getElementById("content-id").value;
+
+        if(!contentId) { return; }
+        localStorage.setItem('content-id', contentId);
+
+        const objectId = contentId.startsWith("iq__") ? contentId : "";
+        const versionHash = contentId.startsWith("hq__") ? contentId : "";
+
+        const client = await ElvClient.FromConfigurationUrl({
+          configUrl: document.getElementById("config-url").value
+        });
+
+        const privateKey = document.getElementById("private-key").value;
+        if(privateKey) {
+          localStorage.setItem('private-key', privateKey);
+          const wallet = client.GenerateWallet();
+          const signer = wallet.AddAccount({privateKey});
+          client.SetSigner({signer});
+        } else {
+          await client.SetStaticToken({
+            token: client.utils.B64(JSON.stringify({qspace_id: await client.ContentSpaceId()}))
+          });
+        }
+
+        let playoutOptions;
+        if(PLAYER_TYPE === "bitmovin") {
+          playoutOptions = await client.BitmovinPlayoutOptions({
+            objectId,
+            versionHash,
+            protocols: [PROTOCOL],
+            drms: [DRM]
+          });
+
+          LoadBitmovin(playoutOptions);
+        } else {
+          playoutOptions = await client.PlayoutOptions({
+            objectId,
+            versionHash,
+            protocols: [PROTOCOL],
+            drms: [DRM]
+          });
+
+          if(PROTOCOL === "hls") {
+            LoadHlsJs(playoutOptions);
+          } else {
+            LoadDash(playoutOptions);
+          }
+        }
+
+        if(player) { // could also check if error is not set
+          Monitor(client);
+        }
+      } catch(error) {
+        SetErrorMessage(error.message ? error.message : error);
+        console.error(error);
+      }
+    };
+
+    const SetOptions = (protocol, drm) => {
+      PROTOCOL = protocol;
+      DRM = drm || "";
+
+      UpdateButtons();
+    };
+
+    const SetPlayer = (playerType) => {
+      PLAYER_TYPE = playerType;
+
+      if(playerType === "bitmovin") {
+        document.getElementById("player-configuration").value = JSON.stringify({
+          "live": {
+            "lowLatency": {
+              "targetLatency": 7,
+              "catchup": {
+                "playbackRateThreshold": 0.075,
+                "seekThreshold": 5,
+                "playbackRate": 1.2
+              },
+              "fallback": {
+                "playbackRateThreshold": 0.075,
+                "seekThreshold": 5,
+                "playbackRate": 0.95
+              }
+            }
+          }
+        }, null, 2);
+      } else {
+        document.getElementById("player-configuration").value = "{}";
+      }
+
+      UpdateButtons();
+    };
+
+    document.getElementById("select-hls-dash").onclick = () => SetPlayer("hls-dash");
+    document.getElementById("select-bitmovin").onclick = () => SetPlayer("bitmovin");
+
+    document.getElementById("load-hls").onclick = () => SetOptions("hls", "clear");
+    document.getElementById("load-hls-aes").onclick = () => SetOptions("hls", "aes-128");
+    document.getElementById("load-hls-sample-aes").onclick = () => SetOptions("hls", "sample-aes");
+    document.getElementById("load-hls-fairplay").onclick = () => SetOptions("hls", "fairplay");
+    document.getElementById("load-dash").onclick = () => SetOptions("dash", "clear");
+    document.getElementById("load-dash-wv").onclick = () => SetOptions("dash", "widevine");
+
+    document.getElementById("load-button").onclick = () => Load();
+    document.getElementById("destroy-button").onclick = () => DestroyPlayer();
+
+    document.getElementById("content-id").value = localStorage.getItem('content-id');
+    document.getElementById("private-key").value = localStorage.getItem('private-key');
+
+    UpdateButtons();
+  </script>
+</body>
+
+</html>
