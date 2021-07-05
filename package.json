@@ -28,7 +28,7 @@
   "dependencies": {
     "@eluvio/elv-client-js": "^3.1.45",
     "buffer": "^5.2.1",
-    "chart.js": "^2.9.3",
+    "chart.js": "^2.9.4",
     "dashjs": "^3.1.2",
     "elv-components-js": "git+https://github.com/eluv-io/elv-components-js.git#645165da87ec42845a908a9ce0817db202523866",
     "hls-fix": "git@github.com:elv-peter/hls.js.git#prebuilt/bugfix/live-init-cache",
@@ -41,7 +41,7 @@
     "react-chartjs-2": "^2.9.0",
     "react-datetime-picker": "^2.7.1",
     "react-dom": "^16.8.6",
-    "urijs": "^1.19.1",
+    "urijs": "^1.19.6",
     "url-join": "^4.0.1"
   },
   "devDependencies": {

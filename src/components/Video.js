@@ -150,10 +150,11 @@ class Video extends React.Component {
         currentLevel: this.player.currentLevel
       }));
 
-    this.player.on(HLSPlayer.Events.FRAG_LOADED, (_, {frag, stats}) => {
+    this.player.on(HLSPlayer.Events.FRAG_LOADED, (_, {frag}) => {
       try {
         if(frag.type !== "main" || frag.sn === "initSegment") { return; }
 
+        const stats = frag.stats;
         const level = this.player.levels[frag.level];
         const bitrate = level.bitrate / 1000;
         const resolution = level.attrs.RESOLUTION;
@@ -162,8 +163,8 @@ class Video extends React.Component {
         const size = stats.total / (1024 * 1024);
 
         // Seconds
-        const latency = Math.max(1, stats.tfirst - stats.trequest) / 1000;
-        const downloadTime = Math.max(1, stats.tload - stats.tfirst) / 1000;
+        const latency = Math.max(1, stats.loading.first - stats.loading.start) / 1000;
+        const downloadTime = Math.max(1, stats.loading.end - stats.loading.first) / 1000;
 
         // Bits per second
         const downloadRate = (8 * stats.total) / downloadTime;
