@@ -83,11 +83,17 @@ class AdvancedControls extends React.Component {
   Region() {
     const regions = [
       ["Automatic", ""],
+
+      ["NA Northeast", "na-east-north"],
+      ["NA Southeast", "na-east-south"],
       ["NA Northwest", "na-west-north"],
       ["NA Southwest", "na-west-south"],
-      ["NA East", "na-east"],
-      ["EU West", "eu-west"],
-      ["EU East", "eu-east"],
+
+      ["EU Northeast", "eu-east-north"],
+      ["EU Southeast", "eu-east-south"],
+      ["EU Northwest", "eu-west-north"],
+      ["EU Southwest", "eu-west-south"],
+
       ["AU East", "au-east"],
       ["AS East", "as-east"]
     ];

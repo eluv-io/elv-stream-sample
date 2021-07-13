@@ -42,7 +42,7 @@ class RootStore {
         configUrl: EluvioConfiguration["config-url"],
         region
       });
-      
+
       yield client.SetStaticToken({
         token: client.utils.B64(JSON.stringify({qspace_id: yield client.ContentSpaceId()}))
       });
@@ -66,20 +66,30 @@ class RootStore {
     }
 
     // Record available nodes
-    this.nodes = yield client.Nodes();
-
-    this.fabricNode = fabricNode;
-    this.ethNode = ethNode;
+    let nodes = yield client.Nodes();
 
     if(fabricNode) {
-      this.fabricNode = fabricNode;
-      yield client.SetNodes({fabricURIs: [this.fabricNode]});
+      yield client.SetNodes({fabricURIs: [fabricNode]});
+
+      // Ensure selected node is in list
+      if(!nodes.fabricURIs.find(uri => uri === fabricNode)) {
+        nodes.fabricURIs.push(fabricNode);
+      }
     }
 
     if(this.ethNode) {
-      this.ethNode = ethNode;
-      yield client.SetNodes({ethereumURIs: [this.ethNode]});
+      yield client.SetNodes({ethereumURIs: [ethNode]});
+
+      // Ensure selected node is in list
+      if(!nodes.ethereumURIs.find(uri => uri === ethNode)) {
+        nodes.ethereumURIs.push(ethNode);
+      }
     }
+
+    this.nodes = nodes;
+
+    this.fabricNode = fabricNode;
+    this.ethNode = ethNode;
 
     this.availableDRMs = yield client.AvailableDRMs();
 
