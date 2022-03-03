@@ -41,7 +41,7 @@
     "react-chartjs-2": "^2.9.0",
     "react-datetime-picker": "^2.7.1",
     "react-dom": "^16.8.6",
-    "urijs": "^1.19.6",
+    "urijs": "^1.19.9",
     "url-join": "^4.0.1"
   },
   "devDependencies": {
