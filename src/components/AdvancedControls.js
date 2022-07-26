@@ -165,6 +165,8 @@ class AdvancedControls extends React.Component {
   }
 
   render() {
+    if(!this.props.videoStore.playoutOptions) { return null; }
+
     const toggleButton = (
       <div className="controls-container advanced-controls-toggle">
         <div className="control-row">
