@@ -7,13 +7,27 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const TerserPlugin = require("terser-webpack-plugin");
 const HtmlWebpackInlineSourcePlugin = require("html-webpack-inline-source-plugin");
 
+let plugins = [
+  new HtmlWebpackPlugin({
+    title: "Eluvio Stream Sample",
+    template: Path.join(__dirname, "src", "index.html"),
+    cache: false,
+    filename: "index.html",
+    favicon: "node_modules/elv-components-js/src/icons/favicon.png"
+  }),
+  new CopyWebpackPlugin([{
+    from: Path.join(__dirname, "configuration.js"),
+    to: Path.join(__dirname, "dist", "configuration.js")
+  }]),
+];
+
 module.exports = {
   entry: "./src/index.js",
   target: "web",
   output: {
     path: Path.resolve(__dirname, "dist"),
     filename: "index.js",
-    chunkFilename: "[name].bundle.js"
+    chunkFilename: "[name].[contenthash].bundle.js"
   },
   devServer: {
     disableHostCheck: true,
@@ -31,14 +45,6 @@ module.exports = {
     }
   },
   optimization: {
-    minimizer: [
-      new TerserPlugin({
-        terserOptions: {
-          keep_classnames: true,
-          keep_fnames: true
-        }
-      })
-    ],
     splitChunks: {
       chunks: "all"
     }
@@ -47,29 +53,8 @@ module.exports = {
     fs: "empty"
   },
   mode: "development",
-  devtool: "source-map",
-  plugins: [
-    new webpack.optimize.LimitChunkCountPlugin({
-      maxChunks: 1,
-    }),
-    new CopyWebpackPlugin([
-      {
-        from: Path.join(__dirname, "configuration.js"),
-        to: Path.join(__dirname, "dist","configuration.js")
-      }
-    ]),
-    new HtmlWebpackPlugin({
-      title: "Eluvio Stream Sample",
-      template: Path.join(__dirname, "src", "index.html"),
-      inject: "body",
-      cache: false,
-      filename: "index.html",
-      inlineSource: ".(js|css)$",
-      favicon: "node_modules/elv-components-js/src/icons/favicon.png"
-    }),
-    new HtmlWebpackInlineSourcePlugin()
-    //, new BundleAnalyzerPlugin()
-  ],
+  devtool: "eval-source-map",
+  plugins,
   module: {
     rules: [
       {
@@ -96,11 +81,20 @@ module.exports = {
         exclude: /node_modules\/(?!elv-components-js)/,
         loader: "babel-loader",
         options: {
-          presets: ["@babel/preset-env", "@babel/preset-react", "babel-preset-mobx"],
+          presets: [
+            "@babel/preset-env",
+            "@babel/preset-react",
+            "babel-preset-mobx"
+          ],
           plugins: [
+            ["@babel/plugin-proposal-decorators", { "version": "legacy" }],
             require("@babel/plugin-proposal-object-rest-spread"),
             require("@babel/plugin-transform-regenerator"),
-            require("@babel/plugin-transform-runtime")
+            require("@babel/plugin-transform-runtime"),
+            require("@babel/plugin-proposal-optional-chaining"),
+            require("@babel/plugin-transform-modules-commonjs"),
+            ["@babel/plugin-proposal-private-methods", { loose: true }],
+            ["@babel/plugin-proposal-private-property-in-object", { "loose": true }]
           ]
         }
       },
