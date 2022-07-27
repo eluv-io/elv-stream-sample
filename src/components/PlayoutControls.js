@@ -70,6 +70,8 @@ class PlayoutControls extends React.Component {
   }
 
   render() {
+    if(!this.props.videoStore.playoutOptions) { return null; }
+
     return (
       <div className="controls-container playout-controls">
         <h3 className="controls-header">Playout Options</h3>

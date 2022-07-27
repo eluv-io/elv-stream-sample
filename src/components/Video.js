@@ -131,6 +131,13 @@ class Video extends React.Component {
       });
     });
 
+    this.player.on(HLSPlayer.Events.SUBTITLE_TRACKS_UPDATED, () => {
+      this.props.videoStore.SetTextTracks({
+        tracks: Array.from(this.video.textTracks),
+        currentTrack: this.player.subtitleTrack
+      });
+    });
+
     this.player.on(HLSPlayer.Events.SUBTITLE_TRACK_LOADED, () => {
       this.props.videoStore.SetTextTracks({
         tracks: Array.from(this.video.textTracks),
@@ -388,6 +395,7 @@ class Video extends React.Component {
           {
             this.props.videoStore.playerTextTracks.map((track, index) => {
               let label;
+
               try {
                 label = this.props.videoStore.protocol === "dash" ?
                   this.player.getTracksFor("text")[index].labels[0].text :
