@@ -1,5 +1,3 @@
-![Eluvio Logo](src/static/images/Logo-Small.png "Eluvio Logo")
-  
 # Eluvio Video Streaming Sample
 
 This small application is designed to demonstrate the video serving capabilities of the Eluvio Content Fabric. 
