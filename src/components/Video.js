@@ -501,6 +501,16 @@ class Video extends React.Component {
     );
   }
 
+  VideoError = () => {
+    if(this.props.videoStore.error) {
+      return (
+        <div className="video-error-message">
+          {this.props.videoStore.error}
+        </div>
+      );
+    }
+  }
+
   render() {
     return (
       <div className="video video-container" key={`video-version-${this.state.videoVersion}`}>
@@ -516,6 +526,7 @@ class Video extends React.Component {
             playsInline
             controls={!!this.props.videoStore.playoutOptions}
           />
+          { this.VideoError() }
           <div className="video-playback-controls">
             { this.Tracks() }
             { this.PlaybackLevel() }

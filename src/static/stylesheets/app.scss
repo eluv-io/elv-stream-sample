@@ -191,6 +191,13 @@ header {
       margin-right: $elv-spacing-xs;
     }
   }
+
+  .video-error-message {
+    bottom: -2.45rem;
+    color: $elv-color-red;
+    left: 0;
+    position: absolute;
+  }
 }
 
 .video-container,

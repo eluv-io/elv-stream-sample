@@ -279,7 +279,14 @@ class VideoStore {
 
     // If no suitable DRMs in current protocol, switch to other protocol
     if(!Object.keys(playoutOptions[this.protocol].playoutMethods).find(drm => this.rootStore.availableDRMs.includes(drm))) {
-      this.SetProtocol(this.protocol === "hls" ? "dash" : "hls");
+      const switchedProtocol = this.protocol === "hls" ? "dash" : "hls";
+
+      if(playoutOptions.hasOwnProperty(switchedProtocol)) {
+        this.SetProtocol(switchedProtocol);
+      } else {
+        this.SetError("No playout formats compatible with this browser are available.");
+        return;
+      }
     }
 
     // If current DRM is not suitable, switch
