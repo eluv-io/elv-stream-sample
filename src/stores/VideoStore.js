@@ -143,7 +143,7 @@ class VideoStore {
     if(this.playoutOptions) {
       // Prefer clear
       const playoutMethods = this.playoutOptions[this.protocol].playoutMethods;
-      this.drm = playoutMethods.clear ? "clear" : (playoutMethods[this.aesOption] ? this.aesOption : "widevine");
+      this.drm = playoutMethods.clear ? "clear" : (playoutMethods[this.aesOption] ? this.aesOption : playoutMethods.widevine ? "widevine" : "fairplay");
     } else if(this.drm !== "clear") {
       this.drm = this.protocol === "hls" ? this.aesOption : "widevine";
     }
@@ -293,7 +293,18 @@ class VideoStore {
     if(!playoutOptions[this.protocol].playoutMethods[this.drm]) {
       // Prefer DRM
       const playoutMethods = playoutOptions[this.protocol].playoutMethods;
-      this.drm = playoutMethods.clear ? "clear" : (playoutMethods[this.aesOption] ? this.aesOption : "widevine");
+      if(playoutMethods.clear) {
+        this.drm = "clear";
+      } else if(playoutMethods[this.aesOption]) {
+        this.drm = this.aesOption;
+      } else if(playoutMethods.widevine) {
+        this.drm = "widevine";
+      } else if(playoutMethods.fairplay) {
+        this.drm = "fairplay";
+      } else {
+        this.SetError("No playout formats compatible with this browser are available.");
+        return;
+      }
     }
 
     this.playoutOptions = playoutOptions;
