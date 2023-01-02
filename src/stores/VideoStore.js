@@ -1,5 +1,6 @@
 import {observable, action, flow, runInAction, computed} from "mobx";
-import HLSPlayer from "hls-fix";
+//import HLSPlayer from "hls-fix";
+import HLSPlayer from "hls.js";
 
 class VideoStore {
   @observable loading = false;
