@@ -68,7 +68,7 @@
     "babel-plugin-syntax-async-functions": "^6.13.0",
     "babel-preset-mobx": "^2.0.0",
     "copy-webpack-plugin": "^4.6.0",
-    "css-loader": "^1.0.1",
+    "css-loader": "^6.7.3",
     "eslint": "^5.16.0",
     "eslint-plugin-react": "^7.12.4",
     "fast-sass-loader": "^2.0.1",
