@@ -275,8 +275,8 @@
 
       const playerElement = CreatePlayerElement();
 
-      // Use native player for Sample AES and FairPlay
-      if(DRM === "sample-aes" && PLAYER_TYPE !== "bitmovin") {
+      // Use native player for Sample AES and FairPlay, or iOS
+      if((DRM === "sample-aes" && PLAYER_TYPE !== "bitmovin") || !Hls.isSupported()) {
         playerElement.src = playoutInfo.playoutUrl;
         return;
       } else if(DRM === "fairplay" && PLAYER_TYPE !== "bitmovin") {
