@@ -134,7 +134,7 @@
     <div class="input-container">
       <input
         id="config-url"
-        value="https://demov3.net955210.contentfabric.io/config"
+        value="https://main.net955305.contentfabric.io/config"
         placeholder="Config URL">
       <input
         id="private-key"
@@ -142,7 +142,7 @@
         placeholder="Private Key">
       <input
         id="content-id"
-        value=""
+        value="hq__CcdV4wnCNq9wv6jXpYeCQ2GE4FLQBFtVSSSt2XKfBJMrH89DFDGsfkpWWvBy16QBGGYeF5mLGo"
         placeholder="Object ID or Version Hash">
     </div>
 
@@ -275,8 +275,8 @@
 
       const playerElement = CreatePlayerElement();
 
-      // Use native player for Sample AES and FairPlay
-      if(DRM === "sample-aes" && PLAYER_TYPE !== "bitmovin") {
+      // Use native player for Sample AES and FairPlay, or iOS
+      if(PLAYER_TYPE !== "bitmovin" && (DRM === "sample-aes" || !Hls.isSupported())) {
         playerElement.src = playoutInfo.playoutUrl;
         return;
       } else if(DRM === "fairplay" && PLAYER_TYPE !== "bitmovin") {
