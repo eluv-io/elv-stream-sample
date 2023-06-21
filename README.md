@@ -4,14 +4,22 @@ This small application is designed to demonstrate the video serving capabilities
 
 Feel free to look at the code to learn how to serve video from the Fabric in your own application, or keep reading for a detailed explanation of the [basic example page](examples/basic-video-example.html)
 
+## Using the Eluvio Player
+It is highly recommended to use the [Eluvio Player](https://www.npmjs.com/package/@eluvio/elv-player-js) instead of implementing playout yourself. The Eluvio Player makes it easy to play content from the fabric on your web page.
+
 ## Quick Start - Serving video from the Eluvio Content Fabric
 
 Playing video from the Fabric using the Dash and HLS adaptive bitrate streaming protocols can be done in a few simple steps:
 
-- Import the [Eluvio JavaScript client (ElvClient)](https://github.com/eluv-io/elv-client-js) and initialize ElvClient with the appropriate configuration URL and user private key (generating one if necessary) or OAuth token
+- Import the [Eluvio JavaScript client (ElvClient)](https://www.npmjs.com/package/@eluvio/elv-client-js) and initialize ElvClient with the appropriate configuration URL and (for non-public content) user private key
 - Use the client to retrieve the dash manifest / HLS playlist for the content, along with any DRM specific information
 - Initialize the player with the manifest/playlist + DRM info and start playing
 
+#### Using the Eluvio Wallet Client
+
+If you are using the wallet environment, you can retrieve the ElvClient instance from the wallet client:
+- Initialze the [Eluvio Wallet Client](https://eluv-io.github.io/elv-client-js/wallet-client/index.html) and perform any necessary authorization (e.g. logging in with `walletClient.LogIn`)
+- Access the wallet client's instance of ElvClient via `walletClient.client`. For example, `walletClient.client.PlayoutOptions(...)`
 
 ### Basic Example - Step by Step
 
@@ -21,7 +29,7 @@ Below is a detailed explanation of how this example page works.
 
 #### Important Note: 
 
-The Bitmovin player will not run from a static HTML file. In order to run this sample with Bitmovin support, it must be accessed from a web server. You can use the node [http-server](https://www.npmjs.com/package/http-server) utility to serve the file locally:
+FairPlay support and the Bitmovin player will not run from a static HTML file. In order to run this sample with support for Bitmovin and FairPlay, it must be accessed from a web server. You can use the node [http-server](https://www.npmjs.com/package/http-server) utility to serve the file locally:
 
 - Install http-server using `npm install -g http-server`
 - Use http-server to serve the examples directory `http-server ./examples`
@@ -41,7 +49,9 @@ Starting at the top of the file, we are importing the various players, as well a
 
 This line imports the minified Eluvio JavaScript client from [GitHub](https://github.com/eluv-io/elv-client-js) using the [jsDelivr](https://www.jsdelivr.com) CDN. The client is also available on [NPM](https://www.npmjs.com/package/@eluvio/elv-client-js). For more information, check the [client documentation](https://eluv-io.github.io/elv-client-js/ElvClient.html).
 
-Moving down to the `Load` method (~line 300):
+The client can also be installed via the NPM package [@eluvio/elv-client-js](https://www.npmjs.com/package/@eluvio/elv-client-js).
+
+Moving down to the `Load` method (~line 400):
 
 ```javascript
 // Create client with the configuration URL of the network
@@ -54,35 +64,19 @@ const wallet = client.GenerateWallet();
 const signer = wallet.AddAccount({privateKey: (private-key)});
 await client.SetSigner({signer});
 
-// Or initialize client with static token
-await client.SetStaticToken({
-  token: client.utils.B64(JSON.stringify({qspace_id: await client.ContentSpaceId()}))
-});
 ```
 
 This is the basic process of intitializing the client. 
 
 Being built on blockchain technology, interaction with the Fabric requires the use of an ethereum private key, representing a user account, in order to verify and authenticate requests, perform encryption, transfer funds, and generally serve as an identity for the user. 
 
-However, in many cases where the goal is simply to serve video, much of this functionality is unnecessary for an end user. Instead, we can simply generate a private key as needed in order to perform the functions necessary to access the Fabric without the hassle of managing user data. In this case, we generate a random mnemonic phrase, which is then converted into a "signer" containing - among other things - a private key that the client may use to perform operations on the Fabric.
+However, in many cases where the goal is simply to serve video, much of this functionality is unnecessary for an end user. Instead, we can simply generate a private key as needed in order to perform the functions necessary to access the Fabric without the hassle of managing user data. In this case, we generate a random mnemonic phrase, which is then converted into a "signer" containing - among other things - a private key that the client may use to perform operations on the Fabric. The client does this automatically by default - if no other authorization method is set up, it will use a randomly generated private key.
 
 On the other hand, if a stronger user identity is desired, you can design your application to keep track of this mnemonic (or the private key it represents) and use it any time that user accesses a video or any other content on the Fabric. Because accessing content creates a blockchain record, it is then possible to correlate every content access to the specific user who accessed it.
 
 Note that the more the account is used for, the more valuable the account becomes. Always treat private keys (and mnemonics) as private, sensitive user data. Always store and transfer them encrypted (the client has a method for encrypting private keys with a password - see see [ElvWallet#GenerateEncryptedPrivateKey](https://eluv-io.github.io/elv-client-js/ElvWallet.html#GenerateEncryptedPrivateKey)). A plaintext private key or mnemonic should *never* leave the user's browser - all use of the private key should done on the client side.
 
-##### Using an OAuth token for authentication
-
-If authenticating with OAuth, you can simply set the OAuth token in the client in lieu of setting the signer. Here is an example using an [Okta](https://developer.okta.com/code/javascript/okta_auth_sdk/) ID token:
-
-```
-const configUrl = "https://demov3.net955210.contentfabric.io/config";
-const client = await ElvClient.FromConfigurationUrl({configUrl});
-
-const oauthToken = await okta.getIdToken();
-
-await this.props.client.SetOauthToken({token: oauthToken});
-```
-
+For end user cases where the user's account is important, it is recommended to use the [Eluvio Wallet Client](https://eluv-io.github.io/elv-client-js/wallet-client/index.html). This allows the user to log in via OAuth with email and password, creating a custodial wallet where the private key is protected.
 
 #### Step 2 - Access the content
 
@@ -254,6 +248,7 @@ Now that we have all the information we need to play the content, we can set up 
 ##### Playing HLS
  
  ```javascript
+
 const LoadHlsJs = (playoutOptions) => {
   const playoutMethods = playoutOptions.hls.playoutMethods;
 
@@ -273,15 +268,49 @@ const LoadHlsJs = (playoutOptions) => {
 
   const playerElement = CreatePlayerElement();
 
-  // Use native player for sample AES
+  // Use native player for Sample AES and FairPlay
   if(DRM === "sample-aes" && PLAYER_TYPE !== "bitmovin") {
     playerElement.src = playoutInfo.playoutUrl;
     return;
+  } else if(DRM === "fairplay" && PLAYER_TYPE !== "bitmovin") {
+    import("./FairPlay.js")
+      .then(async ({InitializeFairPlayStream}) => {
+        try {
+          await InitializeFairPlayStream({playoutOptions, video: playerElement})
+        } catch(error) {
+          SetErrorMessage(error.toString());
+        }
+      });
+    return;
   }
 
-  player = new Hls();
-  player.loadSource(playoutInfo.playoutUrl);
+  // Move authorization token from URL params to authorization header.
+  // This improves caching of video segments.
+  const playoutUrl = new URL(playoutInfo.playoutUrl);
+  const authorization = playoutUrl.searchParams.get("authorization");
+  playoutUrl.searchParams.delete("authorization");
+
+  const playerConfiguration = {
+    ...PlayerConfiguration(),
+    xhrSetup: xhr => {
+      xhr.setRequestHeader("Authorization", `Bearer ${authorization}`);
+
+      return xhr;
+    }
+  }
+
+  // Load content and apply specified settings
+  player = new Hls(playerConfiguration);
+  player.loadSource(playoutUrl.toString());
   player.attachMedia(playerElement);
+
+
+  // Register listener to retrieve bitrate for display
+  player.on(Hls.Events.LEVEL_SWITCHED, () => {
+    const currentLevel = player.levels[player.currentLevel];
+
+    document.getElementById("bitrate").innerHTML = `${currentLevel.attrs.RESOLUTION} | ${currentLevel.bitrate / 1000 / 1000} Mbps`;
+  });
 };
 ```
 
@@ -291,6 +320,7 @@ const LoadHlsJs = (playoutOptions) => {
 const LoadDash = (playoutOptions) => {
   const playoutMethods = playoutOptions.dash.playoutMethods;
 
+  // Determine playout URL and license server
   let playoutInfo, licenseServer;
   if(DRM === "widevine") {
     playoutInfo = playoutMethods.widevine;
@@ -308,19 +338,56 @@ const LoadDash = (playoutOptions) => {
     return;
   }
 
+  // Initialize dash player
   const playerElement = CreatePlayerElement();
   player = dashjs.MediaPlayer().create();
-  player.setProtectionData({
-    "com.widevine.alpha": {
-      "serverURL": licenseServer
-    }
+
+
+  // Move authorization token from URL params to authorization header.
+  // This improves caching of video segments.
+  const playoutUrl = new URL(playoutInfo.playoutUrl);
+  const authorization = playoutUrl.searchParams.get("authorization");
+  playoutUrl.searchParams.delete("authorization");
+
+  player.extend("RequestModifier", function () {
+    return {
+      modifyRequestHeader: xhr => {
+        xhr.setRequestHeader("Authorization", `Bearer ${authorization}`);
+
+        return xhr;
+      },
+      modifyRequestURL: url => url
+    };
   });
 
-  player.initialize(playerElement, playoutInfo.playoutUrl);
+  // Specify widevine license server
+  if(DRM === "widevine") {
+    player.setProtectionData({
+      "com.widevine.alpha": {
+        "serverURL": licenseServer
+      }
+    });
+  }
+
+  // Load content and apply specified settings
+  player.initialize(playerElement, playoutUrl.toString());
+  player.updateSettings(PlayerConfiguration());
+
+
+  // Register listener to retrieve bitrate for display
+  player.on(dashjs.MediaPlayer.events.QUALITY_CHANGE_RENDERED, () => {
+    const currentLevel = player.getBitrateInfoListFor("video")[player.getQualityFor("video")];
+
+    document.getElementById("bitrate").innerHTML = `${currentLevel.width}x${currentLevel.height} | ${currentLevel.bitrate / 1000 / 1000} Mbps`;
+  });
 };
 ```
 
 Both cases are relatively straightforward - determine the playout url, then set up the corresponding player. Note that HLS.js does not support HLS playout with Sample AES encryption. You can instead use native Apple HLS playback instead by setting the `src` attribute of the video element.
+
+##### Authorization
+
+In both cases, the authorization token is removed from the playout URL and instead added to the `Authorization` request header. This is not necessary, but it is recommended to improve caching performance for your content. If the authorization token is in the playout URL, each segment URL requested by the player will include it as well. Each client will have a different authorization token which means every request URL will be unique, and therefore will not be improved by caching.
 
 ##### Widevine
 
@@ -384,3 +451,45 @@ Setting up Bitmovin is simpler than setting up HLS or Dash playout separately, b
 At this point, you should have fast, high quality video in your player, freshly transcoded from the Fabric.
 
 
+#### Addendum: Using Global URLs
+
+If for some reason you are not able to use ElvClient or the Eluvio Player in your project (for example, native mobile applications), you can use the fabric's global URLs feature to refer to content in the fabric. These URLs will resolve to a fabric node based on the user's location, ensuring that the content is served from close by for best performance.
+
+The format of these urls is 
+```
+https://<space>.<network>.contentfabric.io/s/<space>/<content>
+``` 
+for public content, or 
+```
+https://<space>.<network>.contentfabric.io/s/<space>/t/<auth-token>/<content>
+``` 
+for authorized content. 
+
+For the production network, the space is `main` and the network is `net955305` - `https://main.net955305.contentfabric.io/s/main/`. 
+
+For demo, the space is `demov3` and the network is `net955210` - `https://demov3.net955210.contentfabric.io/s/demov3/`
+
+Content is referred to either by version hash (`/q/hq__...`) or library ID and object ID (`/qlibs/ilib.../q/iq__...`).
+
+### Examples:
+
+``` 
+Public metadata:
+
+https://main.net955305.contentfabric.io/s/main/q/hq__37GwEoqi3NeaMw6FhtjsUM4hJMvM1a6BhPsL9SDybyawa31hHGDKcZrCjdsdiZdXec9uzLByxj/meta/public
+
+https://main.net955305.contentfabric.io/s/main/q/hq__37GwEoqi3NeaMw6FhtjsUM4hJMvM1a6BhPsL9SDybyawa31hHGDKcZrCjdsdiZdXec9uzLByxj/meta/public/name
+
+```
+
+```
+Playout URLs for HLS Clear:
+
+By version hash:
+
+https://main.net955305.contentfabric.io/s/main/q/hq__37GwEoqi3NeaMw6FhtjsUM4hJMvM1a6BhPsL9SDybyawa31hHGDKcZrCjdsdiZdXec9uzLByxj/rep/playout/default/hls-clear/playlist.m3u8
+
+By library ID and Object ID:
+
+https://main.net955305.contentfabric.io/s/main/qlibs/ilib3C82jGbT41QLSZb35dDwmUWbSuP9/q/iq__5E9asweGiUmnJyPjrwGw7ur3ssd/rep/playout/default/hls-clear/playlist.m3u8
+```

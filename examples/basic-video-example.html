@@ -17,7 +17,7 @@
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
   <!-- dashjs -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/dashjs/3.0.2/dash.all.min.js" integrity="sha256-gmIk8d0B9FnDQ4pcQ5e9/OXc2OEbpZRPti95Lokfccc=" crossorigin="anonymous"></script>
+  <script src="http://cdn.dashjs.org/v4.7.0/dash.all.min.js"></script>
 
   <!-- elv-client-js -->
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@eluvio/elv-client-js@latest/dist/ElvClient-min.js"></script>
@@ -53,20 +53,26 @@
       width: 100%;
       text-align: center;
       font-weight: bold;
-      margin-bottom: 20px;
       height: 2rem;
     }
 
     .controls {
-      margin: 20px 0 50px;
+      margin: 0 0 50px;
+    }
+
+    .actions-container {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
     }
 
     .actions {
-      width: 100%;
+      flex-direction: column;
       display: flex;
       justify-content: center;
       align-items: center;
       padding: 5px 0;
+      gap: 5px;
     }
 
     .actions button {
@@ -89,6 +95,10 @@
       color: white;
     }
 
+    .actions button:disabled {
+      opacity: 0.5;
+    }
+
     .input-container {
       display: flex;
       flex-direction: column;
@@ -98,13 +108,15 @@
     }
 
     .input-container input,
-    .input-container textarea {
+    .input-container textarea,
+    .input-container select {
       width: 75rem;
       padding: 0 0.5rem;
       height: 3rem;
       font-family: monospace;
       margin-bottom: 5px;
       border: 1px solid gray;
+      background: white;
     }
 
     .input-container textarea {
@@ -117,32 +129,36 @@
   <div id="error-message"></div>
   <div class="controls">
     <div id="bitrate"></div>
-    <div class="actions">
-      <button id="select-hls-dash">hls.js / dashjs</button>
-      <button id="select-bitmovin">Bitmovin</button>
-    </div>
+    <div class="actions-container">
+      <div class="actions">
+        <label>Player</label>
+        <button id="select-hls-dash">hls.js / dashjs</button>
+        <button id="select-bitmovin">Bitmovin</button>
+      </div>
 
-    <div class="actions">
-      <button id="load-hls">Play HLS Clear</button>
-      <button id="load-hls-aes">Play HLS AES-128</button>
-      <button id="load-hls-sample-aes">Play HLS Sample AES</button>
-      <button id="load-hls-fairplay">Play HLS FairPlay</button>
-      <button id="load-dash">Play Dash Clear</button>
-      <button id="load-dash-wv">Play Dash Widevine</button>
+      <div class="actions">
+        <label>Playout Method</label>
+        <button id="load-hls">HLS Clear</button>
+        <button id="load-hls-aes">HLS AES-128</button>
+        <button id="load-hls-sample-aes">HLS Sample AES</button>
+        <button id="load-hls-fairplay">HLS FairPlay</button>
+        <button id="load-dash">Dash Clear</button>
+        <button id="load-dash-wv">Dash Widevine</button>
+      </div>
     </div>
 
     <div class="input-container">
-      <input
-        id="config-url"
-        value="https://main.net955305.contentfabric.io/config"
-        placeholder="Config URL">
+      <select id="network">
+        <option value="main">Network: Main</option>
+        <option value="demov3">Network: Demo</option>
+      </select>
       <input
         id="private-key"
         value=""
-        placeholder="Private Key">
+        placeholder="Private Key (leave blank for public content)">
       <input
         id="content-id"
-        value="hq__CcdV4wnCNq9wv6jXpYeCQ2GE4FLQBFtVSSSt2XKfBJMrH89DFDGsfkpWWvBy16QBGGYeF5mLGo"
+        value=""
         placeholder="Object ID or Version Hash">
     </div>
 
@@ -157,8 +173,6 @@
   </div>
 
   <script type="module">
-    import {InitializeFairPlayStream} from "./FairPlay.js";
-
     let PROTOCOL = "hls";
     let DRM = "clear";
     let PLAYER_TYPE = "hls-dash";
@@ -280,14 +294,39 @@
         playerElement.src = playoutInfo.playoutUrl;
         return;
       } else if(DRM === "fairplay" && PLAYER_TYPE !== "bitmovin") {
-        InitializeFairPlayStream({playoutOptions, video: playerElement});
+        import("./FairPlay.js")
+          .then(async ({InitializeFairPlayStream}) => {
+            try {
+              await InitializeFairPlayStream({playoutOptions, video: playerElement})
+            } catch(error) {
+              SetErrorMessage(error.toString());
+            }
+          });
         return;
       }
 
-      player = new Hls(PlayerConfiguration());
-      player.loadSource(playoutInfo.playoutUrl);
+      // Move authorization token from URL params to authorization header.
+      // This improves caching of video segments.
+      const playoutUrl = new URL(playoutInfo.playoutUrl);
+      const authorization = playoutUrl.searchParams.get("authorization");
+      playoutUrl.searchParams.delete("authorization");
+
+      const playerConfiguration = {
+        ...PlayerConfiguration(),
+        xhrSetup: xhr => {
+          xhr.setRequestHeader("Authorization", `Bearer ${authorization}`);
+
+          return xhr;
+        }
+      }
+
+      // Load content and apply specified settings
+      player = new Hls(playerConfiguration);
+      player.loadSource(playoutUrl.toString());
       player.attachMedia(playerElement);
 
+
+      // Register listener to retrieve bitrate for display
       player.on(Hls.Events.LEVEL_SWITCHED, () => {
         const currentLevel = player.levels[player.currentLevel];
 
@@ -298,6 +337,7 @@
     const LoadDash = (playoutOptions) => {
       const playoutMethods = playoutOptions.dash.playoutMethods;
 
+      // Determine playout URL and license server
       let playoutInfo, licenseServer;
       if(DRM === "widevine") {
         playoutInfo = playoutMethods.widevine;
@@ -315,18 +355,43 @@
         return;
       }
 
+      // Initialize dash player
       const playerElement = CreatePlayerElement();
       player = dashjs.MediaPlayer().create();
-      player.setProtectionData({
-        "com.widevine.alpha": {
-          "serverURL": licenseServer
-        }
+
+
+      // Move authorization token from URL params to authorization header.
+      // This improves caching of video segments.
+      const playoutUrl = new URL(playoutInfo.playoutUrl);
+      const authorization = playoutUrl.searchParams.get("authorization");
+      playoutUrl.searchParams.delete("authorization");
+
+      player.extend("RequestModifier", function () {
+        return {
+          modifyRequestHeader: xhr => {
+            xhr.setRequestHeader("Authorization", `Bearer ${authorization}`);
+
+            return xhr;
+          },
+          modifyRequestURL: url => url
+        };
       });
 
-      player.initialize(playerElement, playoutInfo.playoutUrl);
+      // Specify widevine license server
+      if(DRM === "widevine") {
+        player.setProtectionData({
+          "com.widevine.alpha": {
+            "serverURL": licenseServer
+          }
+        });
+      }
 
+      // Load content and apply specified settings
+      player.initialize(playerElement, playoutUrl.toString());
       player.updateSettings(PlayerConfiguration());
 
+
+      // Register listener to retrieve bitrate for display
       player.on(dashjs.MediaPlayer.events.QUALITY_CHANGE_RENDERED, () => {
         const currentLevel = player.getBitrateInfoListFor("video")[player.getQualityFor("video")];
 
@@ -372,13 +437,16 @@
       try {
         const contentId = document.getElementById("content-id").value;
 
-        if(!contentId) { return; }
+        if(!contentId) {
+          SetErrorMessage("Content ID not provided");
+          return;
+        }
 
         const objectId = contentId.startsWith("iq__") ? contentId : "";
         const versionHash = contentId.startsWith("hq__") ? contentId : "";
 
-        const client = await ElvClient.FromConfigurationUrl({
-          configUrl: document.getElementById("config-url").value
+        const client = await ElvClient.FromNetworkName({
+          networkName: document.getElementById("network").value
         });
 
         const privateKey = document.getElementById("private-key").value;
@@ -386,10 +454,6 @@
           const wallet = client.GenerateWallet();
           const signer = wallet.AddAccount({privateKey});
           client.SetSigner({signer});
-        } else {
-          await client.SetStaticToken({
-            token: client.utils.B64(JSON.stringify({qspace_id: await client.ContentSpaceId()}))
-          });
         }
 
         let playoutOptions;
@@ -432,27 +496,7 @@
     const SetPlayer = (playerType) => {
       PLAYER_TYPE = playerType;
 
-      if(playerType === "bitmovin") {
-        document.getElementById("player-configuration").value = JSON.stringify({
-          "live": {
-            "lowLatency": {
-              "targetLatency": 7,
-              "catchup": {
-                "playbackRateThreshold": 0.075,
-                "seekThreshold": 5,
-                "playbackRate": 1.2
-              },
-              "fallback": {
-                "playbackRateThreshold": 0.075,
-                "seekThreshold": 5,
-                "playbackRate": 0.95
-              }
-            }
-          }
-        }, null, 2);
-      } else {
-        document.getElementById("player-configuration").value = "{}";
-      }
+      document.getElementById("player-configuration").value = "{}";
 
       UpdateButtons();
     };
@@ -467,7 +511,14 @@
     document.getElementById("load-dash").onclick = () => SetOptions("dash", "clear");
     document.getElementById("load-dash-wv").onclick = () => SetOptions("dash", "widevine");
 
-    document.getElementById("load-button").onclick = () => Load();
+    document.getElementById("load-button").onclick = async () => {
+      try {
+        document.getElementById("load-button").disabled = true;
+        await Load()
+      } finally {
+        document.getElementById("load-button").disabled = false;
+      }
+    };
 
     UpdateButtons();
   </script>
