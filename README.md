@@ -451,7 +451,7 @@ Setting up Bitmovin is simpler than setting up HLS or Dash playout separately, b
 At this point, you should have fast, high quality video in your player, freshly transcoded from the Fabric.
 
 
-#### Addendum: Using Global URLs
+### Addendum: Using Global URLs
 
 If for some reason you are not able to use ElvClient or the Eluvio Player in your project (for example, native mobile applications), you can use the fabric's global URLs feature to refer to content in the fabric. These URLs will resolve to a fabric node based on the user's location, ensuring that the content is served from close by for best performance.
 
@@ -471,7 +471,7 @@ For demo, the space is `demov3` and the network is `net955210` - `https://demov3
 
 Content is referred to either by version hash (`/q/hq__...`) or library ID and object ID (`/qlibs/ilib.../q/iq__...`).
 
-### Examples:
+#### Examples:
 
 ``` 
 Public metadata:
