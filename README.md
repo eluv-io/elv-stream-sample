@@ -461,7 +461,7 @@ https://<space>.<network>.contentfabric.io/s/<space>/<content>
 ``` 
 for public content, or 
 ```
-https://<space>.<network>.contentfabric.io/s/<space>/t/<auth-token>/<content>
+https://<space>.<network>.contentfabric.io/t/<auth-token>/<content>
 ``` 
 for authorized content. 
 
@@ -473,13 +473,22 @@ Content is referred to either by version hash (`/q/hq__...`) or library ID and o
 
 #### Examples:
 
+```
+File link:
+
+https://main.net955305.contentfabric.io/s/main/q/hq__AADtsVwBaACsaCGdrfK46hPuqjgTDwNvYVuK4oqJFkgbuhrwnCP8qER8m4zpQk86xpzWgMEPHh/files/general_thumbnails_eluv-design/JUSTICE-NFT-Face-_182C5D.jpg
+
+Using auth token:
+
+https://main.net955305.contentfabric.io/t/eyJxc3BhY2VfaWQiOiJpc3BjMlJVb1JlOWVSMnYzM0hBUlFVVlNwMXJZWHp3MSJ9/q/hq__AADtsVwBaACsaCGdrfK46hPuqjgTDwNvYVuK4oqJFkgbuhrwnCP8qER8m4zpQk86xpzWgMEPHh/files/general_thumbnails_eluv-design/JUSTICE-NFT-Face-_182C5D.jpg
+```
+
 ``` 
 Public metadata:
 
 https://main.net955305.contentfabric.io/s/main/q/hq__37GwEoqi3NeaMw6FhtjsUM4hJMvM1a6BhPsL9SDybyawa31hHGDKcZrCjdsdiZdXec9uzLByxj/meta/public
 
 https://main.net955305.contentfabric.io/s/main/q/hq__37GwEoqi3NeaMw6FhtjsUM4hJMvM1a6BhPsL9SDybyawa31hHGDKcZrCjdsdiZdXec9uzLByxj/meta/public/name
-
 ```
 
 ```
