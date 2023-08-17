@@ -320,7 +320,7 @@ class VideoStore {
     this.embedUrl = yield this.rootStore.client.EmbedUrl({
       objectId,
       versionHash,
-      options: {offering: this.offering}
+      options: {offerings: [this.offering]}
     });
   });
 }
