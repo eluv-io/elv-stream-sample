@@ -317,35 +317,11 @@ class VideoStore {
 
   @action.bound
   GenerateEmbedUrl = flow(function * ({objectId, versionHash}) {
-    let embedUrl = new URL("https://embed.v3.contentfabric.io");
-    const networkInfo = yield this.rootStore.client.NetworkInfo();
-    const networkName = networkInfo.name === "demov3" ? "demo" : (networkInfo.name === "test" && networkInfo.id === 955205) ? "testv4" : networkInfo.name;
-    const permission = yield this.rootStore.client.Permission({
-      objectId: objectId ? objectId : yield this.rootStore.client.utils.DecodeVersionHash(versionHash).objectId
+    this.embedUrl = yield this.rootStore.client.EmbedUrl({
+      objectId,
+      versionHash,
+      options: {offering: this.offering}
     });
-
-    embedUrl.searchParams.set("p", "");
-    embedUrl.searchParams.set("net", networkName);
-    embedUrl.searchParams.set("ct", "s");
-    embedUrl.searchParams.set("off", this.offering);
-
-    if(versionHash) {
-      embedUrl.searchParams.set("vid", versionHash);
-    } else if(objectId) {
-      embedUrl.searchParams.set("oid", objectId);
-    }
-
-    if(["owner", "editable", "viewable"].includes(permission)) {
-      const token = yield this.rootStore.client.CreateSignedToken({
-        objectId,
-        versionHash,
-        duration: 100 * 24 * 60 * 60 * 1000 // milliseconds
-      });
-
-      embedUrl.searchParams.set("ath", token);
-    }
-
-    this.embedUrl = embedUrl.toString();
   });
 }
 
