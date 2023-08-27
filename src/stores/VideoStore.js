@@ -34,6 +34,7 @@ class VideoStore {
   @observable offering = "default";
   @observable playoutType;
   @observable availableOfferings = ["default"];
+  @observable embedUrl = "";
 
   constructor(rootStore) {
     this.rootStore = rootStore;
@@ -70,6 +71,7 @@ class VideoStore {
     this.playoutHandler = "playout";
     this.offering = "default";
     this.playoutType = undefined;
+    this.embedUrl = "";
 
     this.playerLevels = [];
     this.playerCurrentLevel = undefined;
@@ -203,6 +205,8 @@ class VideoStore {
         return;
       }
 
+      this.GenerateEmbedUrl({versionHash, objectId});
+
       this.title =
         (yield client.ContentObjectMetadata({
           libraryId,
@@ -309,6 +313,15 @@ class VideoStore {
     }
 
     this.playoutOptions = playoutOptions;
+  });
+
+  @action.bound
+  GenerateEmbedUrl = flow(function * ({objectId, versionHash}) {
+    this.embedUrl = yield this.rootStore.client.EmbedUrl({
+      objectId,
+      versionHash,
+      options: {offerings: [this.offering]}
+    });
   });
 }
 

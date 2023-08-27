@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "@babel/plugin-proposal-decorators": "^7.18.9",
-    "@eluvio/elv-client-js": "^4.0.36",
+    "@eluvio/elv-client-js": "^4.0.47",
     "buffer": "^5.2.1",
     "chart.js": "^2.9.4",
     "dashjs": "^3.1.2",

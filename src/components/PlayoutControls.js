@@ -1,6 +1,7 @@
 import React from "react";
 import {inject, observer} from "mobx-react";
-import {Action} from "elv-components-js";
+import {Action, Copy, ImageIcon} from "elv-components-js";
+import ClipboardIcon from "../static/icons/clipboard.svg";
 
 @inject("rootStore")
 @inject("videoStore")
@@ -69,11 +70,28 @@ class PlayoutControls extends React.Component {
     );
   }
 
+  EmbedUrl() {
+    return (
+      <div className="controls-container">
+        <h3 className="controls-header">
+          Embeddable URL
+          <Copy className="copy-button" copy={this.props.videoStore.embedUrl}>
+            <ImageIcon icon={ClipboardIcon} />
+          </Copy>
+        </h3>
+        <div className="playout-url">
+          {this.props.videoStore.embedUrl}
+        </div>
+      </div>
+    );
+  }
+
   render() {
     if(!this.props.videoStore.playoutOptions) { return null; }
 
     return (
       <div className="controls-container playout-controls">
+        { this.EmbedUrl() }
         <h3 className="controls-header">Playout Options</h3>
         { this.ProtocolSelection() }
         { this.DRMSelection() }
