@@ -33,7 +33,7 @@ class VideoStore {
   @observable playoutHandler = "playout";
   @observable offering = "default";
   @observable playoutType;
-  @observable availableOfferings = ["default"];
+  @observable availableOfferings = {default: { display_name: "default" }};
   @observable embedUrl = "";
 
   constructor(rootStore) {

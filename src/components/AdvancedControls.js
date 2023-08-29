@@ -50,13 +50,14 @@ class AdvancedControls extends React.Component {
         <h3 className="controls-header">Blockchain Node</h3>
         <select
           value={this.props.rootStore.ethNode}
-          onChange={event => this.props.rootStore.InitializeClient(this.props.rootStore.region, this.props.rootStore.fabricNode, event.target.value)}
+          onChange={event => this.props.rootStore.SetEthNode(event.target.value)}
         >
           <option value="">Automatic</option>
           {
             this.props.rootStore.nodes.ethereumURIs.map(ethNode =>
               <option value={ethNode} key={`eth-node-${ethNode}`}>{ ethNode }</option> )
           }
+          <option value="custom">Automatic</option>
         </select>
       </div>
     );
@@ -68,14 +69,23 @@ class AdvancedControls extends React.Component {
         <h3 className="controls-header">Fabric Node</h3>
         <select
           value={this.props.rootStore.fabricNode}
-          onChange={event => this.props.rootStore.InitializeClient(this.props.rootStore.region, event.target.value, this.props.rootStore.ethNode)}
+          onChange={event => this.props.rootStore.SetFabricNode(event.target.value)}
         >
           <option value="">Automatic</option>
           {
             this.props.rootStore.nodes.fabricURIs.map(fabricNode =>
               <option value={fabricNode} key={`fabric-node-${fabricNode}`}>{ fabricNode }</option> )
           }
+          <option value="custom">Custom</option>
         </select>
+        {
+          this.props.rootStore.fabricNode !== "custom" ? null :
+            <input
+              placeholder="Fabric Node"
+              value={this.props.rootStore.customFabricNode}
+              onChange={event => this.props.rootStore.SetCustomFabricNode(event.target.value)}
+            />
+        }
       </div>
     );
   }
@@ -103,7 +113,7 @@ class AdvancedControls extends React.Component {
         <h3 className="controls-header">Region</h3>
         <select
           value={this.props.rootStore.region}
-          onChange={event => this.props.rootStore.InitializeClient(event.target.value)}
+          onChange={event => this.props.rootStore.SetRegion(event.target.value)}
         >
           {
             regions.map(([label, value]) =>
@@ -165,8 +175,6 @@ class AdvancedControls extends React.Component {
   }
 
   render() {
-    if(!this.props.videoStore.playoutOptions) { return null; }
-
     const toggleButton = (
       <div className="controls-container advanced-controls-toggle">
         <div className="control-row">
@@ -184,7 +192,10 @@ class AdvancedControls extends React.Component {
       <div className="controls-container">
         <div className="control-row">
           <Action
-            onClick={() => this.props.videoStore.LoadVideo({contentId: this.props.videoStore.contentId})}
+            onClick={async () => {
+              await this.props.rootStore.InitializeClient();
+              this.props.videoStore.LoadVideo({contentId: this.props.videoStore.contentId});
+            }}
           >
             Reload
           </Action>

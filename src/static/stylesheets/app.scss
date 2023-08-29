@@ -363,13 +363,18 @@ video {
     word-break: break-all;
   }
 
-  select {
+  select,
+  input {
     font-size: $elv-font-m;
     height: 2.5rem;
     margin-top: $elv-spacing-xxs;
     padding: 0 $elv-spacing-xs;
     text-align: center;
     width: 100%;
+  }
+
+  input {
+    margin-top: $elv-spacing-xs;
   }
 
   .control-auth-context {

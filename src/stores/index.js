@@ -14,10 +14,12 @@ class RootStore {
   @observable initialLoadComplete = false;
 
   @observable client;
-  @observable region;
   @observable nodes;
-  @observable fabricNode;
-  @observable ethNode;
+
+  @observable region = "";
+  @observable fabricNode = "";
+  @observable customFabricNode = "";
+  @observable ethNode = "";
 
   @observable devMode = URI(window.location.toString()).hasQuery("dev");
   @observable displayAppMode = URI(window.location.toString()).hasQuery("action");
@@ -32,7 +34,7 @@ class RootStore {
   }
 
   @action.bound
-  InitializeClient = flow(function * (region="", fabricNode="", ethNode) {
+  InitializeClient = flow(function * () {
     let client;
     // Initialize ElvClient or FrameClient
     if(window.self === window.top) {
@@ -40,7 +42,7 @@ class RootStore {
 
       client = yield ElvClient.FromConfigurationUrl({
         configUrl: EluvioConfiguration["config-url"],
-        region
+        region: this.region
       });
 
       yield client.SetStaticToken({
@@ -53,8 +55,8 @@ class RootStore {
         timeout: 30
       });
 
-      if(region) {
-        yield client.UseRegion({region});
+      if(this.region) {
+        yield client.UseRegion({region: this.region});
       } else {
         yield client.ResetRegion();
       }
@@ -68,6 +70,8 @@ class RootStore {
     // Record available nodes
     let nodes = yield client.Nodes();
 
+    const fabricNode = this.fabricNode === "custom" ? this.customFabricNode : this.fabricNode;
+
     if(fabricNode) {
       yield client.SetNodes({fabricURIs: [fabricNode]});
 
@@ -78,18 +82,15 @@ class RootStore {
     }
 
     if(this.ethNode) {
-      yield client.SetNodes({ethereumURIs: [ethNode]});
+      yield client.SetNodes({ethereumURIs: [this.ethNode]});
 
       // Ensure selected node is in list
-      if(!nodes.ethereumURIs.find(uri => uri === ethNode)) {
-        nodes.ethereumURIs.push(ethNode);
+      if(!nodes.ethereumURIs.find(uri => uri === this.ethNode)) {
+        nodes.ethereumURIs.push(this.ethNode);
       }
     }
 
     this.nodes = nodes;
-
-    this.fabricNode = fabricNode;
-    this.ethNode = ethNode;
 
     this.availableDRMs = yield client.AvailableDRMs();
 
@@ -98,7 +99,6 @@ class RootStore {
     }
 
     this.client = client;
-    this.region = region;
 
     if(!this.initialLoadComplete) {
       const urlParams = new URLSearchParams(window.location.search);
@@ -129,6 +129,31 @@ class RootStore {
 
     this.initialLoadComplete = true;
   });
+
+  @action.bound
+  SetFabricNode(fabricNode) {
+    this.fabricNode = fabricNode;
+  }
+
+  @action.bound
+  SetCustomFabricNode(fabricNode) {
+    this.customFabricNode = fabricNode;
+  }
+
+  @action.bound
+  SetEthNode(ethNode) {
+    this.ethNode = ethNode;
+  }
+
+  @action.bound
+  SetRegion = flow(function * (region) {
+    this.region = region;
+    this.fabricNode = "";
+    this.customFabricNode = "";
+
+    yield this.client.UseRegion({region});
+    this.nodes = yield this.client.Nodes();
+  })
 
   @action.bound
   ToggleDevMode(enable) {

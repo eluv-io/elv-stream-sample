@@ -2,6 +2,7 @@ import React from "react";
 import {inject, observer} from "mobx-react";
 import {Action, onEnterPressed} from "elv-components-js";
 
+@inject("rootStore")
 @inject("videoStore")
 @observer
 class ContentInfo extends React.Component {
@@ -38,7 +39,10 @@ class ContentInfo extends React.Component {
   }
 
   ContentInput() {
-    const Submit = () => this.props.videoStore.LoadVideo({contentId: this.state.contentId});
+    const Submit = async () => {
+      await this.props.rootStore.InitializeClient();
+      await this.props.videoStore.LoadVideo({contentId: this.state.contentId});
+    };
 
     return (
       <div className="content-input">
