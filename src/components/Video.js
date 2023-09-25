@@ -21,12 +21,7 @@ class Video extends React.Component {
       initialTime: undefined,
       video: undefined,
       videoVersion: 1,
-      qualityLevel: -1,
-      hlsOptions: JSON.stringify({
-        maxBufferLength: 30,
-        maxBufferSize: 300,
-        enableWorker: true
-      }, null, 2)
+      qualityLevel: -1
     };
 
     this.InitializeVideo = this.InitializeVideo.bind(this);
@@ -109,8 +104,7 @@ class Video extends React.Component {
   }
 
   InitializeHLS(video, playoutUrl) {
-    const options = JSON.parse(this.state.hlsOptions);
-    this.player = new HLSPlayer(options);
+    this.player = new HLSPlayer(this.props.videoStore.hlsjsOptions);
 
     this.bandwidthInterval = setInterval(
       () => this.props.videoStore.SetBandwidthEstimate(this.player.bandwidthEstimate),

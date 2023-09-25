@@ -14,6 +14,35 @@ class AdvancedControls extends React.Component {
     };
   }
 
+  HLSJSOptions() {
+    return (
+      <div className="controls-container">
+        <h3 className="controls-header">HLS JS Options</h3>
+        <JsonInput
+          name="hlsjsOptions"
+          value={JSON.stringify(this.props.videoStore.hlsjsOptions, null, 2)}
+          className="control-auth-context"
+          onChange={event => {
+            try {
+              this.props.videoStore.SetHLSJSOptions(JSON.parse(event.target.value));
+            } catch(error) {
+              // eslint-disable-next-line no-console
+              console.error(error);
+            }
+          }}
+        />
+        <a
+          target="_blank"
+          rel="noopener"
+          className="controls-link"
+          href="https://github.com/video-dev/hls.js/blob/master/docs/API.md"
+        >
+          API Docs
+        </a>
+      </div>
+    );
+  }
+
   AuthContext() {
     return (
       <div className="controls-container">
@@ -219,6 +248,7 @@ class AdvancedControls extends React.Component {
         { this.FabricNodes() }
         { this.BlockchainNodes() }
         { this.AuthContext() }
+        { this.HLSJSOptions() }
         { reloadButton }
       </React.Fragment>
     );

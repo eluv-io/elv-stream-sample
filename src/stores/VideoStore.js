@@ -9,6 +9,12 @@ class VideoStore {
   @observable loadId = 1;
   @observable dashjsSupported = typeof (window.MediaSource || window.WebKitMediaSource) === "function";
   @observable hlsjsSupported = HLSPlayer.isSupported();
+  @observable hlsjsOptions = {
+    maxBufferLength: 30,
+    maxBufferSize: 300,
+    enableWorker: true,
+    capLevelToPlayerSize: false
+  };
   @observable contentId;
   @observable posterUrl;
   @observable playoutOptions;
@@ -101,6 +107,11 @@ class VideoStore {
         }
       }, 5000);
     }
+  }
+
+  @action.bound
+  SetHLSJSOptions(options) {
+    this.hlsjsOptions = options;
   }
 
   @action.bound
