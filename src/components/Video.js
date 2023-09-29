@@ -3,11 +3,21 @@ import PropTypes from "prop-types";
 //import HLSPlayer from "hls-fix";
 import HLSPlayer from "hls.js";
 import DashJS from "dashjs";
-import URI from "urijs";
 import Mux from "mux-embed";
 import {inject, observer} from "mobx-react";
 import {LoadingElement} from "elv-components-js";
 import {InitializeFairPlayStream} from "../../FairPlay";
+
+export const LowLatencyLiveHLSOptions = {
+  "enableWorker": true,
+  "lowLatencyMode": true,
+  "maxBufferLength": 5,
+  "backBufferLength": 5,
+  "liveSyncDuration": 5,
+  "liveMaxLatencyDuration": 15,
+  "liveDurationInfinity": false,
+  "highBufferWatchdogPeriod": 1
+};
 
 @inject("rootStore")
 @inject("videoStore")
@@ -104,7 +114,17 @@ class Video extends React.Component {
   }
 
   InitializeHLS(video, playoutUrl) {
-    this.player = new HLSPlayer(this.props.videoStore.hlsjsOptions);
+    const hlsOptions = {
+      ...(this.props.videoStore.playerProfile === "live" ? LowLatencyLiveHLSOptions : {}),
+      ...(this.props.videoStore.hlsjsOptions || {})
+    };
+
+    // eslint-disable-next-line no-console
+    console.log("Initializing HLS player with the following options:");
+    // eslint-disable-next-line no-console
+    console.log(hlsOptions);
+
+    this.player = new HLSPlayer(hlsOptions);
 
     this.bandwidthInterval = setInterval(
       () => this.props.videoStore.SetBandwidthEstimate(this.player.bandwidthEstimate),
@@ -294,7 +314,7 @@ class Video extends React.Component {
         env_key: "2i5480sms8vdgj0sv9bv6lpk5",
         video_id: this.props.videoStore.contentId,
         video_title: this.props.videoStore.title,
-        video_cdn: URI(playoutUrl).hostname(),
+        video_cdn: playoutUrl ? new URL(playoutUrl).hostname : "",
         viewer_user_id: await this.props.videoStore.rootStore.client.CurrentAccountAddress()
       }
     };

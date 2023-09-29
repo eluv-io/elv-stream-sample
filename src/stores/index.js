@@ -1,5 +1,4 @@
 import {configure, observable, action, flow} from "mobx";
-import URI from "urijs";
 import { FrameClient } from "@eluvio/elv-client-js/src/FrameClient";
 
 import VideoStore from "./VideoStore";
@@ -9,6 +8,8 @@ import MetricsStore from "./Metrics";
 configure({
   enforceActions: "always"
 });
+
+const searchParams = new URLSearchParams(window.location.search);
 
 class RootStore {
   @observable initialLoadComplete = false;
@@ -21,8 +22,8 @@ class RootStore {
   @observable customFabricNode = "";
   @observable ethNode = "";
 
-  @observable devMode = URI(window.location.toString()).hasQuery("dev");
-  @observable displayAppMode = URI(window.location.toString()).hasQuery("action");
+  @observable devMode = searchParams.has("dev")
+  @observable displayAppMode = searchParams.has("action");
 
   constructor() {
     this.videoStore = new VideoStore(this);

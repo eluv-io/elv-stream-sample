@@ -2,12 +2,15 @@ import {observable, action, flow, runInAction, computed} from "mobx";
 //import HLSPlayer from "hls-fix";
 import HLSPlayer from "hls.js";
 
+const searchParams = new URLSearchParams(window.location.search);
+
 class VideoStore {
   @observable loading = false;
   @observable error = "";
 
   @observable loadId = 1;
   @observable dashjsSupported = typeof (window.MediaSource || window.WebKitMediaSource) === "function";
+  @observable playerProfile = searchParams.get("playerProfile");
   @observable hlsjsSupported = HLSPlayer.isSupported();
   @observable hlsjsOptions = {
     maxBufferLength: 30,
@@ -181,6 +184,11 @@ class VideoStore {
   @action.bound
   SetPlayoutType(playoutType) {
     this.playoutType = playoutType;
+  }
+
+  @action.bound
+  SetPlayerProfile(playerProfile) {
+    this.playerProfile = playerProfile;
   }
 
   @action.bound

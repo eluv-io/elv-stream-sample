@@ -153,6 +153,21 @@ class AdvancedControls extends React.Component {
     );
   }
 
+  PlayoutProfile() {
+    return (
+      <div className="controls-container">
+        <h3 className="controls-header">Player Profile</h3>
+        <select
+          value={this.props.videoStore.playerProfile}
+          onChange={event => this.props.videoStore.SetPlayerProfile(event.target.value)}
+        >
+          <option value="">VOD</option>
+          <option value="live">Live</option>
+        </select>
+      </div>
+    );
+  }
+
   PlayoutType() {
     return (
       <div className="controls-container">
@@ -244,6 +259,7 @@ class AdvancedControls extends React.Component {
         { this.Offerings() }
         { this.PlayoutHandler() }
         { this.PlayoutType() }
+        { this.PlayoutProfile() }
         { this.Region() }
         { this.FabricNodes() }
         { this.BlockchainNodes() }
