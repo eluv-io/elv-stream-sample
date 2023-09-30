@@ -8,17 +8,6 @@ import {inject, observer} from "mobx-react";
 import {LoadingElement} from "elv-components-js";
 import {InitializeFairPlayStream} from "../../FairPlay";
 
-export const LowLatencyLiveHLSOptions = {
-  "enableWorker": true,
-  "lowLatencyMode": true,
-  "maxBufferLength": 5,
-  "backBufferLength": 5,
-  "liveSyncDuration": 5,
-  "liveMaxLatencyDuration": 15,
-  "liveDurationInfinity": false,
-  "highBufferWatchdogPeriod": 1
-};
-
 @inject("rootStore")
 @inject("videoStore")
 @inject("metricsStore")
@@ -114,17 +103,12 @@ class Video extends React.Component {
   }
 
   InitializeHLS(video, playoutUrl) {
-    const hlsOptions = {
-      ...(this.props.videoStore.playerProfile === "live" ? LowLatencyLiveHLSOptions : {}),
-      ...(this.props.videoStore.hlsjsOptions || {})
-    };
-
     // eslint-disable-next-line no-console
     console.log("Initializing HLS player with the following options:");
     // eslint-disable-next-line no-console
-    console.log(hlsOptions);
+    console.log(this.props.videoStore.hlsjsOptions);
 
-    this.player = new HLSPlayer(hlsOptions);
+    this.player = new HLSPlayer(this.props.videoStore.hlsjsOptions);
 
     this.bandwidthInterval = setInterval(
       () => this.props.videoStore.SetBandwidthEstimate(this.player.bandwidthEstimate),

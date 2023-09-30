@@ -4,20 +4,28 @@ import HLSPlayer from "hls.js";
 
 const searchParams = new URLSearchParams(window.location.search);
 
+const playerProfile = searchParams.get("playerProfile");
+
+const LowLatencyLiveHLSOptions = {
+  "enableWorker": true,
+  "lowLatencyMode": true,
+  "maxBufferLength": 5,
+  "backBufferLength": 5,
+  "liveSyncDuration": 5,
+  "liveMaxLatencyDuration": 15,
+  "liveDurationInfinity": false,
+  "highBufferWatchdogPeriod": 1
+};
+
 class VideoStore {
   @observable loading = false;
   @observable error = "";
 
   @observable loadId = 1;
   @observable dashjsSupported = typeof (window.MediaSource || window.WebKitMediaSource) === "function";
-  @observable playerProfile = searchParams.get("playerProfile");
+  @observable playerProfile = playerProfile
   @observable hlsjsSupported = HLSPlayer.isSupported();
-  @observable hlsjsOptions = {
-    maxBufferLength: 30,
-    maxBufferSize: 300,
-    enableWorker: true,
-    capLevelToPlayerSize: false
-  };
+  @observable hlsjsOptions = playerProfile === "live" ? LowLatencyLiveHLSOptions : {};
   @observable contentId;
   @observable posterUrl;
   @observable playoutOptions;
@@ -189,6 +197,12 @@ class VideoStore {
   @action.bound
   SetPlayerProfile(playerProfile) {
     this.playerProfile = playerProfile;
+
+    if(playerProfile === "live") {
+      this.hlsjsOptions = LowLatencyLiveHLSOptions;
+    } else {
+      this.hlsjsOptions = {};
+    }
   }
 
   @action.bound

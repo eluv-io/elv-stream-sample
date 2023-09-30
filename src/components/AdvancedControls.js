@@ -16,7 +16,7 @@ class AdvancedControls extends React.Component {
 
   HLSJSOptions() {
     return (
-      <div className="controls-container">
+      <div className="controls-container" key={`hls-js-options-${this.props.videoStore.playerProfile}`}>
         <h3 className="controls-header">HLS JS Options</h3>
         <JsonInput
           name="hlsjsOptions"
