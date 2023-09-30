@@ -103,11 +103,6 @@ class Video extends React.Component {
   }
 
   InitializeHLS(video, playoutUrl) {
-    // eslint-disable-next-line no-console
-    console.log("Initializing HLS player with the following options:");
-    // eslint-disable-next-line no-console
-    console.log(this.props.videoStore.hlsjsOptions);
-
     this.player = new HLSPlayer(this.props.videoStore.hlsjsOptions);
 
     this.bandwidthInterval = setInterval(
