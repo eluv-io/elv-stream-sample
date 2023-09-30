@@ -353,6 +353,7 @@ class VideoStore {
     this.embedUrl = yield this.rootStore.client.EmbedUrl({
       objectId,
       versionHash,
+      mediaType: this.playerProfile === "live" ? "live_video" : "video",
       options: {offerings: [this.offering]}
     });
   });
