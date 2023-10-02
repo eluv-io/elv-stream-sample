@@ -1,21 +1,11 @@
 import {observable, action, flow, runInAction, computed} from "mobx";
 //import HLSPlayer from "hls-fix";
 import HLSPlayer from "hls.js";
+import {Utils} from "@eluvio/elv-client-js";
 
 const searchParams = new URLSearchParams(window.location.search);
 
 const playerProfile = searchParams.get("playerProfile");
-
-const LowLatencyLiveHLSOptions = {
-  "enableWorker": true,
-  "lowLatencyMode": true,
-  "maxBufferLength": 5,
-  "backBufferLength": 5,
-  "liveSyncDuration": 5,
-  "liveMaxLatencyDuration": 15,
-  "liveDurationInfinity": false,
-  "highBufferWatchdogPeriod": 1
-};
 
 class VideoStore {
   @observable loading = false;
@@ -25,7 +15,7 @@ class VideoStore {
   @observable dashjsSupported = typeof (window.MediaSource || window.WebKitMediaSource) === "function";
   @observable playerProfile = playerProfile
   @observable hlsjsSupported = HLSPlayer.isSupported();
-  @observable hlsjsOptions = playerProfile === "live" ? LowLatencyLiveHLSOptions : {};
+  @observable hlsjsOptions = playerProfile === "live" ? Utils.LiveHLSJSSettings({lowLatency: true}) : {};
   @observable contentId;
   @observable posterUrl;
   @observable playoutOptions;
@@ -199,7 +189,7 @@ class VideoStore {
     this.playerProfile = playerProfile;
 
     if(playerProfile === "live") {
-      this.hlsjsOptions = LowLatencyLiveHLSOptions;
+      this.hlsjsOptions = Utils.LiveHLSJSSettings({lowLatency: true});
     } else {
       this.hlsjsOptions = {};
     }
