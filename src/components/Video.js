@@ -103,7 +103,19 @@ class Video extends React.Component {
   }
 
   InitializeHLS(video, playoutUrl) {
-    this.player = new HLSPlayer(this.props.videoStore.hlsjsOptions);
+    playoutUrl = new URL(playoutUrl);
+    const authorizationToken = playoutUrl.searchParams.get("authorization");
+    playoutUrl.searchParams.delete("authorization");
+    playoutUrl = playoutUrl.toString();
+
+    const hlsOptions = this.props.videoStore.hlsjsOptions || {};
+    this.player = new HLSPlayer({
+      ...hlsOptions,
+      xhrSetup: xhr => {
+        xhr.setRequestHeader("Authorization", `Bearer ${authorizationToken}`);
+        return xhr;
+      },
+    });
 
     this.bandwidthInterval = setInterval(
       () => this.props.videoStore.SetBandwidthEstimate(this.player.bandwidthEstimate),
@@ -147,7 +159,7 @@ class Video extends React.Component {
 
     this.player.on(HLSPlayer.Events.LEVEL_SWITCHED, () =>
       this.props.videoStore.SetPlayerLevels({
-        levels: this.player.levels.map(level => ({resolution: level.attrs.RESOLUTION, bitrate: level.bitrate})),
+        levels: this.player.levels.map((level, index) => ({resolution: level.attrs.RESOLUTION, bitrate: level.bitrate, qualityIndex: index})),
         currentLevel: this.player.currentLevel
       }));
 
@@ -193,6 +205,22 @@ class Video extends React.Component {
   InitializeDash(video, playoutUrl, widevineOptions) {
     this.player = DashJS.MediaPlayer().create();
 
+    playoutUrl = new URL(playoutUrl);
+    const authorizationToken = playoutUrl.searchParams.get("authorization");
+    playoutUrl.searchParams.delete("authorization");
+    playoutUrl = playoutUrl.toString();
+
+    this.player.extend("RequestModifier", function () {
+      return {
+        modifyRequestHeader: xhr => {
+          xhr.setRequestHeader("Authorization", `Bearer ${authorizationToken}`);
+
+          return xhr;
+        },
+        modifyRequestURL: url => url
+      };
+    });
+
     this.bandwidthInterval = setInterval(
       () => this.props.videoStore.SetBandwidthEstimate(this.player.getAverageThroughput("video") * 1000),
       1000
@@ -214,7 +242,7 @@ class Video extends React.Component {
         this.props.videoStore.SetPlayerLevels({
           levels: this.player.getBitrateInfoListFor("video")
             .map(level => ({resolution: `${level.width}x${level.height}`, bitrate: level.bitrate, qualityIndex: level.qualityIndex})),
-          currentLevel: 1
+          currentLevel: this.player.getQualityFor("video")
         });
 
         this.props.videoStore.SetAudioTracks({
@@ -229,6 +257,17 @@ class Video extends React.Component {
 
         this.setState({
           audioTrack: this.player.getCurrentTrackFor("audio").index
+        });
+      }
+    );
+
+    this.player.on(
+      DashJS.MediaPlayer.events.QUALITY_CHANGE_RENDERED,
+      () => {
+        this.props.videoStore.SetPlayerLevels({
+          levels: this.player.getBitrateInfoListFor("video")
+            .map(level => ({resolution: `${level.width}x${level.height}`, bitrate: level.bitrate, qualityIndex: level.qualityIndex})),
+          currentLevel: this.player.getQualityFor("video")
         });
       }
     );
@@ -476,10 +515,18 @@ class Video extends React.Component {
       );
     });
 
+    let autoLabel = "Auto";
+    const currentLevel = this.props.videoStore.playerLevels?.find(level =>
+      level.qualityIndex === this.props.videoStore.playerCurrentLevel
+    );
+    if(this.state.qualityLevel < 0 && currentLevel) {
+      autoLabel = `Auto (${currentLevel.resolution})`;
+    }
+
     // Add auto level
     levels.unshift(
       <option key="playback-level-auto" value={-1}>
-        Auto
+        {autoLabel}
       </option>
     );
 
