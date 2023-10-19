@@ -156,13 +156,14 @@ class AdvancedControls extends React.Component {
   PlayoutProfile() {
     return (
       <div className="controls-container">
-        <h3 className="controls-header">Player Profile</h3>
+        <h3 className="controls-header">HLS Player Profile</h3>
         <select
           value={this.props.videoStore.playerProfile}
           onChange={event => this.props.videoStore.SetPlayerProfile(event.target.value)}
         >
-          <option value="">VOD</option>
-          <option value="live">Live</option>
+          <option value="">Default</option>
+          <option value="live">Low Latency Live</option>
+          <option value="live_ull">Ultra Low Latency Live</option>
         </select>
       </div>
     );

@@ -188,7 +188,9 @@ class VideoStore {
   SetPlayerProfile(playerProfile) {
     this.playerProfile = playerProfile;
 
-    if(playerProfile === "live") {
+    if(playerProfile === "live_ull") {
+      this.hlsjsOptions = Utils.LiveHLSJSSettings({ultraLowLatency: true});
+    } else if(playerProfile === "live") {
       this.hlsjsOptions = Utils.LiveHLSJSSettings({lowLatency: true});
     } else {
       this.hlsjsOptions = {};
