@@ -342,12 +342,24 @@ class VideoStore {
 
   @action.bound
   GenerateEmbedUrl = flow(function * ({objectId, versionHash}) {
-    this.embedUrl = yield this.rootStore.client.EmbedUrl({
-      objectId,
-      versionHash,
-      mediaType: this.playerProfile === "live" ? "live_video" : "video",
-      options: {offerings: [this.offering]}
-    });
+    let embedUrl = new URL(
+      yield this.rootStore.client.EmbedUrl({
+        objectId,
+        versionHash,
+        mediaType: this.playerProfile === "live" ? "live_video" : "video",
+        options: {offerings: [this.offering]}
+      })
+    );
+
+    if(JSON.stringify(this.hlsjsOptions) === JSON.stringify(Utils.LiveHLSJSSettings({ultraLowLatency: true}))) {
+      embedUrl.searchParams.set("prf", "ull");
+    } else if(JSON.stringify(this.hlsjsOptions) === JSON.stringify(Utils.LiveHLSJSSettings({lowLatency: true}))) {
+      embedUrl.searchParams.set("prf", "ll");
+    } else if(this.hlsjsOptions && Object.keys(this.hlsjsOptions).length > 0) {
+      embedUrl.searchParams.set("hls", Utils.B58(JSON.stringify(this.hlsjsOptions)));
+    }
+
+    this.embedUrl = embedUrl.toString();
   });
 }
 
