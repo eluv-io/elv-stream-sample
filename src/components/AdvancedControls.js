@@ -31,14 +31,16 @@ class AdvancedControls extends React.Component {
             }
           }}
         />
-        <a
-          target="_blank"
-          rel="noopener"
-          className="controls-link"
-          href="https://github.com/video-dev/hls.js/blob/master/docs/API.md"
-        >
-          API Docs
-        </a>
+        <div className="controls-link-container">
+          <a
+            target="_blank"
+            rel="noopener"
+            className="controls-link"
+            href="https://github.com/video-dev/hls.js/blob/master/docs/API.md"
+          >
+            API Docs
+          </a>
+        </div>
       </div>
     );
   }
@@ -161,9 +163,9 @@ class AdvancedControls extends React.Component {
           value={this.props.videoStore.playerProfile}
           onChange={event => this.props.videoStore.SetPlayerProfile(event.target.value)}
         >
-          <option value="">Default</option>
-          <option value="live">Low Latency Live</option>
-          <option value="live_ull">Ultra Low Latency Live</option>
+          <option value="default">Default</option>
+          <option value="ll">Low Latency Live</option>
+          <option value="ull">Ultra Low Latency Live</option>
         </select>
       </div>
     );

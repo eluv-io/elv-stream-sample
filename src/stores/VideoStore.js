@@ -5,7 +5,12 @@ import {Utils} from "@eluvio/elv-client-js";
 
 const searchParams = new URLSearchParams(window.location.search);
 
-const playerProfile = searchParams.get("playerProfile");
+let playerProfile = searchParams.get("playerProfile") || "default";
+if(playerProfile === "live") {
+  playerProfile = "ll";
+} else if(!["default", "ll", "ull"].includes(playerProfile)) {
+  playerProfile = "default";
+}
 
 class VideoStore {
   @observable loading = false;
@@ -15,7 +20,7 @@ class VideoStore {
   @observable dashjsSupported = typeof (window.MediaSource || window.WebKitMediaSource) === "function";
   @observable playerProfile = playerProfile
   @observable hlsjsSupported = HLSPlayer.isSupported();
-  @observable hlsjsOptions = playerProfile === "live" ? Utils.LiveHLSJSSettings({lowLatency: true}) : {};
+  @observable hlsjsOptions = Utils.HLSJSSettings({profile: playerProfile});
   @observable contentId;
   @observable posterUrl;
   @observable playoutOptions;
@@ -188,13 +193,7 @@ class VideoStore {
   SetPlayerProfile(playerProfile) {
     this.playerProfile = playerProfile;
 
-    if(playerProfile === "live_ull") {
-      this.hlsjsOptions = Utils.LiveHLSJSSettings({ultraLowLatency: true});
-    } else if(playerProfile === "live") {
-      this.hlsjsOptions = Utils.LiveHLSJSSettings({lowLatency: true});
-    } else {
-      this.hlsjsOptions = {};
-    }
+    this.hlsjsOptions = Utils.HLSJSSettings({profile: playerProfile});
   }
 
   @action.bound
@@ -346,17 +345,22 @@ class VideoStore {
       yield this.rootStore.client.EmbedUrl({
         objectId,
         versionHash,
-        mediaType: this.playerProfile === "live" ? "live_video" : "video",
+        mediaType: ["ll", "ull"].includes(this.playerProfile) ? "live_video" : "video",
         options: {offerings: [this.offering]}
       })
     );
 
-    if(JSON.stringify(this.hlsjsOptions) === JSON.stringify(Utils.LiveHLSJSSettings({ultraLowLatency: true}))) {
+    if(JSON.stringify(this.hlsjsOptions) === JSON.stringify(Utils.HLSJSSettings({profile: "ull"}))) {
+      // Matches ultra low latency profile
       embedUrl.searchParams.set("prf", "ull");
-    } else if(JSON.stringify(this.hlsjsOptions) === JSON.stringify(Utils.LiveHLSJSSettings({lowLatency: true}))) {
+    } else if(JSON.stringify(this.hlsjsOptions) === JSON.stringify(Utils.HLSJSSettings({profile: "ll"}))) {
+      // Matches low latency profile
       embedUrl.searchParams.set("prf", "ll");
     } else if(this.hlsjsOptions && Object.keys(this.hlsjsOptions).length > 0) {
-      embedUrl.searchParams.set("hls", Utils.B58(JSON.stringify(this.hlsjsOptions)));
+      if(JSON.stringify(this.hlsjsOptions) !== JSON.stringify(Utils.HLSJSSettings({profile: "default"}))) {
+        // Settings present but does not match default profile
+        embedUrl.searchParams.set("hls", Utils.B58(JSON.stringify(this.hlsjsOptions)));
+      }
     }
 
     this.embedUrl = embedUrl.toString();

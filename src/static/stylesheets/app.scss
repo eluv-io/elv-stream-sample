@@ -340,12 +340,17 @@ video {
     padding: 0 $elv-spacing-m;
   }
 
+  .controls-link-container {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+  }
+
   .controls-link {
     color: $elv-color-mediumblue;
     font-size: $elv-font-s;
     margin: $elv-spacing-xs 0;
     text-align: right;
-    width: 100%;
   }
 
   .control-row {
