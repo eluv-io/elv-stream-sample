@@ -310,6 +310,7 @@ video {
 }
 
 .controls-header {
+  align-items: center;
   display: flex;
   font-size: $elv-font-l;
   font-weight: 600;
@@ -328,6 +329,7 @@ video {
 }
 
 .controls-section {
+  margin-top: 10px;
   overflow-y: auto;
   padding-bottom: $elv-spacing-xl;
 
@@ -376,6 +378,13 @@ video {
     max-width: 100%;
     min-width: 100%;
     word-break: break-all;
+  }
+
+  .embed-edit-link {
+    border: 1px solid $elv-color-mediumgray;
+    border-radius: 3px;
+    font-size: 10px;
+    padding: 3px 10px;
   }
 
   select,

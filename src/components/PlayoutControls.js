@@ -71,6 +71,11 @@ class PlayoutControls extends React.Component {
   }
 
   EmbedUrl() {
+    if(!this.props.videoStore.embedUrl) { return; }
+
+    const embedFormUrl = new URL(this.props.videoStore.embedUrl);
+    embedFormUrl.searchParams.delete("p");
+
     return (
       <div className="controls-container">
         <h3 className="controls-header">
@@ -78,6 +83,9 @@ class PlayoutControls extends React.Component {
           <Copy className="copy-button" copy={this.props.videoStore.embedUrl}>
             <ImageIcon icon={ClipboardIcon} />
           </Copy>
+          <a className="embed-edit-link" href={embedFormUrl.toString()} target="_blank">
+            Edit
+          </a>
         </h3>
         <div className="playout-url">
           {this.props.videoStore.embedUrl}
