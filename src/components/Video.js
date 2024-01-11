@@ -126,14 +126,15 @@ class Video extends React.Component {
     this.player.attachMedia(video);
 
     this.player.on(HLSPlayer.Events.AUDIO_TRACK_SWITCHED, () => {
+      const tracks = Array.from(this.video.audioTracks).map(track => ({
+        index: track.id,
+        label: track.label || track.language,
+        active: track.enabled
+      }));
+
       this.props.videoStore.SetAudioTracks({
-        tracks: this.player.audioTrackController.tracks.map(audioTrack =>
-          ({
-            index: audioTrack.id,
-            label: audioTrack.name
-          })
-        ),
-        currentTrack: this.player.audioTrack
+        tracks,
+        currentTrack: tracks.find(track => track.active)?.index
       });
     });
 
