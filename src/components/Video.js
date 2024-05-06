@@ -206,6 +206,17 @@ class Video extends React.Component {
   InitializeDash(video, playoutUrl, widevineOptions) {
     this.player = DashJS.MediaPlayer().create();
 
+    this.player.updateSettings({
+      streaming: {
+        buffer: {
+          fastSwitchEnabled: true
+        },
+        text: {
+          defaultEnabled: false
+        }
+      }
+    });
+
     playoutUrl = new URL(playoutUrl);
     const authorizationToken = playoutUrl.searchParams.get("authorization");
     playoutUrl.searchParams.delete("authorization");
@@ -267,7 +278,11 @@ class Video extends React.Component {
       () => {
         this.props.videoStore.SetPlayerLevels({
           levels: this.player.getBitrateInfoListFor("video")
-            .map(level => ({resolution: `${level.width}x${level.height}`, bitrate: level.bitrate, qualityIndex: level.qualityIndex})),
+            .map(level => ({
+              resolution: `${level.width}x${level.height}`,
+              bitrate: level.bitrate,
+              qualityIndex: level.qualityIndex
+            })),
           currentLevel: this.player.getQualityFor("video")
         });
       }
@@ -491,7 +506,12 @@ class Video extends React.Component {
         this.player.setQualityFor("video", parseInt(event.target.value));
         this.player.updateSettings({
           streaming: {
-            fastSwitchEnabled: true,
+            buffer: {
+              fastSwitchEnabled: true,
+            },
+            trackSwitchMode: {
+              video: "alwaysReplace"
+            },
             abr: {
               autoSwitchBitrate: {
                 video: parseInt(event.target.value) === -1
