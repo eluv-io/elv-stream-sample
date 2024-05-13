@@ -248,6 +248,23 @@ class Video extends React.Component {
       });
     }
 
+    const UpdateQualityOptions = () => {
+      try {
+        this.props.videoStore.SetPlayerLevels({
+          levels: this.player.getBitrateInfoListFor("video")
+            .map(level => ({
+              resolution: `${level.width}x${level.height}`,
+              bitrate: level.bitrate,
+              qualityIndex: level.qualityIndex
+            })),
+          currentLevel: this.player.getQualityFor("video")
+        });
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error("Failed to change quality", error);
+      }
+    };
+
     this.player.on(
       DashJS.MediaPlayer.events.CAN_PLAY,
       () => {
@@ -268,23 +285,6 @@ class Video extends React.Component {
         });
       }
     );
-
-    const UpdateQualityOptions = () => {
-      try {
-        this.props.videoStore.SetPlayerLevels({
-          levels: this.player.getBitrateInfoListFor("video")
-            .map(level => ({
-              resolution: `${level.width}x${level.height}`,
-              bitrate: level.bitrate,
-              qualityIndex: level.qualityIndex
-            })),
-          currentLevel: this.player.getQualityFor("video")
-        });
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error("Failed to change quality", error);
-      }
-    };
 
     this.player.on(
       DashJS.MediaPlayer.events.QUALITY_CHANGE_RENDERED,
