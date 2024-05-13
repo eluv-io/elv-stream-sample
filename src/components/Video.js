@@ -206,6 +206,17 @@ class Video extends React.Component {
   InitializeDash(video, playoutUrl, widevineOptions) {
     this.player = DashJS.MediaPlayer().create();
 
+    this.player.updateSettings({
+      streaming: {
+        buffer: {
+          fastSwitchEnabled: true
+        },
+        text: {
+          defaultEnabled: false
+        }
+      }
+    });
+
     playoutUrl = new URL(playoutUrl);
     const authorizationToken = playoutUrl.searchParams.get("authorization");
     playoutUrl.searchParams.delete("authorization");
@@ -237,14 +248,27 @@ class Video extends React.Component {
       });
     }
 
+    const UpdateQualityOptions = () => {
+      try {
+        this.props.videoStore.SetPlayerLevels({
+          levels: this.player.getBitrateInfoListFor("video")
+            .map(level => ({
+              resolution: `${level.width}x${level.height}`,
+              bitrate: level.bitrate,
+              qualityIndex: level.qualityIndex
+            })),
+          currentLevel: this.player.getQualityFor("video")
+        });
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error("Failed to change quality", error);
+      }
+    };
+
     this.player.on(
       DashJS.MediaPlayer.events.CAN_PLAY,
       () => {
-        this.props.videoStore.SetPlayerLevels({
-          levels: this.player.getBitrateInfoListFor("video")
-            .map(level => ({resolution: `${level.width}x${level.height}`, bitrate: level.bitrate, qualityIndex: level.qualityIndex})),
-          currentLevel: this.player.getQualityFor("video")
-        });
+        UpdateQualityOptions();
 
         this.props.videoStore.SetAudioTracks({
           tracks: this.player.getTracksFor("audio").map(audioTrack =>
@@ -265,13 +289,11 @@ class Video extends React.Component {
     this.player.on(
       DashJS.MediaPlayer.events.QUALITY_CHANGE_RENDERED,
       () => {
-        this.props.videoStore.SetPlayerLevels({
-          levels: this.player.getBitrateInfoListFor("video")
-            .map(level => ({resolution: `${level.width}x${level.height}`, bitrate: level.bitrate, qualityIndex: level.qualityIndex})),
-          currentLevel: this.player.getQualityFor("video")
-        });
+        UpdateQualityOptions();
       }
     );
+
+    this.player.on(DashJS.MediaPlayer.events.MANIFEST_LOADED, () => UpdateQualityOptions());
 
     this.player.on(
       DashJS.MediaPlayer.events.TEXT_TRACK_ADDED,
@@ -488,10 +510,15 @@ class Video extends React.Component {
     } else {
       SetLevel = event => {
         // Set quality, disable or enable auto level, and seek a bit to make it reload segments
-        this.player.setQualityFor("video", parseInt(event.target.value));
+        this.player.setQualityFor("video", parseInt(event.target.value), true);
         this.player.updateSettings({
           streaming: {
-            fastSwitchEnabled: true,
+            buffer: {
+              fastSwitchEnabled: true,
+            },
+            trackSwitchMode: {
+              video: "alwaysReplace"
+            },
             abr: {
               autoSwitchBitrate: {
                 video: parseInt(event.target.value) === -1
