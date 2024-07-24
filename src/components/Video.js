@@ -80,8 +80,8 @@ class Video extends React.Component {
     }
 
     this.props.videoStore.protocol === "hls" ?
-      this.InitializeHLS(video, playoutOptions.playoutUrl) :
-      this.InitializeDash(video, playoutOptions.playoutUrl, playoutOptions.drms);
+      this.InitializeHLS({video, playoutUrl: playoutOptions.playoutUrl, drms: playoutOptions.drms}) :
+      this.InitializeDash({video, playoutUrl: playoutOptions.playoutUrl, drms: playoutOptions.drms});
 
     this.InitializeMuxMonitoring(video, playoutOptions.playoutUrl);
 
@@ -102,15 +102,42 @@ class Video extends React.Component {
     window.player = this.player;
   }
 
-  InitializeHLS(video, playoutUrl) {
+  InitializeHLS({video, playoutUrl, drms}) {
     playoutUrl = new URL(playoutUrl);
     const authorizationToken = playoutUrl.searchParams.get("authorization");
     playoutUrl.searchParams.delete("authorization");
     playoutUrl = playoutUrl.toString();
 
+    let drmSettings = {};
+    if(["playready", "widevine"].includes(this.props.videoStore.drm)) {
+      drmSettings = {
+        drmSystems: {},
+        emeEnabled: true,
+        licenseXhrSetup: (xhr, url) => {
+          xhr.open("POST", url, true);
+          xhr.setRequestHeader("Authorization", `Bearer ${authorizationToken}`);
+        }
+      };
+
+      if(this.props.videoStore.drm === "playready") {
+        drmSettings.drmSystems = {
+          "com.microsoft.playready": {
+            licenseUrl: drms.playready.licenseServers[0]
+          }
+        };
+      } else if (this.props.videoStore.drm === "widevine") {
+        drmSettings.drmSystems = {
+          "com.widevine.alpha": {
+            licenseUrl: drms.widevine.licenseServers[0]
+          }
+        };
+      }
+    }
+
     const hlsOptions = this.props.videoStore.hlsjsOptions || {};
     this.player = new HLSPlayer({
       ...hlsOptions,
+      ...drmSettings,
       xhrSetup: xhr => {
         xhr.setRequestHeader("Authorization", `Bearer ${authorizationToken}`);
         return xhr;
@@ -203,7 +230,7 @@ class Video extends React.Component {
     });
   }
 
-  InitializeDash(video, playoutUrl, widevineOptions) {
+  InitializeDash({video, playoutUrl, drms}) {
     this.player = DashJS.MediaPlayer().create();
 
     this.player.updateSettings({
@@ -239,7 +266,7 @@ class Video extends React.Component {
     );
 
     if(this.props.videoStore.drm === "widevine") {
-      const widevineUrl = widevineOptions.widevine.licenseServers[0];
+      const widevineUrl = drms.widevine.licenseServers[0];
 
       this.player.setProtectionData({
         "com.widevine.alpha": {

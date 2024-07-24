@@ -10,15 +10,14 @@ class PlayoutInfo extends React.Component {
   LicenseServer() {
     if(
       !this.props.videoStore.playoutOptions ||
-      this.props.videoStore.protocol !== "dash" ||
-      this.props.videoStore.drm !== "widevine"
+      !["widevine", "playready"].includes(this.props.videoStore.drm)
     ) { return; }
 
 
     const playoutMethods = this.props.videoStore.playoutOptions[this.props.videoStore.protocol]
       .playoutMethods[this.props.videoStore.drm];
 
-    const licenseServer = playoutMethods.drms.widevine.licenseServers[0];
+    const licenseServer = playoutMethods.drms[this.props.videoStore.drm].licenseServers[0];
 
     return (
       <div className="controls-container playout-url">

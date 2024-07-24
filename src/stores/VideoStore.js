@@ -58,7 +58,8 @@ class VideoStore {
       "hls": "HLS",
       "sample-aes": "Sample AES",
       "widevine": "Widevine",
-      "fairplay": "FairPlay"
+      "fairplay": "FairPlay",
+      "playready": "PlayReady",
     };
   }
 
@@ -330,6 +331,8 @@ class VideoStore {
         this.drm = "widevine";
       } else if(playoutMethods.fairplay) {
         this.drm = "fairplay";
+      } else if(playoutMethods.playready) {
+        this.drm = "playready";
       } else {
         this.SetError("No playout formats compatible with this browser are available.");
         return;
