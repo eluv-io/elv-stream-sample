@@ -294,7 +294,8 @@ class VideoStore {
       versionHash,
       handler: isChannel ? "channel" : this.playoutHandler,
       offering: this.offering,
-      playoutType: this.playoutType
+      playoutType: this.playoutType,
+      options: {dvr: 1}
     });
 
     if(isChannel) {
