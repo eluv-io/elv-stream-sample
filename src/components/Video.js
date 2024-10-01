@@ -326,11 +326,11 @@ class Video extends React.Component {
       DashJS.MediaPlayer.events.TEXT_TRACK_ADDED,
       () => {
         const activeTrackIndex = this.player.getCurrentTextTrackIndex();
-        const tracks = this.player.getTracksFor("text").map(track => ({
-          index: track.index,
+        const tracks = this.player.getTracksFor("text").map((track, index) => ({
+          index: index,
           label: track.labels && track.labels.length > 0 ? track.labels[0].text : track.lang,
           language: track.lang,
-          active: track.index === activeTrackIndex
+          active: index === activeTrackIndex
         }));
 
         this.props.videoStore.SetTextTracks({
