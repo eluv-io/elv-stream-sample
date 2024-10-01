@@ -130,7 +130,7 @@ class VideoStore {
   @action.bound
   SetTextTracks({tracks, currentTrack}) {
     if(tracks) {
-      this.playerTextTracks = tracks;
+      this.playerTextTracks = tracks.map((track, index) => ({...track, index: track.index || index}));
     }
 
     this.playerCurrentTextTrack = currentTrack;
@@ -295,7 +295,8 @@ class VideoStore {
       handler: isChannel ? "channel" : this.playoutHandler,
       offering: this.offering,
       playoutType: this.playoutType,
-      //options: {dvr: 1}
+      options: this.availableOfferings?.[this.offering]?.properties?.dvr_available ?
+        {dvr: 1} : {}
     });
 
     if(isChannel) {

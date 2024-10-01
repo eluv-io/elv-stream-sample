@@ -325,9 +325,17 @@ class Video extends React.Component {
     this.player.on(
       DashJS.MediaPlayer.events.TEXT_TRACK_ADDED,
       () => {
+        const activeTrackIndex = this.player.getCurrentTextTrackIndex();
+        const tracks = this.player.getTracksFor("text").map(track => ({
+          index: track.index,
+          label: track.labels && track.labels.length > 0 ? track.labels[0].text : track.lang,
+          language: track.lang,
+          active: track.index === activeTrackIndex
+        }));
+
         this.props.videoStore.SetTextTracks({
-          tracks: Array.from(this.video.textTracks),
-          currentTrack: Array.from(this.video.textTracks).find(track => track.mode === "showing") || 0
+          tracks,
+          currentTrack: tracks[activeTrackIndex]
         });
       }
     );
@@ -476,23 +484,11 @@ class Video extends React.Component {
         >
           <option value={-1}>Subtitles: None</option>
           {
-            this.props.videoStore.playerTextTracks.map((track, index) => {
-              let label;
-
-              try {
-                label = this.props.videoStore.protocol === "dash" ?
-                  this.player.getTracksFor("text")[index].labels[0].text :
-                  track.label;
-              } catch(error) {
-                label = track.lang;
-              }
-
-              return (
-                <option value={index} key={`audio-track-${index}`}>
-                  Subtitles: { label }
-                </option>
-              );
-            })
+            this.props.videoStore.playerTextTracks.map(track =>
+              <option value={track.index} key={`audio-track-${track.index}`}>
+                Subtitles: { track.label }
+              </option>
+            )
           }
         </select>
       );
