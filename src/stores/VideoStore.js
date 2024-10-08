@@ -130,7 +130,13 @@ class VideoStore {
   @action.bound
   SetTextTracks({tracks, currentTrack}) {
     if(tracks) {
-      this.playerTextTracks = tracks.map((track, index) => ({...track, index: track.index || index}));
+      this.playerTextTracks = tracks.map((track, index) => {
+        return {
+          ...track,
+          label: track.label,
+          index: track.index || index
+        };
+      });
     }
 
     this.playerCurrentTextTrack = currentTrack;
