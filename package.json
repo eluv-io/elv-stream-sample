@@ -23,7 +23,7 @@
     "@eluvio/elv-client-js": "^4.0.93",
     "buffer": "^5.2.1",
     "chart.js": "^2.9.4",
-    "dashjs": "~4.7.0",
+    "dashjs": "git+https://github.com/elv-zenia/dash.js.git#text-track-fix",
     "elv-components-js": "git+https://github.com/eluv-io/elv-components-js.git#645165da87ec42845a908a9ce0817db202523866",
     "hls.js": "^1.5.13",
     "mobx": "^5.13.0",

@@ -323,10 +323,10 @@ class Video extends React.Component {
     this.player.on(DashJS.MediaPlayer.events.MANIFEST_LOADED, () => UpdateQualityOptions());
 
     this.player.on(
-      DashJS.MediaPlayer.events.TEXT_TRACK_ADDED,
+      DashJS.MediaPlayer.events.TEXT_TRACKS_ADDED,
       () => {
         const activeTrackIndex = this.player.getCurrentTextTrackIndex();
-        const tracks = this.player.getTracksForTypeFromManifest("text").map((track, index) => ({
+        const tracks = this.player.getTracksFor("text").map((track, index) => ({
           index: index,
           label: track.labels && track.labels.length > 0 ? track.labels[0].text : track.lang,
           language: track.lang,
