@@ -51,7 +51,7 @@ class Graph extends React.Component {
                 showLine: true,
                 data: toJS(this.props.data),
                 borderCapStyle: "square",
-                borderColor: "#1b73e8",
+                borderColor: "#AC5DE3",
                 borderWidth: 2,
                 lineTension: 0,
                 pointRadius: 0,
@@ -77,7 +77,7 @@ class BufferGraph extends React.Component {
       <Graph
         name="Buffer Level (seconds)"
         data={this.props.metricsStore.bufferData}
-        color={"#00589d"}
+        color={'#da77f2'}
         windowSize={this.props.metricsStore.sampleWindow}
       />
     );

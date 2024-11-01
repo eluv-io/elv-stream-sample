@@ -1,0 +1,115 @@
+// @import "styles";
+@import './variables.scss';
+
+$elv-button-background: $elv-color-mediumpurple !default;
+$elv-button-background-hover: $elv-color-bg-white !default;
+$elv-button-color: $elv-color-text-white !default;
+$elv-button-color-hover: $elv-color-mediumpurple !default;
+$elv-button-border: $elv-color-mediumpurple !default;
+$elv-button-border-hover: $elv-color-mediumpurple !default;
+
+
+@mixin elv-button {
+  @include elv-no-select;
+  background-color: $elv-button-background;
+  border: 1px solid $elv-button-border;
+  border-radius: 0.5rem;
+  box-sizing: border-box;
+  color: $elv-button-color;
+  cursor: pointer;
+  display: inline-block;
+  font-size: $elv-font-m;
+  min-width: 120px;
+  padding: $elv-spacing-mxs $elv-spacing-s;
+  text-align: center;
+
+  &:not(:active):hover {
+    background-color: $elv-button-background-hover;
+    border: 1px solid $elv-button-border-hover;
+    color: $elv-button-color-hover;
+  }
+
+  &:focus {
+    box-shadow: 0 0 8px $elv-color-lightpurple;
+    outline: 2px auto $elv-color-lighterpurple;
+  }
+}
+
+$elv-button-secondary-background: $elv-color-bg-white !default;
+$elv-button-secondary-background-hover: $elv-color-lightergray !default;
+$elv-button-secondary-color: $elv-color-text-dark !default;
+$elv-button-secondary-color-hover: $elv-color-mediumpurple !default;
+$elv-button-secondary-border: $elv-color-gray !default;
+$elv-button-secondary-border-hover: $elv-color-mediumpurple !default;
+
+@mixin elv-button-secondary {
+  @include elv-button;
+  background-color: $elv-button-secondary-background;
+  border: 1px solid $elv-button-secondary-border;
+  color: $elv-button-secondary-color;
+
+  &:not(:active):hover {
+    background-color: $elv-button-secondary-background-hover;
+    border: 1px solid $elv-button-secondary-border-hover;
+    color: $elv-button-secondary-color-hover;
+  }
+}
+
+$elv-button-tertiary-background: $elv-color-bg-white !default;
+$elv-button-tertiary-background-hover: $elv-color-bg-light !default;
+$elv-button-tertiary-color: $elv-color-text-light !default;
+$elv-button-tertiary-color-hover: $elv-color-text-black !default;
+$elv-button-tertiary-border: transparent !default;
+$elv-button-tertiary-border-hover: $elv-color-mediumgray !default;
+
+@mixin elv-button-tertiary {
+  @include elv-button;
+  background-color: $elv-button-tertiary-background;
+  border: 1px solid $elv-button-tertiary-border;
+  color: $elv-button-tertiary-color;
+
+  &:not(:active):hover {
+    background-color: $elv-button-tertiary-background-hover;
+    border: 1px solid $elv-button-tertiary-border-hover;
+    color: $elv-button-tertiary-color-hover;
+  }
+}
+
+$elv-button-danger-background: $elv-color-bg-white !default;
+$elv-button-danger-background-hover: $elv-color-darkergray !default;
+$elv-button-danger-color: $elv-color-darkergray !default;
+$elv-button-danger-color-hover: $elv-color-text-white !default;
+$elv-button-danger-border: $elv-color-darkergray !default;
+$elv-button-danger-border-hover: $elv-color-darkergray !default;
+
+@mixin elv-button-danger {
+  @include elv-button;
+  background-color: $elv-button-danger-background;
+  border: 1px solid $elv-button-danger-border;
+  color: $elv-button-danger-color;
+
+  &:not(:active):hover {
+    background-color: $elv-button-danger-background-hover;
+    border: 1px solid $elv-button-danger-border-hover;
+    color: $elv-button-danger-color-hover;
+  }
+}
+
+.-elv-button {
+  // Increase specificity
+  &.-elv-button {
+    @include elv-button;
+
+    &.secondary {
+      @include elv-button-secondary;
+    }
+
+    &.tertiary {
+      @include elv-button-tertiary;
+    }
+
+    &.danger {
+      @include elv-button-danger;
+    }
+  }
+}

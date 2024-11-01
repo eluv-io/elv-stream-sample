@@ -1,0 +1,165 @@
+// FONTS
+
+$elv-font-default: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+$elv-font-monospace: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+
+$elv-font-xxs: 0.5rem;
+$elv-font-xs: 0.6rem;
+$elv-font-s: 0.7rem;
+$elv-font-m: 0.8rem;
+$elv-font-l: 1rem;
+$elv-font-xl: 1.2rem;
+$elv-font-xxl: 1.4rem;
+
+// COLORS
+
+$elv-color-black: #000;
+$elv-color-darkergray: #444;
+$elv-color-darkgray: #555;
+$elv-color-mediumgray: #aaa;
+$elv-color-gray: #ccc;
+$elv-color-lightgray: #ddd;
+$elv-color-lightergray: #eee;
+$elv-color-lightestgray: #f5f5f5;
+$elv-color-white: #fff;
+
+$elv-color-palered: #955;
+$elv-color-mediumred: #a33;
+$elv-color-red: #f33;
+
+$elv-color-green: #3d3;
+$elv-color-mediumgreen: #393;
+
+$elv-color-text-white: #fff;
+$elv-color-text-lightest: #acacac;
+$elv-color-text-lighter: #8c8c8c;
+$elv-color-text-light: #6c6c6c;
+$elv-color-text-dark: #222;
+$elv-color-text-black: #000;
+
+$elv-color-bg-white: #fff;
+$elv-color-bg-light: #fafafa;
+$elv-color-bg-light-dark: #f5f5f5;
+$elv-color-bg-dark: #333;
+$elv-color-bg-black: #000;
+
+$elv-color-bg-modal: rgba(0, 0, 0, 0.3);
+
+$elv-color-lighterpurple: #e9d9f6;
+$elv-color-lightpurple:  #DBC1EE;
+$elv-color-mediumpurple: #b964ff;
+$elv-color-darkpurple:#862e9c;
+
+$elv-color-gradient-lightpurple: linear-gradient(to right, $elv-color-lightpurple, $elv-color-lighterpurple);
+$elv-color-gradient-mediumpurple: linear-gradient(to right, $elv-color-mediumpurple, $elv-color-lightpurple);
+$elv-color-gradient-darkpurple: linear-gradient(to right, $elv-color-darkpurple, $elv-color-mediumpurple);
+
+$elv-color-lighterblue: #60dfff;
+$elv-color-lightblue: #0fafff;
+$elv-color-mediumblue: #1b73e8;
+$elv-color-darkblue: #003c7e;
+
+$elv-color-shadow-gray: rgba(161, 161, 161, 0.5);
+
+$elv-color-gradient-lightblue: linear-gradient(to right, $elv-color-lightblue, $elv-color-lighterblue);
+$elv-color-gradient-mediumblue: linear-gradient(to right, $elv-color-mediumblue, $elv-color-lightblue);
+$elv-color-gradient-darkblue: linear-gradient(to right, $elv-color-darkblue, $elv-color-mediumblue);
+
+$elv-color-action-primary: $elv-color-mediumblue;
+$elv-color-action-secondary: $elv-color-gray;
+$elv-color-action-tertiary: $elv-color-white;
+$elv-color-action-delete: $elv-color-mediumred;
+$elv-color-action-disabled: $elv-color-lightergray;
+
+// SPACING
+
+$elv-spacing-xxs: 0.25rem;
+$elv-spacing-mxs: 0.33rem;
+$elv-spacing-xs: 0.5rem;
+$elv-spacing-ss: 0.75rem;
+$elv-spacing-s: 1rem;
+$elv-spacing-m: 1.5rem;
+$elv-spacing-l: 2rem;
+$elv-spacing-ml: 2.5rem;
+$elv-spacing-xl: 4rem;
+$elv-spacing-xxl: 8rem;
+
+// MIXINS
+
+@mixin elv-no-select {
+  user-select: none;
+}
+
+@mixin elv-select {
+  appearance: none;
+  background: url("data:image/svg+xml;base64,PHN2ZyBpZD0iTGF5ZXJfMSIgZGF0YS1uYW1lPSJMYXllciAxIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0Ljk1IDEwIj48ZGVmcz48c3R5bGU+LmNscy0xe2ZpbGw6I2ZmZjt9LmNscy0ye2ZpbGw6IzQ0NDt9PC9zdHlsZT48L2RlZnM+PHRpdGxlPmFycm93czwvdGl0bGU+PHJlY3QgY2xhc3M9ImNscy0xIiB3aWR0aD0iNC45NSIgaGVpZ2h0PSIxMCIvPjxwb2x5Z29uIGNsYXNzPSJjbHMtMiIgcG9pbnRzPSIxLjQxIDQuNjcgMi40OCAzLjE4IDMuNTQgNC42NyAxLjQxIDQuNjciLz48cG9seWdvbiBjbGFzcz0iY2xzLTIiIHBvaW50cz0iMy41NCA1LjMzIDIuNDggNi44MiAxLjQxIDUuMzMgMy41NCA1LjMzIi8+PC9zdmc+") no-repeat 98% 50%;
+  border: 1px solid $elv-color-gray;
+  border-radius: 0;
+  cursor: pointer;
+  font-size: 16px;
+  height: 32px;
+  padding: 0 0 0 $elv-spacing-xxs;
+  width: 250px;
+}
+
+@mixin elv-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin elv-cropped-image($width, $height, $border-radius, $max-width: 200px, $max-height: 200px, $fit: cover) {
+  display: flex;
+  justify-content: center;
+  padding: 0;
+
+  .-elv-cropped-icon {
+    align-items: center;
+    border-radius: $border-radius;
+    display: flex;
+    height: $max-height;
+    justify-content: left;
+    max-height: $max-height;
+    overflow: hidden;
+    width: $width;
+
+    .-elv-icon {
+      height: $height;
+      max-height: $max-height;
+      max-width: $max-width;
+      object-fit: $fit;
+      object-position: center;
+      padding: 0;
+      width: $width;
+    }
+  }
+
+  .-elv-cropped-icon-with-action {
+    position: relative;
+
+    .-elv-hover-action {
+      align-items: center;
+      cursor: pointer;
+      display: flex;
+      height: 100%;
+      justify-content: center;
+      position: absolute;
+      visibility: hidden;
+      width: 100%;
+      z-index: 1000;
+
+      span {
+        background: rgba(0, 0, 0, 0.75);
+        color: $elv-color-white;
+        padding: $elv-spacing-xs;
+      }
+    }
+
+    &:hover {
+      .-elv-hover-action {
+        background: $elv-color-bg-modal;
+        visibility: visible;
+      }
+    }
+  }
+}

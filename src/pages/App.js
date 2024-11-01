@@ -58,7 +58,7 @@ class App extends React.Component {
       <div className="app-container">
         <header>
           <div className="header-logo">
-            <ImageIcon className="logo" icon={Logo} label="Eluvio" onClick={this.props.rootStore.ReturnToApps}/>
+            {/* <ImageIcon className="logo" icon={Logo} label="Eluvio" onClick={this.props.rootStore.ReturnToApps}/> */}
             <h1>
               Video Streaming Sample
             </h1>

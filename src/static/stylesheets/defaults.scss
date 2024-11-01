@@ -1,0 +1,106 @@
+// @import "styles";
+
+@import "./variables.scss";
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  background-color: $elv-color-bg-white;
+  color: $elv-color-text-dark;
+  font-family: $elv-font-default;
+  font-size: 16px;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+h1 {
+  font-size: 28px;
+  font-weight: bold;
+  margin: 0;
+}
+
+h2 {
+  font-size: 24px;
+  font-weight: bold;
+  margin: 0;
+}
+
+h3 {
+  font-size: 20px;
+  font-weight: normal;
+  margin: 0;
+
+  &.header-with-loader {
+    align-items: center;
+    display: flex;
+    height: 30px;
+    justify-content: space-between;
+  }
+}
+
+h4 {
+  color: $elv-color-text-dark;
+  font-size: 16px;
+  font-weight: normal;
+  margin: $elv-spacing-xs 0 $elv-spacing-xxs;
+}
+
+a {
+  text-decoration: none;
+
+  &,
+  &:visited {
+    color: $elv-color-darkgray;
+  }
+
+  &.link {
+    display: block;
+  }
+
+  &.image-link {
+    display: flex;
+  }
+}
+
+ul {
+  display: flex;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+
+  li {
+    display: inline;
+  }
+}
+
+select {
+  @include elv-select;
+}
+
+input {
+  height: 32px;
+}
+
+input,
+textarea,
+pre {
+  border: 1px solid $elv-color-lightgray;
+  padding: 0 $elv-spacing-xxs;
+}
+
+pre {
+  font-family: $elv-font-monospace;
+  margin: 0;
+  overflow: auto;
+  padding: $elv-spacing-ss $elv-spacing-xs;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.-elv-copyable {
+  cursor: pointer;
+}
