@@ -2,6 +2,7 @@ import React from "react";
 import {inject, observer} from "mobx-react";
 import {Action, Copy, ImageIcon} from "elv-components-js";
 import ClipboardIcon from "../static/icons/clipboard.svg";
+import '../static/stylesheets/buttons.scss';
 
 @inject("rootStore")
 @inject("videoStore")

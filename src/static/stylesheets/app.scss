@@ -1,5 +1,9 @@
-@import "~elv-components-js/src/stylesheets/defaults";
-@import "~elv-components-js/src/stylesheets/styles";
+// @import "~elv-components-js/src/stylesheets/defaults";
+// @import "~elv-components-js/src/stylesheets/styles";
+
+@import "./defaults.scss";
+@import "./variables.scss";
+
 
 $header-height: 3rem;
 
@@ -38,6 +42,7 @@ header {
   max-height: $header-height;
   min-height: $header-height;
   padding: $elv-spacing-xs $elv-spacing-s;
+  margin-top: 0.5rem;
 
   .logo {
     cursor: pointer;
@@ -49,9 +54,9 @@ header {
 
   h1 {
     @include elv-no-select;
-    color: $elv-color-text-light;
+    color: #4b494e;
     font-size: $elv-font-xxl;
-    font-weight: normal;
+    font-weight: 600;
     margin-left: $elv-spacing-s;
   }
 }
@@ -64,12 +69,13 @@ header {
 
 .source-link {
   align-items: center;
-  border: 1px solid $elv-color-mediumgray;
-  border-radius: 3px;
+  border: 0.0625rem solid $elv-color-lightpurple;
+  border-radius: 0.25rem;
   display: flex;
   font-size: $elv-font-m;
-  padding: $elv-spacing-xxs $elv-spacing-xs;
+  padding: $elv-spacing-s $elv-spacing-s;
   width: auto;
+  margin-right: $elv-spacing-s;
 
   .github-icon {
     height: $elv-font-xxl;
@@ -78,15 +84,21 @@ header {
   }
 
   &:hover {
-    background-color: $elv-color-lightestgray;
+    background-color: rgba(242, 236, 250, 0.35);
   }
 }
 
 .content-info-container {
   align-items: center;
-  background: $elv-color-lightergray;
+  justify-content: center;
+  border: 0.0625rem solid #ced4da;
+  border-radius: 1.5rem;
   display: flex;
-  padding: $elv-spacing-xs $elv-spacing-s;
+  margin: 0.25rem 1.85rem 0 1.85rem;
+
+  &:focus, &:focus-within {
+    border: 0.0625rem solid $elv-color-lightpurple;
+  }
 
   .content-input {
     align-items: center;
@@ -97,6 +109,13 @@ header {
       flex: 1 1;
       font-size: $elv-font-l;
       width: 100%;
+      background-color: transparent;
+      margin-left: 0.5rem;
+      color: #717171;
+    }
+    button {
+      border-radius: 1.5rem;
+      margin-right: 0.5rem;
     }
   }
 
@@ -132,9 +151,9 @@ header {
   align-items: center;
   color: $elv-color-text-dark;
   display: flex;
-  font-size: 2rem;
+  margin: 1.25rem 0 0.5rem 1.85rem;
+  font-size: 1.25rem;
   font-weight: 300;
-  justify-content: center;
 
   &.error {
     color: $elv-color-mediumred;
@@ -184,8 +203,15 @@ header {
   .video-playback-control {
     background-color: $elv-color-bg-white;
     font-size: $elv-font-l;
+    color: $elv-color-text-dark;
     height: 2.1rem;
     width: 15rem;
+    border-radius: 2rem;
+    text-align: center;
+    border: 1px solid $elv-color-lighterpurple;
+    // &:focus-visible {
+    //   border: 2px solid $elv-color-mediumpurple;
+    // }
 
     &:not(:last-child) {
       margin-right: $elv-spacing-xs;
@@ -277,7 +303,7 @@ video {
     position: relative;
 
     .duration {
-      background: $elv-color-gray;
+      background: $elv-color-lighterpurple;
       height: 50%;
       position: absolute;
       text-align: right;
@@ -294,14 +320,14 @@ video {
     }
 
     .latency {
-      background: $elv-color-darkblue;
+      background: $elv-color-darkpurple;
       box-shadow: $elv-color-black 1px 2px 3px;
       height: 70%;
       z-index: 15;
     }
 
     .download {
-      background: $elv-color-mediumblue;
+      background: $elv-color-mediumpurple;
       box-shadow: $elv-color-black 1px 2px 3px;
       height: 60%;
       z-index: 10;
@@ -340,6 +366,20 @@ video {
     justify-content: center;
     margin-bottom: $elv-spacing-s;
     padding: 0 $elv-spacing-m;
+
+    select {
+      border: 1px solid $elv-color-lighterpurple;
+      border-radius: 2rem;
+
+      &:focus-visible {
+        border: 2px solid $elv-color-mediumpurple;
+        border-radius: 2rem;
+      }
+    }
+
+    textarea {
+      border: 1px solid $elv-color-lighterpurple;
+    }
   }
 
   .controls-link-container {
@@ -349,7 +389,7 @@ video {
   }
 
   .controls-link {
-    color: $elv-color-mediumblue;
+    color: $elv-color-mediumpurple;
     font-size: $elv-font-s;
     margin: $elv-spacing-xs 0;
     text-align: right;
@@ -448,7 +488,7 @@ video {
 main {
   display: grid;
   flex-grow: 1;
-  grid-template-areas: "selection selection" "title empty" "video controls" "segments controls";
+  grid-template-areas: "selection empty" "title empty" "video controls" "segments controls";
   grid-template-columns: 3fr minmax(400px, 1fr);
   grid-template-rows: 3rem 4rem 3fr 2fr;
   max-height: calc(100vh - #{$header-height});
