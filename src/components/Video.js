@@ -165,6 +165,19 @@ class Video extends React.Component {
       });
     });
 
+    this.player.on(HLSPlayer.Events.AUDIO_TRACKS_UPDATED, (event, data) => {
+      const tracks = Array.from(this.player.audioTracks).map((track) => ({
+        index: track.id,
+        label: track.label || track.name || track.language || track.lang || `Audio ${track.id}`,
+        active: track.enabled
+      }));
+
+      this.props.videoStore.SetAudioTracks({
+        tracks,
+        currentTrack: tracks.find(track => track.active)?.index
+      });
+    })
+
     this.player.on(HLSPlayer.Events.SUBTITLE_TRACKS_UPDATED, () => {
       this.props.videoStore.SetTextTracks({
         tracks: Array.from(this.video.textTracks),
