@@ -37,29 +37,46 @@ class PlayoutInfo extends React.Component {
   PlayoutUrl() {
     if(!this.props.videoStore.playoutOptions) { return; }
 
-    const playoutUrl = this.props.videoStore.playoutOptions[this.props.videoStore.protocol]
-      .playoutMethods[this.props.videoStore.drm].playoutUrl;
+    const playoutInfo = this.props.videoStore.playoutOptions[this.props.videoStore.protocol]
+      .playoutMethods[this.props.videoStore.drm];
+    const playoutUrl = playoutInfo.staticPlayoutUrl || playoutInfo.playoutUrl;
 
     return (
-      <div className="controls-container playout-url">
-        <h3 className="controls-header">
-          Playout URL
-          <Copy className="copy-button" copy={playoutUrl}>
-            <ImageIcon icon={ClipboardIcon} />
-          </Copy>
-        </h3>
-        <div className="playout-url">
-          { playoutUrl }
+      <>
+        {
+          !playoutInfo.globalPlayoutUrl ? null :
+            <div className="controls-container playout-url">
+              <h3 className="controls-header">
+                Universal Playout URL
+                <Copy className="copy-button" copy={playoutInfo.globalPlayoutUrl}>
+                  <ImageIcon icon={ClipboardIcon}/>
+                </Copy>
+              </h3>
+              <div className="playout-url">
+                {playoutInfo.globalPlayoutUrl}
+              </div>
+            </div>
+        }
+        <div className="controls-container playout-url">
+          <h3 className="controls-header">
+            Playout URL
+            <Copy className="copy-button" copy={playoutUrl}>
+              <ImageIcon icon={ClipboardIcon}/>
+            </Copy>
+          </h3>
+          <div className="playout-url">
+            {playoutUrl}
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   render() {
     return (
       <React.Fragment>
-        { this.PlayoutUrl() }
-        { this.LicenseServer() }
+        {this.PlayoutUrl()}
+        {this.LicenseServer()}
       </React.Fragment>
     );
   }

@@ -1,7 +1,7 @@
 import {observable, action, flow, runInAction, computed} from "mobx";
-//import HLSPlayer from "hls-fix";
 import HLSPlayer from "hls.js";
 import {Utils} from "@eluvio/elv-client-js";
+import UrlJoin from "url-join";
 
 const searchParams = new URLSearchParams(window.location.search);
 
@@ -24,7 +24,6 @@ class VideoStore {
   @observable contentId;
   @observable posterUrl;
   @observable playoutOptions;
-  @observable authToken;
   @observable title;
   @observable bandwidthEstimate = 0;
 
@@ -38,7 +37,7 @@ class VideoStore {
   @observable playerTextTracks = [];
   @observable playerCurrentTextTrack = -1;
 
-  @observable protocol = this.dashjsSupported ? "dash" : "hls";
+  @observable protocol = "hls";
   @observable drm = "clear";
   @observable aesOption = "aes-128";
 
@@ -313,8 +312,6 @@ class VideoStore {
       this.protocol = Object.keys(playoutOptions)[0] || "hls";
     }
 
-    this.authToken = yield this.rootStore.client.GenerateStateChannelToken({objectId, versionHash});
-
     // If no suitable DRMs in current protocol, switch to other protocol
     if(!Object.keys(playoutOptions[this.protocol].playoutMethods).find(drm => this.rootStore.availableDRMs.includes(drm))) {
       const switchedProtocol = this.protocol === "hls" ? "dash" : "hls";
@@ -347,11 +344,60 @@ class VideoStore {
       }
     }
 
+    const publiclyAccessible = ["listable", "public"].includes(yield this.rootStore.client.Permission({objectId}));
+    if(publiclyAccessible) {
+      // If publicly accessible, create display urls with no auth/static tokens
+      const libraryId = yield this.rootStore.client.ContentObjectLibraryId({objectId});
+      const staticToken = Utils.B64(JSON.stringify({qspace_id: yield this.rootStore.client.ContentSpaceId(), qlib_id: libraryId}));
+
+      for(const protocol of Object.keys(playoutOptions)) {
+        for(const drm of Object.keys(playoutOptions[protocol].playoutMethods || {})) {
+          try {
+            let playoutUrl = new URL(playoutOptions[protocol].playoutMethods[drm].playoutUrl);
+
+            playoutUrl = new URL(playoutUrl);
+            playoutUrl.searchParams.set("authorization", staticToken);
+            playoutOptions[protocol].playoutMethods[drm].staticPlayoutUrl = playoutUrl.toString();
+
+            let path = UrlJoin("rep", playoutUrl.pathname.split("/rep")[1]);
+            if(playoutUrl.pathname.includes("/meta")) {
+              path = UrlJoin("meta", playoutUrl.pathname.split("/meta")[1]);
+            }
+
+            playoutOptions[protocol].playoutMethods[drm].globalPlayoutUrl = yield this.rootStore.client.GlobalUrl({
+              objectId,
+              path,
+              noAuth: true,
+              resolve: false
+            });
+          } catch(error) {
+            // eslint-disable-next-line no-console
+            console.error(error);
+          }
+        }
+      }
+    }
+
     this.playoutOptions = playoutOptions;
   });
 
   @action.bound
   GenerateEmbedUrl = flow(function * ({objectId, versionHash}) {
+    const publiclyAccessible = ["listable", "public"].includes(yield this.rootStore.client.Permission({objectId}));
+
+    if(!publiclyAccessible) {
+      // Current user must be an editor of the content in order to create a token for it
+      objectId = objectId || Utils.DecodeVersionHash(versionHash).objectId;
+      const canEdit = yield this.rootStore.client.CallContractMethod({
+        contractAddress: Utils.HashToAddress(objectId),
+        methodName: "canEdit"
+      });
+
+      if(!canEdit) {
+        return;
+      }
+    }
+
     let embedUrl = new URL(
       yield this.rootStore.client.EmbedUrl({
         objectId,
