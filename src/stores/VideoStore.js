@@ -403,7 +403,8 @@ class VideoStore {
         objectId,
         versionHash,
         mediaType: ["ll", "ull"].includes(this.playerProfile) ? "live_video" : "video",
-        options: {offerings: [this.offering]}
+        options: {offerings: [this.offering]},
+        duration: 7 * 24 * 60 * 60 * 1000
       })
     );
 
