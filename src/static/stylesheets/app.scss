@@ -393,27 +393,23 @@ video {
   .playout-url {
     color: $elv-color-text-lighter;
     font-size: $elv-font-m;
+    max-height: 70px;
     max-width: 100%;
     min-width: 100%;
     overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    position: relative;
     word-break: break-all;
-  }
 
-  .embed-edit-link {
-    align-items: center;
-    border: 1px solid $elv-color-mediumgray;
-    border-radius: 3px;
-    display: flex;
-    font-size: 9px;
-    height: 15px;
-    justify-content: center;
-    margin-left: 20px;
-    position: absolute;
-    right: 70px;
-    top: 1px;
-    width: 40px;
+    &:before {
+      background: linear-gradient(transparent 75%, #fff);
+      content: "";
+      height: 70px;
+      pointer-events: none;
+      position: absolute;
+      top: 0;
+      user-select: none;
+      width: 100%;
+    }
   }
 
   select,

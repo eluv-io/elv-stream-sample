@@ -3,6 +3,7 @@ import {inject, observer} from "mobx-react";
 import {Copy, ImageIcon} from "elv-components-js";
 
 import CopyIcon from "../static/icons/copy.svg";
+import EditIcon from "../static/icons/edit.svg";
 
 @inject("videoStore")
 @observer
@@ -20,7 +21,7 @@ class PlayoutInfo extends React.Component {
     const licenseServer = playoutMethods.drms[this.props.videoStore.drm].licenseServers[0];
 
     return (
-      <div className="controls-container playout-url">
+      <div className="controls-container">
         <h3 className="controls-header controls-header--secondary">
           License Server URL
           <Copy className="copy-button" copy={licenseServer}>
@@ -58,8 +59,8 @@ class PlayoutInfo extends React.Component {
                 <Copy className="copy-button" copy={this.props.videoStore.embedUrl}>
                   <ImageIcon icon={CopyIcon}/>
                 </Copy>
-                <a className="embed-edit-link" href={embedFormUrl.toString()} target="_blank">
-                  Edit
+                <a className="copy-button" href={embedFormUrl.toString()} target="_blank">
+                  <ImageIcon icon={EditIcon} />
                 </a>
               </h3>
               <div className="playout-url">

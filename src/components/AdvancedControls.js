@@ -251,6 +251,10 @@ class AdvancedControls extends React.Component {
     );
 
     if(!this.state.visible) {
+      if(this.props.videoStore.loading) {
+        return null;
+      }
+
       return (
         toggleButton
       );
