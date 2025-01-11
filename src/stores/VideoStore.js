@@ -204,6 +204,8 @@ class VideoStore {
 
   @action.bound
   LoadVideo = flow(function * ({contentId, retry=true}) {
+    contentId = contentId || searchParams.get("objectId") || searchParams.get("versionHash");
+
     // Reset state if new video is loaded
     if(retry && this.contentId && this.contentId !== contentId) {
       this.Reset();
@@ -419,6 +421,13 @@ class VideoStore {
         // Settings present but does not match default profile
         embedUrl.searchParams.set("hls", Utils.B58(JSON.stringify(this.hlsjsOptions)));
       }
+    }
+
+    const customFabricNode = this.rootStore.fabricNode === "custom" ?
+      this.rootStore.customFabricNode :
+      this.rootStore.fabricNode;
+    if(customFabricNode) {
+      embedUrl.searchParams.set("node", customFabricNode);
     }
 
     this.embedUrl = embedUrl.toString();
