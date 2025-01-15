@@ -11,8 +11,12 @@ class PlayoutControls extends React.Component {
       ["clear", "widevine"] : ["clear", this.props.videoStore.aesOption];
 
     if(this.props.videoStore.playoutOptions) {
-      drms = Object.keys(this.props.videoStore.playoutOptions[protocol].playoutMethods)
+      drms = Object.keys(this.props.videoStore.playoutOptions[protocol]?.playoutMethods || {})
         .sort((a) => a === "clear" ? -1 : 1);
+    }
+
+    if(!drms || drms.length === 0) {
+      return [];
     }
 
     drms = drms.filter(drm => this.props.rootStore.availableDRMs.includes(drm));

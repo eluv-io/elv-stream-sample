@@ -38,8 +38,11 @@ class PlayoutInfo extends React.Component {
   PlayoutUrls() {
     if(!this.props.videoStore.playoutOptions) { return; }
 
-    const playoutInfo = this.props.videoStore.playoutOptions[this.props.videoStore.protocol]
-      .playoutMethods[this.props.videoStore.drm];
+    const playoutInfo = this.props.videoStore.playoutOptions?.[this.props.videoStore.protocol]
+      ?.playoutMethods[this.props.videoStore.drm];
+
+    if(!playoutInfo) { return null; }
+
     const playoutUrl = playoutInfo.staticPlayoutUrl || playoutInfo.playoutUrl;
 
     let embedFormUrl;
