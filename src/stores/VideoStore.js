@@ -265,6 +265,7 @@ class VideoStore {
         versionHash,
         handler: isChannel ? "channel" : this.playoutHandler
       });
+
       yield this.LoadVideoPlayout({objectId, versionHash});
 
       this.loadId += 1;

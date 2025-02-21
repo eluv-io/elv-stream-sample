@@ -400,6 +400,14 @@ video {
     position: relative;
     word-break: break-all;
 
+    &--full {
+      max-height: 100%;
+
+      &:before {
+        display: none;
+      }
+    }
+
     &:before {
       background: linear-gradient(transparent 75%, #fff);
       content: "";

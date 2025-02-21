@@ -92,7 +92,7 @@ class PlayoutInfo extends React.Component {
               <ImageIcon icon={CopyIcon}/>
             </Copy>
           </h3>
-          <div className="playout-url">
+          <div className="playout-url playout-url--full">
             {playoutUrl}
           </div>
         </div>
