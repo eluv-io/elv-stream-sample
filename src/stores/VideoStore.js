@@ -290,6 +290,10 @@ class VideoStore {
 
   @action.bound
   LoadVideoPlayout = flow(function * ({objectId, versionHash}) {
+    if(versionHash) {
+      objectId = this.rootStore.client.utils.DecodeVersionHash(versionHash).objectId;
+    }
+
     const isChannel = yield this.rootStore.client.ContentObjectMetadata({
       libraryId: yield this.rootStore.client.ContentObjectLibraryId({objectId, versionHash}),
       objectId,
