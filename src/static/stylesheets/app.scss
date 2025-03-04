@@ -3,6 +3,10 @@
 
 $header-height: 3rem;
 
+* {
+  font-family: Inter, Helvetica Neue, helvetica, sans-serif;
+}
+
 html {
   font-size: 14px;
 }
@@ -294,14 +298,14 @@ video {
     }
 
     .latency {
-      background: $elv-color-darkblue;
+      background: #003c7e;
       box-shadow: $elv-color-black 1px 2px 3px;
       height: 70%;
       z-index: 15;
     }
 
     .download {
-      background: $elv-color-mediumblue;
+      background: #1c73e8;
       box-shadow: $elv-color-black 1px 2px 3px;
       height: 60%;
       z-index: 10;
@@ -311,15 +315,17 @@ video {
 
 .controls-header {
   align-items: center;
+  color: #3c3c3c;
   display: flex;
-  font-size: $elv-font-l;
+  font-size: 1.25rem;
   font-weight: 600;
-  justify-content: center;
+  justify-content: flex-start;
   margin-bottom: $elv-spacing-xxs;
   padding: 0;
+  width: 100%;
 
   &--secondary {
-    font-weight: 400;
+    font-size: 1rem;
   }
 
   .copy-button {
@@ -332,6 +338,12 @@ video {
       stroke: $elv-color-gray;
     }
   }
+
+  .controls-header-actions {
+    display: flex;
+    flex-direction: row;
+    margin-left: auto;
+  }
 }
 
 .controls-section {
@@ -340,10 +352,10 @@ video {
   padding-bottom: $elv-spacing-xl;
 
   .controls-container {
-    align-items: center;
+    align-items: flex-start;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     margin-bottom: $elv-spacing-s;
     max-width: 100%;
     padding: 0 $elv-spacing-m;
@@ -357,8 +369,8 @@ video {
   }
 
   .controls-link {
-    color: $elv-color-mediumblue;
-    font-size: $elv-font-s;
+    color: #336be4;
+    font-size: 0.875rem;
     margin: $elv-spacing-xs 0;
     text-align: right;
   }
@@ -374,8 +386,13 @@ video {
       margin-right: $elv-spacing-xs;
 
       &.-elv-button {
-        height: 28px;
+        height: 32px;
         min-width: $elv-spacing-l;
+
+        &:hover {
+          background-color: #1a71cf;
+          color: white;
+        }
       }
     }
   }
@@ -391,8 +408,9 @@ video {
   }
 
   .playout-url {
-    color: $elv-color-text-lighter;
-    font-size: $elv-font-m;
+    color: #adb5bd;
+    font-size: 0.875rem;
+    font-weight: 400;
     max-height: 70px;
     max-width: 100%;
     min-width: 100%;
@@ -426,7 +444,6 @@ video {
     height: 2.5rem;
     margin-top: $elv-spacing-xxs;
     padding: 0 $elv-spacing-xs;
-    text-align: center;
     width: 100%;
   }
 
