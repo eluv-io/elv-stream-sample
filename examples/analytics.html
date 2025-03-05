@@ -266,8 +266,10 @@
       const contentId = document.getElementById("content-id").value;
       const objectId = contentId.startsWith("iq__") ? contentId : "";
       const versionHash = contentId.startsWith("hq__") ? contentId : "";
+      const libraryId = await client.ContentObjectLibraryId({objectId, versionHash});
 
       const publicMeta = await client.ContentObjectMetadata({
+        libraryId,
         objectId,
         versionHash,
         metadataSubtree: "public"
