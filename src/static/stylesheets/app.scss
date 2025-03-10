@@ -132,6 +132,14 @@ header {
   }
 }
 
+select,
+textarea,
+input {
+  border-radius: 6px;
+  font-size: 0.875rem !important;
+  color: #3c3c3c;
+}
+
 .content-title {
   align-items: center;
   color: $elv-color-text-dark;
@@ -235,6 +243,7 @@ video {
 
 .segments-table {
   border: 1px solid $elv-color-lightgray;
+  border-radius: 5px;
   display: flex;
   flex: 1 1 0;
   flex-direction: column;
@@ -252,7 +261,7 @@ video {
     align-items: center;
     display: grid;
     grid-template-columns: 3rem 1fr 6rem 8rem 8rem 2fr;
-    height: 2.2rem;
+    height: 1.875rem;
     margin-right: $elv-spacing-s;
     text-align: center;
   }
@@ -262,7 +271,16 @@ video {
     font-weight: 500;
   }
 
+  .segments-header-column {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #3c3c3c;
+  }
+
   .segment-row {
+    color: #3c3c3c;
+    font-size: 0.75rem;
+
     &.even {
       background: $elv-color-lightergray;
     }
@@ -281,7 +299,7 @@ video {
     position: relative;
 
     .duration {
-      background: $elv-color-gray;
+      background: #dadada;
       height: 50%;
       position: absolute;
       text-align: right;
@@ -305,7 +323,7 @@ video {
     }
 
     .download {
-      background: #1c73e8;
+      background: #4489df;
       box-shadow: $elv-color-black 1px 2px 3px;
       height: 60%;
       z-index: 10;
@@ -315,9 +333,9 @@ video {
 
 .controls-header {
   align-items: center;
-  color: #3c3c3c;
+  color: #228be6;
   display: flex;
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   font-weight: 600;
   justify-content: flex-start;
   margin-bottom: $elv-spacing-xxs;
@@ -330,12 +348,12 @@ video {
 
   .copy-button {
     align-items: center;
-    color: $elv-color-gray;
     display: flex;
 
     svg {
-      height: $elv-font-xl;
-      stroke: $elv-color-gray;
+      color: #a9a0b2;
+      height: 17px;
+      stroke: none;
     }
   }
 
@@ -388,10 +406,18 @@ video {
       &.-elv-button {
         height: 32px;
         min-width: $elv-spacing-l;
+        border-radius: 5px;
+        background-color: #4489df;
 
         &:hover {
           background-color: #1a71cf;
           color: white;
+        }
+
+        &.secondary {
+          background-color: white;
+          color: #228be6;
+          border: 1px solid #228be6;
         }
       }
     }
@@ -408,9 +434,9 @@ video {
   }
 
   .playout-url {
-    color: #adb5bd;
+    color: #868e96;
     font-size: 0.75rem;
-    font-weight: 400;
+    font-weight: 500;
     max-height: 70px;
     max-width: 100%;
     min-width: 100%;
