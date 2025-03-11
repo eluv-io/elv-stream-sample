@@ -28,9 +28,9 @@ class PlayoutInfo extends React.Component {
             <ImageIcon icon={CopyIcon} />
           </Copy>
         </h3>
-        <div className="playout-url">
+        <h6 className="playout-url">
           { licenseServer }
-        </div>
+        </h6>
       </div>
     );
   }
@@ -68,9 +68,9 @@ class PlayoutInfo extends React.Component {
                   </a>
                 </div>
               </h3>
-              <div className="playout-url">
+              <h6 className="playout-url">
                 {this.props.videoStore.embedUrl}
-              </div>
+              </h6>
             </div>
         }
         {
@@ -84,9 +84,9 @@ class PlayoutInfo extends React.Component {
                   </Copy>
                 </div>
               </h3>
-              <div className="playout-url">
+              <h6 className="playout-url">
                 {playoutInfo.globalPlayoutUrl}
-              </div>
+              </h6>
             </div>
         }
         <div className="controls-container">
@@ -98,9 +98,9 @@ class PlayoutInfo extends React.Component {
               </Copy>
             </div>
           </h3>
-          <div className="playout-url playout-url--full">
+          <h6 className="playout-url playout-url--full">
             {playoutUrl}
-          </div>
+          </h6>
         </div>
       </>
     );
