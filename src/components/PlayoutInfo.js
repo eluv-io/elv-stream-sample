@@ -28,9 +28,9 @@ class PlayoutInfo extends React.Component {
             <ImageIcon icon={CopyIcon} />
           </Copy>
         </h3>
-        <div className="playout-url">
+        <h6 className="playout-url">
           { licenseServer }
-        </div>
+        </h6>
       </div>
     );
   }
@@ -57,44 +57,50 @@ class PlayoutInfo extends React.Component {
         {
           !this.props.videoStore.embedUrl ? null :
             <div className="controls-container">
-              <h3 className="controls-header controls-header--secondary">
+              <h3 className="controls-header">
                 Embeddable URL
-                <Copy className="copy-button" copy={this.props.videoStore.embedUrl}>
-                  <ImageIcon icon={CopyIcon}/>
-                </Copy>
-                <a className="copy-button" href={embedFormUrl.toString()} target="_blank">
-                  <ImageIcon icon={EditIcon} />
-                </a>
+                <div className="controls-header-actions">
+                  <Copy className="copy-button" copy={this.props.videoStore.embedUrl}>
+                    <ImageIcon icon={CopyIcon}/>
+                  </Copy>
+                  <a className="copy-button" href={embedFormUrl.toString()} target="_blank">
+                    <ImageIcon icon={EditIcon} />
+                  </a>
+                </div>
               </h3>
-              <div className="playout-url">
+              <h6 className="playout-url">
                 {this.props.videoStore.embedUrl}
-              </div>
+              </h6>
             </div>
         }
         {
           !playoutInfo.globalPlayoutUrl ? null :
             <div className="controls-container">
-              <h3 className="controls-header controls-header--secondary">
+              <h3 className="controls-header">
                 Global Playout URL
-                <Copy className="copy-button" copy={playoutInfo.globalPlayoutUrl}>
-                  <ImageIcon icon={CopyIcon}/>
-                </Copy>
+                <div className="controls-header-actions">
+                  <Copy className="copy-button" copy={playoutInfo.globalPlayoutUrl}>
+                    <ImageIcon icon={CopyIcon}/>
+                  </Copy>
+                </div>
               </h3>
-              <div className="playout-url">
+              <h6 className="playout-url">
                 {playoutInfo.globalPlayoutUrl}
-              </div>
+              </h6>
             </div>
         }
         <div className="controls-container">
-          <h3 className="controls-header controls-header--secondary">
+          <h3 className="controls-header">
             Playout URL
-            <Copy className="copy-button" copy={playoutUrl}>
-              <ImageIcon icon={CopyIcon}/>
-            </Copy>
+            <div className="controls-header-actions">
+              <Copy className="copy-button" copy={playoutUrl}>
+                <ImageIcon icon={CopyIcon}/>
+              </Copy>
+            </div>
           </h3>
-          <div className="playout-url playout-url--full">
+          <h6 className="playout-url playout-url--full">
             {playoutUrl}
-          </div>
+          </h6>
         </div>
       </>
     );

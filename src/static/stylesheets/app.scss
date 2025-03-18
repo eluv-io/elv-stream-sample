@@ -3,8 +3,14 @@
 
 $header-height: 3rem;
 
+* {
+  font-family: Inter, Helvetica Neue, helvetica, sans-serif;
+}
+
 html {
-  font-size: 14px;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body,
@@ -128,6 +134,14 @@ header {
   }
 }
 
+select,
+textarea,
+input {
+  border-radius: 6px;
+  font-size: 0.875rem !important;
+  color: #3c3c3c;
+}
+
 .content-title {
   align-items: center;
   color: $elv-color-text-dark;
@@ -231,6 +245,7 @@ video {
 
 .segments-table {
   border: 1px solid $elv-color-lightgray;
+  border-radius: 5px;
   display: flex;
   flex: 1 1 0;
   flex-direction: column;
@@ -248,7 +263,7 @@ video {
     align-items: center;
     display: grid;
     grid-template-columns: 3rem 1fr 6rem 8rem 8rem 2fr;
-    height: 2.2rem;
+    height: 1.875rem;
     margin-right: $elv-spacing-s;
     text-align: center;
   }
@@ -258,7 +273,16 @@ video {
     font-weight: 500;
   }
 
+  .segments-header-column {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #3c3c3c;
+  }
+
   .segment-row {
+    color: #3c3c3c;
+    font-size: 0.75rem;
+
     &.even {
       background: $elv-color-lightergray;
     }
@@ -266,6 +290,10 @@ video {
     * {
       @include elv-ellipsis
     }
+  }
+
+  .timing-wrapper {
+    align-items: center;
   }
 
   .timing {
@@ -277,8 +305,8 @@ video {
     position: relative;
 
     .duration {
-      background: $elv-color-gray;
-      height: 50%;
+      background: #dadada;
+      height: calc(.5 * 1.875rem);
       position: absolute;
       text-align: right;
       width: 100%;
@@ -294,16 +322,17 @@ video {
     }
 
     .latency {
-      background: $elv-color-darkblue;
+      background: #003c7e;
       box-shadow: $elv-color-black 1px 2px 3px;
-      height: 70%;
+      height: calc(.7 * 1.875rem);
       z-index: 15;
+      padding-top: calc((.7 * 1.875rem) - (.6 * 1.875rem));
     }
 
     .download {
-      background: $elv-color-mediumblue;
+      background: #4489df;
       box-shadow: $elv-color-black 1px 2px 3px;
-      height: 60%;
+      height: calc(.6 * 1.875rem);
       z-index: 10;
     }
   }
@@ -311,26 +340,34 @@ video {
 
 .controls-header {
   align-items: center;
+  color: #4489df;
   display: flex;
-  font-size: $elv-font-l;
+  font-size: 1.125rem;
   font-weight: 600;
-  justify-content: center;
+  justify-content: flex-start;
   margin-bottom: $elv-spacing-xxs;
   padding: 0;
+  width: 100%;
 
   &--secondary {
-    font-weight: 400;
+    font-size: 1rem;
   }
 
   .copy-button {
     align-items: center;
-    color: $elv-color-gray;
     display: flex;
 
     svg {
-      height: $elv-font-xl;
-      stroke: $elv-color-gray;
+      color: #868e96;
+      height: 17px;
+      stroke: none;
     }
+  }
+
+  .controls-header-actions {
+    display: flex;
+    flex-direction: row;
+    margin-left: auto;
   }
 }
 
@@ -340,10 +377,10 @@ video {
   padding-bottom: $elv-spacing-xl;
 
   .controls-container {
-    align-items: center;
+    align-items: flex-start;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     margin-bottom: $elv-spacing-s;
     max-width: 100%;
     padding: 0 $elv-spacing-m;
@@ -357,8 +394,8 @@ video {
   }
 
   .controls-link {
-    color: $elv-color-mediumblue;
-    font-size: $elv-font-s;
+    color: #336be4;
+    font-size: 0.875rem;
     margin: $elv-spacing-xs 0;
     text-align: right;
   }
@@ -374,8 +411,21 @@ video {
       margin-right: $elv-spacing-xs;
 
       &.-elv-button {
-        height: 28px;
+        height: 32px;
         min-width: $elv-spacing-l;
+        border-radius: 5px;
+        background-color: #4489df;
+
+        &:hover {
+          background-color: #1a71cf;
+          color: white;
+        }
+
+        &.secondary {
+          background-color: white;
+          color: #228be6;
+          border: 1px solid #228be6;
+        }
       }
     }
   }
@@ -384,21 +434,24 @@ video {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    margin: 30px 0;
+    margin: 30px 0 5px;
     max-width: 100%;
     overflow: hidden;
     width: 100%;
   }
 
   .playout-url {
-    color: $elv-color-text-lighter;
-    font-size: $elv-font-m;
+    color: #868e96;
+    font-family: Inter, Helvetica Neue, helvetica, sans-serif;
+    font-size: 0.75rem;
+    font-weight: 500;
     max-height: 70px;
     max-width: 100%;
     min-width: 100%;
     overflow: hidden;
     position: relative;
     word-break: break-all;
+    margin: 0;
 
     &--full {
       max-height: 100%;
@@ -426,7 +479,6 @@ video {
     height: 2.5rem;
     margin-top: $elv-spacing-xxs;
     padding: 0 $elv-spacing-xs;
-    text-align: center;
     width: 100%;
   }
 

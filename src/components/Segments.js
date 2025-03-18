@@ -63,28 +63,30 @@ class Segments extends React.Component {
         <div>{`${segment.size.toFixed(2)} MB`}</div>
         <div>{`${PrettyBytes(segment.downloadRate, {bits: true}) }/s`}</div>
         <div>{`${PrettyBytes(segment.fullDownloadRate, {bits: true}) }/s`}</div>
-        <div className="timing">
-          <span
-            className="duration"
-            style={{width: `${durationWidth}%`}}
-            title={`Segment duration: ${duration.toFixed(0)}`}
-          >
-            { duration.toFixed(0) }
-          </span>
-          <span
-            className="latency"
-            style={{width: `${latencyWidth}%`}}
-            title={`Latency: ${latency.toFixed(0)}ms`}
-          >
-            { latency.toFixed(0) }
-          </span>
-          <span
-            className="download"
-            style={{width: `${downloadWidth}%`}}
-            title={`Download: ${downloadTime.toFixed(0)}ms`}
-          >
-            { downloadTime.toFixed(0) }
-          </span>
+        <div className="timing-wrapper">
+          <div className="timing">
+            <span
+              className="duration"
+              style={{width: `${durationWidth}%`}}
+              title={`Segment duration: ${duration.toFixed(0)}`}
+            >
+              { duration.toFixed(0) }
+            </span>
+            <span
+              className="latency"
+              style={{width: `${latencyWidth}%`}}
+              title={`Latency: ${latency.toFixed(0)}ms`}
+            >
+              { latency.toFixed(0) }
+            </span>
+            <span
+              className="download"
+              style={{width: `${downloadWidth}%`}}
+              title={`Download: ${downloadTime.toFixed(0)}ms`}
+            >
+              { downloadTime.toFixed(0) }
+            </span>
+          </div>
         </div>
       </div>
     );

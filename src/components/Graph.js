@@ -77,7 +77,7 @@ class BufferGraph extends React.Component {
       <Graph
         name="Buffer Level (seconds)"
         data={this.props.metricsStore.bufferData}
-        color={"#00589d"}
+        color={"#1c73e8"}
         windowSize={this.props.metricsStore.sampleWindow}
       />
     );
