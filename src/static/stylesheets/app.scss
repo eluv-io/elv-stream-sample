@@ -263,7 +263,7 @@ video {
     align-items: center;
     display: grid;
     grid-template-columns: 3rem 1fr 6rem 8rem 8rem 2fr;
-    height: 2.2rem;
+    height: 1.875rem;
     margin-right: $elv-spacing-s;
     text-align: center;
   }
@@ -292,6 +292,10 @@ video {
     }
   }
 
+  .timing-wrapper {
+    align-items: center;
+  }
+
   .timing {
     align-items: flex-end;
     color: $elv-color-white;
@@ -302,7 +306,7 @@ video {
 
     .duration {
       background: #dadada;
-      height: 50%;
+      height: calc(.5 * 1.875rem);
       position: absolute;
       text-align: right;
       width: 100%;
@@ -320,14 +324,15 @@ video {
     .latency {
       background: #003c7e;
       box-shadow: $elv-color-black 1px 2px 3px;
-      height: 70%;
+      height: calc(.7 * 1.875rem);
       z-index: 15;
+      padding-top: calc((.7 * 1.875rem) - (.6 * 1.875rem));
     }
 
     .download {
       background: #4489df;
       box-shadow: $elv-color-black 1px 2px 3px;
-      height: 60%;
+      height: calc(.6 * 1.875rem);
       z-index: 10;
     }
   }
