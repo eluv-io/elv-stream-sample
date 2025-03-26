@@ -153,7 +153,7 @@ class Video extends React.Component {
     this.player.attachMedia(video);
 
     this.player.on(HLSPlayer.Events.AUDIO_TRACK_SWITCHED, () => {
-      const selectedTrackIndex = this.player.audioTrack
+      const selectedTrackIndex = this.player.audioTrack;
       const tracks = Array.from(this.player.audioTracks).map(track => ({
         index: track.id,
         label:track.name || track.label || track.language || track.lang,
@@ -437,6 +437,46 @@ class Video extends React.Component {
     }, samplePeriod);
   }
 
+  OfferingsAndChannels() {
+    const offerings = this.props.videoStore.availableOfferings;
+    const channels = this.props.videoStore.availableChannels;
+
+    if(
+      Object.keys(offerings || {}).length === 0 &&
+      Object.keys(channels || {}).length === 0
+    ) { return null; }
+
+    return (
+      <select
+        value={this.props.videoStore.offering}
+        className="video-playback-control"
+        aria-label="Offerings and Channels"
+        onChange={event => this.props.videoStore.SetOffering(event.target.value)}
+      >
+        {
+          Object.keys(offerings).map(offeringKey =>
+            <option
+              value={offeringKey}
+              key={`offering-${offeringKey}`}
+            >
+              Offering: { offerings[offeringKey].display_name || offeringKey }
+            </option>
+          )
+        }
+        {
+          Object.keys(channels || {}).map(channelKey =>
+            <option
+              value={`channel--${channelKey}`}
+              key={`channel-${channelKey}`}
+            >
+              Channel: { channels[channelKey].display_name || channelKey }
+            </option>
+          )
+        }
+      </select>
+    );
+  }
+
   Tracks() {
     if(this.props.videoStore.playerAudioTracks.length <= 1 && this.props.videoStore.playerTextTracks.length <= 0) {
       return null;
@@ -594,16 +634,6 @@ class Video extends React.Component {
     );
   }
 
-  VideoError = () => {
-    if(this.props.videoStore.error) {
-      return (
-        <div className="video-error-message">
-          {this.props.videoStore.error}
-        </div>
-      );
-    }
-  }
-
   render() {
     return (
       <div className="video video-container" key={`video-version-${this.state.videoVersion}`}>
@@ -619,8 +649,8 @@ class Video extends React.Component {
             playsInline
             controls={!!this.props.videoStore.playoutOptions}
           />
-          { this.VideoError() }
           <div className="video-playback-controls">
+            { this.OfferingsAndChannels() }
             { this.Tracks() }
             { this.PlaybackLevel() }
           </div>

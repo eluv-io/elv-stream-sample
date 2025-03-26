@@ -201,26 +201,6 @@ class AdvancedControls extends React.Component {
     );
   }
 
-  Offerings() {
-    const offerings = this.props.videoStore.availableOfferings;
-    if(!offerings || Object.keys(offerings).length === 0) { return null; }
-
-    return (
-      <div className="controls-container">
-        <h3 className="controls-header controls-header--secondary">Offering</h3>
-        <select
-          value={this.props.videoStore.offering}
-          onChange={event => this.props.videoStore.SetOffering(event.target.value)}
-        >
-          {
-            Object.keys(offerings).map(offeringKey =>
-              <option value={offeringKey} key={`offering-${offeringKey}`}>{ offerings[offeringKey].display_name || offeringKey }</option> )
-          }
-        </select>
-      </div>
-    );
-  }
-
   render() {
     const toggleButton = (
       <div className="controls-container advanced-controls-toggle">
@@ -263,7 +243,6 @@ class AdvancedControls extends React.Component {
     return (
       <React.Fragment>
         { toggleButton }
-        { this.Offerings() }
         { this.PlayoutHandler() }
         { this.PlayoutType() }
         { this.PlayoutProfile() }

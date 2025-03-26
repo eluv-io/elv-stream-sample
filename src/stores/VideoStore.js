@@ -12,6 +12,13 @@ if(playerProfile === "live") {
   playerProfile = "default";
 }
 
+let initialOffering = "default";
+if(searchParams.has("offering")) {
+  initialOffering = searchParams.get("offering");
+} else if(searchParams.has("channel")) {
+  initialOffering = `channel--${searchParams.get("channel")}`;
+}
+
 class VideoStore {
   @observable loading = false;
   @observable error = "";
@@ -42,9 +49,10 @@ class VideoStore {
   @observable aesOption = "aes-128";
 
   @observable playoutHandler = "playout";
-  @observable offering = "default";
+  @observable offering = initialOffering || "default";
   @observable playoutType;
   @observable availableOfferings = {default: { display_name: "default" }};
+  @observable availableChannels = {};
   @observable embedUrl = "";
 
   constructor(rootStore) {
@@ -181,13 +189,10 @@ class VideoStore {
   }
 
   @action.bound
-  SetPlayoutHandler(handler) {
-    this.playoutHandler = handler;
-  }
-
-  @action.bound
   SetOffering(offering) {
     this.offering = offering;
+
+    this.LoadVideo({contentId: this.contentId});
   }
 
   @action.bound
@@ -253,17 +258,30 @@ class VideoStore {
           metadataSubtree: "public/name"
         }));
 
-      const isChannel = yield this.rootStore.client.ContentObjectMetadata({
+      const channelMetadata = (yield client.ContentObjectMetadata({
         libraryId,
         objectId,
         versionHash,
-        metadataSubtree: "public/channel"
-      });
+        metadataSubtree: "channel/offerings",
+        select: [
+          "*/display_name"
+        ]
+      }));
+
+      if(channelMetadata) {
+        let availableChannels = {};
+
+        Object.keys(channelMetadata).map(channelKey =>
+          availableChannels[channelKey] = {display_name: channelMetadata[channelKey].display_name}
+        );
+
+        this.availableChannels = availableChannels;
+      }
 
       this.availableOfferings = yield client.AvailableOfferings({
         objectId,
         versionHash,
-        handler: isChannel ? "channel" : this.playoutHandler
+        handler: this.playoutHandler
       });
 
       yield this.LoadVideoPlayout({objectId, versionHash});
@@ -294,26 +312,16 @@ class VideoStore {
       objectId = this.rootStore.client.utils.DecodeVersionHash(versionHash).objectId;
     }
 
-    const isChannel = yield this.rootStore.client.ContentObjectMetadata({
-      libraryId: yield this.rootStore.client.ContentObjectLibraryId({objectId, versionHash}),
-      objectId,
-      versionHash,
-      metadataSubtree: "public/channel"
-    });
-
+    const isChannel = this.offering.startsWith("channel--");
     const playoutOptions = yield this.rootStore.client.PlayoutOptions({
       objectId,
       versionHash,
       handler: isChannel ? "channel" : this.playoutHandler,
-      offering: this.offering,
+      offering: isChannel ? this.offering.replace("channel--", "") : this.offering,
       playoutType: this.playoutType,
-      options: this.availableOfferings?.[this.offering]?.properties?.dvr_available ?
+      options: !isChannel && this.availableOfferings?.[this.offering]?.properties?.dvr_available ?
         {dvr: 1} : {}
     });
-
-    if(isChannel) {
-      this.protocol = "hls";
-    }
 
     if(!playoutOptions[this.protocol]) {
       this.protocol = Object.keys(playoutOptions)[0] || "hls";
@@ -410,10 +418,15 @@ class VideoStore {
         objectId,
         versionHash,
         mediaType: ["ll", "ull"].includes(this.playerProfile) ? "live_video" : "video",
-        options: {offerings: [this.offering]},
         duration: 7 * 24 * 60 * 60 * 1000
       })
     );
+
+    if(this.offering.startsWith("channel--")) {
+      embedUrl.searchParams.set("ch", this.offering.replace("channel--", ""));
+    } else {
+      embedUrl.searchParams.set("off", this.offering);
+    }
 
     if(JSON.stringify(this.hlsjsOptions) === JSON.stringify(Utils.HLSJSSettings({profile: "ull"}))) {
       // Matches ultra low latency profile

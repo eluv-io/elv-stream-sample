@@ -8,9 +8,9 @@ $header-height: 3rem;
 }
 
 html {
-  font-size: 16px;
-  -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  font-size: 16px;
 }
 
 body,
@@ -138,16 +138,16 @@ select,
 textarea,
 input {
   border-radius: 6px;
-  font-size: 0.875rem !important;
   color: #3c3c3c;
+  font-size: 0.875rem !important;
 }
 
 .content-title {
   align-items: center;
   color: $elv-color-text-dark;
   display: flex;
-  font-size: 2rem;
-  font-weight: 300;
+  font-size: 1.5rem;
+  font-weight: 500;
   justify-content: center;
 
   &.error {
@@ -274,9 +274,9 @@ video {
   }
 
   .segments-header-column {
+    color: #3c3c3c;
     font-size: 0.75rem;
     font-weight: 700;
-    color: #3c3c3c;
   }
 
   .segment-row {
@@ -325,8 +325,8 @@ video {
       background: #003c7e;
       box-shadow: $elv-color-black 1px 2px 3px;
       height: calc(.7 * 1.875rem);
-      z-index: 15;
       padding-top: calc((.7 * 1.875rem) - (.6 * 1.875rem));
+      z-index: 15;
     }
 
     .download {
@@ -411,20 +411,20 @@ video {
       margin-right: $elv-spacing-xs;
 
       &.-elv-button {
+        background-color: #4489df;
+        border-radius: 5px;
         height: 32px;
         min-width: $elv-spacing-l;
-        border-radius: 5px;
-        background-color: #4489df;
 
         &:hover {
           background-color: #1a71cf;
-          color: white;
+          color: #ffffff;
         }
 
         &.secondary {
-          background-color: white;
-          color: #228be6;
+          background-color: #ffffff;
           border: 1px solid #228be6;
+          color: #228be6;
         }
       }
     }
@@ -445,13 +445,13 @@ video {
     font-family: Inter, Helvetica Neue, helvetica, sans-serif;
     font-size: 0.75rem;
     font-weight: 500;
+    margin: 0;
     max-height: 70px;
     max-width: 100%;
     min-width: 100%;
     overflow: hidden;
     position: relative;
     word-break: break-all;
-    margin: 0;
 
     &--full {
       max-height: 100%;

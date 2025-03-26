@@ -107,6 +107,7 @@ class RootStore {
       const initialContentId =
         urlParams.get("objectId") ||
         urlParams.get("versionHash") ||
+        urlParams.get("contentId") ||
         pathParams[0];
 
       const initialOffering = urlParams.get("offering") || pathParams[1];
