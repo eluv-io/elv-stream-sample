@@ -54,6 +54,7 @@ class VideoStore {
   @observable availableOfferings = {default: { display_name: "default" }};
   @observable availableChannels = {};
   @observable embedUrl = "";
+  @observable srtUrl = "";
 
   constructor(rootStore) {
     this.rootStore = rootStore;
@@ -243,7 +244,6 @@ class VideoStore {
       }
 
       this.GenerateEmbedUrl({versionHash, objectId});
-      this.GenerateSrtUrl({libraryId, objectId});
 
       this.title =
         (yield client.ContentObjectMetadata({
@@ -286,6 +286,7 @@ class VideoStore {
       });
 
       yield this.LoadVideoPlayout({objectId, versionHash});
+      this.GenerateSrtUrl({libraryId, objectId});
 
       this.loadId += 1;
     } catch(error) {
@@ -467,12 +468,21 @@ class VideoStore {
 
       if(!srt_egress_enabled || !originUrl) { return; }
 
-      let hostname;
 
-      // Used to extract hostname
-      const urlObject = new URL(
-        this.rootStore.fabricNode === "custom" ? this.rootStore.customFabricNode : (this.rootStore.fabricNode || originUrl)
-      );
+      let nodeUrl;
+      const playoutInfo = this.playoutOptions?.[this.protocol]
+        ?.playoutMethods[this.drm];
+      const playoutUrl = playoutInfo.staticPlayoutUrl || playoutInfo.playoutUrl;
+
+      if(this.rootStore.fabricNode === "") {
+        nodeUrl = playoutUrl || originUrl;
+      } else if(this.rootStore.fabricNode === "custom") {
+        nodeUrl = this.rootStore.customFabricNode;
+      } else {
+        nodeUrl = (this.rootStore.fabricNode || originUrl);
+      }
+
+      const urlObject = new URL(nodeUrl);
 
       if(!urlObject) {
         // eslint-disable-next-line no-console
