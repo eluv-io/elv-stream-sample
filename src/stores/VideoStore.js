@@ -243,6 +243,7 @@ class VideoStore {
       }
 
       this.GenerateEmbedUrl({versionHash, objectId});
+      this.GenerateSrtUrl({libraryId, objectId});
 
       this.title =
         (yield client.ContentObjectMetadata({
@@ -449,6 +450,63 @@ class VideoStore {
     }
 
     this.embedUrl = embedUrl.toString();
+  });
+
+  @action.bound
+  GenerateSrtUrl = flow(function * ({libraryId, objectId}){
+    try {
+      const {srt_egress_enabled, url: originUrl} = yield this.rootStore.client.ContentObjectMetadata({
+        libraryId,
+        objectId,
+        metadataSubtree: "live_recording_config",
+        select: [
+          "srt_egress_enabled",
+          "url"
+        ]
+      });
+
+      if(!srt_egress_enabled || !originUrl) { return; }
+
+      let hostname;
+
+      // Used to extract hostname
+      const urlObject = new URL(
+        this.rootStore.fabricNode === "custom" ? this.rootStore.customFabricNode : (this.rootStore.fabricNode || originUrl)
+      );
+
+      if(!urlObject) {
+        // eslint-disable-next-line no-console
+        console.error(`Invalid origin url: ${originUrl}`);
+        return "";
+      }
+
+      let token = "";
+      const url = new URL(`srt://${urlObject.hostname}:11080`);
+
+      const permission = yield this.rootStore.client.Permission({
+        objectId
+      });
+
+      if(["owner", "editable", "viewable"].includes(permission)) {
+        token = yield this.rootStore.client.CreateSignedToken({
+          objectId,
+          duration: 86400000
+        });
+      } else {
+        const contentSpaceId = yield this.rootStore.client.ContentSpaceId();
+        token = this.rootStore.client.utils.B64(
+          JSON.stringify({ qspace_id: contentSpaceId })
+        );
+      }
+
+      url.searchParams.set("streamid", `live-ts.${objectId}${token ? `.${token}` : ""}`);
+
+      this.srtUrl = url.toString();
+    } catch(error) {
+      // eslint-disable-next-line no-console
+      console.error(error);
+      return "";
+    }
   });
 }
 

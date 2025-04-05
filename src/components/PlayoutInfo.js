@@ -102,6 +102,22 @@ class PlayoutInfo extends React.Component {
             {playoutUrl}
           </h6>
         </div>
+        {
+          this.props.videoStore.srtUrl &&
+          <div className="controls-container">
+            <h3 className="controls-header">
+              SRT URL
+              <div className="controls-header-actions">
+                <Copy className="copy-button" copy={this.props.videoStore.srtUrl}>
+                  <ImageIcon icon={CopyIcon}/>
+                </Copy>
+              </div>
+            </h3>
+            <h6 className="playout-url">
+              {this.props.videoStore.srtUrl}
+            </h6>
+          </div>
+        }
       </>
     );
   }
