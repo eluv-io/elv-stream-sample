@@ -54,6 +54,7 @@ class VideoStore {
   @observable availableOfferings = {default: { display_name: "default" }};
   @observable availableChannels = {};
   @observable embedUrl = "";
+  @observable srtUrl = "";
 
   constructor(rootStore) {
     this.rootStore = rootStore;
@@ -285,6 +286,7 @@ class VideoStore {
       });
 
       yield this.LoadVideoPlayout({objectId, versionHash});
+      this.GenerateSrtUrl({libraryId, objectId});
 
       this.loadId += 1;
     } catch(error) {
@@ -449,6 +451,72 @@ class VideoStore {
     }
 
     this.embedUrl = embedUrl.toString();
+  });
+
+  @action.bound
+  GenerateSrtUrl = flow(function * ({libraryId, objectId}){
+    try {
+      const {srt_egress_enabled, url: originUrl} = yield this.rootStore.client.ContentObjectMetadata({
+        libraryId,
+        objectId,
+        metadataSubtree: "live_recording_config",
+        select: [
+          "srt_egress_enabled",
+          "url"
+        ]
+      });
+
+      if(!srt_egress_enabled || !originUrl) { return; }
+
+
+      let nodeUrl;
+      const playoutInfo = this.playoutOptions?.[this.protocol]
+        ?.playoutMethods[this.drm];
+      const playoutUrl = playoutInfo.staticPlayoutUrl || playoutInfo.playoutUrl;
+
+      if(this.rootStore.fabricNode === "") {
+        nodeUrl = playoutUrl || originUrl;
+      } else if(this.rootStore.fabricNode === "custom") {
+        nodeUrl = this.rootStore.customFabricNode;
+      } else {
+        nodeUrl = (this.rootStore.fabricNode || originUrl);
+      }
+
+      const urlObject = new URL(nodeUrl);
+
+      if(!urlObject) {
+        // eslint-disable-next-line no-console
+        console.error(`Invalid origin url: ${originUrl}`);
+        return "";
+      }
+
+      let token = "";
+      const url = new URL(`srt://${urlObject.hostname}:11080`);
+
+      const permission = yield this.rootStore.client.Permission({
+        objectId
+      });
+
+      if(["owner", "editable", "viewable"].includes(permission)) {
+        token = yield this.rootStore.client.CreateSignedToken({
+          objectId,
+          duration: 86400000
+        });
+      } else {
+        const contentSpaceId = yield this.rootStore.client.ContentSpaceId();
+        token = this.rootStore.client.utils.B64(
+          JSON.stringify({ qspace_id: contentSpaceId })
+        );
+      }
+
+      url.searchParams.set("streamid", `live-ts.${objectId}${token ? `.${token}` : ""}`);
+
+      this.srtUrl = url.toString();
+    } catch(error) {
+      // eslint-disable-next-line no-console
+      console.error(error);
+      return "";
+    }
   });
 }
 
