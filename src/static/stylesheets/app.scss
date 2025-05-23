@@ -199,7 +199,8 @@ input {
     background-color: $elv-color-bg-white;
     font-size: $elv-font-l;
     height: 2.1rem;
-    width: 15rem;
+    padding-right: 1.5em;
+    width: min-content;
 
     &:not(:last-child) {
       margin-right: $elv-spacing-xs;
@@ -418,11 +419,11 @@ video {
 
         &:hover {
           background-color: #1a71cf;
-          color: #ffffff;
+          color: #fff;
         }
 
         &.secondary {
-          background-color: #ffffff;
+          background-color: #fff;
           border: 1px solid #228be6;
           color: #228be6;
         }

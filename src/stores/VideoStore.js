@@ -94,9 +94,11 @@ class VideoStore {
     this.playoutType = undefined;
     this.embedUrl = "";
 
+    this.offering = "default";
     this.playerLevels = [];
     this.playerCurrentLevel = undefined;
     this.playerAudioTracks = [];
+    this.playerTextTracks = [];
     this.playerCurrentAudioTrack = undefined;
     this.playerCurrentTextTrack = -1;
 
@@ -191,8 +193,9 @@ class VideoStore {
 
   @action.bound
   SetOffering(offering) {
-    this.offering = offering;
+    this.Reset();
 
+    this.offering = offering;
     this.LoadVideo({contentId: this.contentId});
   }
 
@@ -456,7 +459,7 @@ class VideoStore {
   @action.bound
   GenerateSrtUrl = flow(function * ({libraryId, objectId}){
     try {
-      const {srt_egress_enabled, url: originUrl} = yield this.rootStore.client.ContentObjectMetadata({
+      const srtInfo = (yield this.rootStore.client.ContentObjectMetadata({
         libraryId,
         objectId,
         metadataSubtree: "live_recording_config",
@@ -464,7 +467,10 @@ class VideoStore {
           "srt_egress_enabled",
           "url"
         ]
-      });
+      })) || {};
+
+      const srt_egress_enabled = srtInfo.srt_egress_enabled;
+      const originUrl = srtInfo.url;
 
       if(!srt_egress_enabled || !originUrl) { return; }
 
