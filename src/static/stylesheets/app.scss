@@ -199,8 +199,11 @@ input {
     background-color: $elv-color-bg-white;
     font-size: $elv-font-l;
     height: 2.1rem;
-    padding-right: 1.5em;
+    padding-right: 1.5rem;
     width: min-content;
+    min-width: 5rem;
+    max-width: 16rem;
+    text-overflow: ellipsis;
 
     &:not(:last-child) {
       margin-right: $elv-spacing-xs;
