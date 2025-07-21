@@ -323,8 +323,10 @@ class VideoStore {
       objectId = this.rootStore.client.utils.DecodeVersionHash(versionHash).objectId;
     }
 
-    let options = this.playoutUrlParams || {};
-    if(!isChannel && this.availableOfferings?.[this.offering]?.properties?.dvr_available) {
+    let options = {};
+    if(this.playoutUrlParams && Object.keys(this.playoutUrlParams).length > 0) {
+      options = this.playoutUrlParams;
+    } else if(!isChannel && this.availableOfferings?.[this.offering]?.properties?.dvr_available) {
       options.dvr = 1;
     }
 
