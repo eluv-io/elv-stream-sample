@@ -14,6 +14,27 @@ class AdvancedControls extends React.Component {
     };
   }
 
+  PlayoutUrlParams() {
+    return (
+      <div className="controls-container">
+        <h3 className="controls-header controls-header--secondary">Playout URL Parameters</h3>
+        <JsonInput
+          name="urlParams"
+          value={JSON.stringify(this.props.videoStore.playoutUrlParams, null, 2)}
+          className="control-auth-context"
+          onChange={event => {
+            try {
+              this.props.videoStore.SetPlayoutUrlParams(JSON.parse(event.target.value));
+            } catch(error) {
+              // eslint-disable-next-line no-console
+              console.error(error);
+            }
+          }}
+        />
+      </div>
+    );
+  }
+
   HLSJSOptions() {
     return (
       <div className="controls-container" key={`hls-js-options-${this.props.videoStore.playerProfile}`}>
@@ -251,6 +272,7 @@ class AdvancedControls extends React.Component {
         { this.BlockchainNodes() }
         { this.AuthContext() }
         { this.HLSJSOptions() }
+        { this.PlayoutUrlParams() }
         { reloadButton }
       </React.Fragment>
     );

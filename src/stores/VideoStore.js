@@ -28,6 +28,7 @@ class VideoStore {
   @observable playerProfile = playerProfile
   @observable hlsjsSupported = HLSPlayer.isSupported();
   @observable hlsjsOptions = Utils.HLSJSSettings({profile: playerProfile});
+  @observable playoutUrlParams = {};
   @observable contentId;
   @observable posterUrl;
   @observable playoutOptions;
@@ -129,6 +130,11 @@ class VideoStore {
   @action.bound
   SetHLSJSOptions(options) {
     this.hlsjsOptions = options;
+  }
+
+  @action.bound
+  SetPlayoutUrlParams(params={}) {
+    this.playoutUrlParams = params;
   }
 
   @action.bound
@@ -317,6 +323,11 @@ class VideoStore {
       objectId = this.rootStore.client.utils.DecodeVersionHash(versionHash).objectId;
     }
 
+    let options = this.playoutUrlParams || {};
+    if(!isChannel && this.availableOfferings?.[this.offering]?.properties?.dvr_available) {
+      options.dvr = 1;
+    }
+
     const isChannel = this.offering.startsWith("channel--");
     const playoutOptions = yield this.rootStore.client.PlayoutOptions({
       objectId,
@@ -324,8 +335,7 @@ class VideoStore {
       handler: isChannel ? "channel" : this.playoutHandler,
       offering: isChannel ? this.offering.replace("channel--", "") : this.offering,
       playoutType: this.playoutType,
-      options: !isChannel && this.availableOfferings?.[this.offering]?.properties?.dvr_available ?
-        {dvr: 1} : {}
+      options: JSON.parse(JSON.stringify(options))
     });
 
     if(!playoutOptions[this.protocol]) {
@@ -366,17 +376,13 @@ class VideoStore {
 
     const publiclyAccessible = ["listable", "public"].includes(yield this.rootStore.client.Permission({objectId}));
     if(publiclyAccessible) {
-      // If publicly accessible, create display urls with no auth/static tokens
-      const libraryId = yield this.rootStore.client.ContentObjectLibraryId({objectId});
-      const staticToken = Utils.B64(JSON.stringify({qspace_id: yield this.rootStore.client.ContentSpaceId(), qlib_id: libraryId}));
-
       for(const protocol of Object.keys(playoutOptions)) {
         for(const drm of Object.keys(playoutOptions[protocol].playoutMethods || {})) {
           try {
             let playoutUrl = new URL(playoutOptions[protocol].playoutMethods[drm].playoutUrl);
 
             playoutUrl = new URL(playoutUrl);
-            playoutUrl.searchParams.set("authorization", staticToken);
+            playoutUrl.searchParams.delete("authorization");
             playoutOptions[protocol].playoutMethods[drm].staticPlayoutUrl = playoutUrl.toString();
 
             let path = UrlJoin("rep", playoutUrl.pathname.split("/rep")[1]);
@@ -384,9 +390,15 @@ class VideoStore {
               path = UrlJoin("meta", playoutUrl.pathname.split("/meta")[1]);
             }
 
+            const queryParams = {};
+            playoutUrl.searchParams.keys().forEach(key =>
+              queryParams[key] = playoutUrl.searchParams.get(key)
+            );
+
             playoutOptions[protocol].playoutMethods[drm].globalPlayoutUrl = yield this.rootStore.client.GlobalUrl({
               objectId,
               path,
+              queryParams,
               noAuth: true,
               resolve: false
             });
@@ -444,6 +456,10 @@ class VideoStore {
         // Settings present but does not match default profile
         embedUrl.searchParams.set("hls", Utils.B58(JSON.stringify(this.hlsjsOptions)));
       }
+    }
+
+    if(this.playoutUrlParams && Object.keys(this.playoutUrlParams).length > 0) {
+      embedUrl.searchParams.set("opt", Utils.B58(JSON.stringify(this.playoutUrlParams)));
     }
 
     const customFabricNode = this.rootStore.fabricNode === "custom" ?
