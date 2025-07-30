@@ -13,7 +13,7 @@ let plugins = [
     template: Path.join(__dirname, "src", "index.html"),
     cache: false,
     filename: "index.html",
-    favicon: "node_modules/elv-components-js/src/icons/favicon.png"
+    favicon: "src/static/icons/favicon-light.png"
   }),
   new CopyWebpackPlugin([{
     from: Path.join(__dirname, "configuration.js"),
