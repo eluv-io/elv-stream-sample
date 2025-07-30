@@ -47,7 +47,7 @@ class RootStore {
       });
 
       yield client.SetStaticToken({
-        token: client.utils.B64(JSON.stringify({qspace_id: yield client.ContentSpaceId()}))
+        token: yield client.CreateFabricToken(),
       });
     } else {
       // Contained in IFrame
