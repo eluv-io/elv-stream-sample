@@ -78,7 +78,7 @@ module.exports = {
       },
       {
         test: /\.(js|mjs)$/,
-        exclude: /node_modules\/(?!elv-components-js)/,
+        exclude: /node_modules\/(?!(elv-components-js|@eluvio))/,
         loader: "babel-loader",
         options: {
           presets: [
