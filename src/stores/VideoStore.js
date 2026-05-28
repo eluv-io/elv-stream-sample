@@ -294,6 +294,10 @@ class VideoStore {
         handler: this.playoutHandler
       });
 
+      if(this.availableOfferings && !this.availableOfferings[this.offering]) {
+        this.offering = Object.keys(this.availableOfferings)[0] || "default";
+      }
+
       yield this.LoadVideoPlayout({objectId, versionHash});
       this.GenerateSrtUrl({libraryId, objectId});
 
