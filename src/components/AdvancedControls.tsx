@@ -59,15 +59,14 @@ export function AdvancedControls() {
   const [authContext, setAuthContextValue] = useState("{}");
 
   const toggleButton = (
-    <div className="rounded-lg border p-4">
-      <Button
-        type="button"
-        variant={visible ? "default" : "secondary"}
-        onClick={() => setVisible((current) => !current)}
-      >
-        Advanced Controls
-      </Button>
-    </div>
+    <Button
+      type="button"
+      className="w-full"
+      variant="default"
+      onClick={() => setVisible((current) => !current)}
+    >
+      Advanced Controls
+    </Button>
   );
 
   if (!visible) {
@@ -75,12 +74,12 @@ export function AdvancedControls() {
       return null;
     }
 
-    return toggleButton;
+    return <div className="rounded-lg border p-4">{toggleButton}</div>;
   }
 
   return (
     <div className="space-y-4">
-      {toggleButton}
+      <div className="rounded-lg border p-4">{toggleButton}</div>
 
       <ControlSection title="Playout Handler">
         <Select value={playoutHandler} onValueChange={setPlayoutHandler}>
@@ -271,7 +270,7 @@ function ControlSection({
 }) {
   return (
     <div className="space-y-2 rounded-lg border p-4">
-      <h3 className="text-sm font-semibold text-muted-foreground">{title}</h3>
+      <h3 className="text-sm font-semibold text-primary">{title}</h3>
       {children}
     </div>
   );

@@ -28,7 +28,7 @@ function BufferGraphChart({ name, data, windowSize, chartColor }: BufferGraphPro
 
   return (
     <div className="rounded-lg border p-4">
-      <h3 className="mb-3 text-sm font-semibold text-muted-foreground">{name}</h3>
+      <h3 className="mb-3 text-sm font-semibold text-primary">{name}</h3>
       <Scatter
         options={{
           animation: false,

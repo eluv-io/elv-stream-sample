@@ -89,6 +89,8 @@ interface VideoState {
   volume: number;
   playerLevels: PlayerLevel[];
   playerCurrentLevel?: number;
+  qualityLevel: number;
+  qualityAutoLabel: string;
   playerAudioTracks: PlayerTrack[];
   playerCurrentAudioTrack?: number;
   playerTextTracks: PlayerTrack[];
@@ -103,6 +105,7 @@ interface VideoState {
   availableChannels: Record<string, OfferingInfo>;
   embedUrl: string;
   srtUrl: string;
+  _qualitySetter?: ((level: number) => void) | null;
   metricsSupported: () => boolean;
   setError: (message: string) => void;
   reset: () => void;
@@ -110,6 +113,9 @@ interface VideoState {
   setHlsjsOptions: (options: Record<string, unknown>) => void;
   setPlayoutUrlParams: (params?: Record<string, unknown>) => void;
   setPlayerLevels: (args: { levels: PlayerLevel[]; currentLevel?: number }) => void;
+  setQualityLevel: (level: number) => void;
+  updateQualityDisplay: (args: { level: number; autoLabel: string }) => void;
+  registerQualitySetter: (setter: ((level: number) => void) | null) => void;
   setTextTracks: (args: { tracks?: PlayerTrack[]; currentTrack: number }) => void;
   setAudioTracks: (args: { tracks?: PlayerTrack[]; currentTrack?: number }) => void;
   updateVolume: (event: Event) => void;
@@ -123,7 +129,11 @@ interface VideoState {
   setMuted: (muted: boolean) => void;
   setAesOption: (aesOption: string) => void;
   loadVideo: (args: { contentId?: string; retry?: boolean }) => Promise<void>;
-  loadVideoPlayout: (args: { objectId?: string; versionHash?: string }) => Promise<void>;
+  reloadPlayout: () => Promise<boolean>;
+  loadVideoPlayout: (args: {
+    objectId?: string;
+    versionHash?: string;
+  }) => Promise<boolean>;
   generateEmbedUrl: (args: { objectId?: string; versionHash?: string }) => Promise<void>;
   generateSrtUrl: (args: { libraryId?: string; objectId?: string }) => Promise<void>;
 }
@@ -146,6 +156,8 @@ const initialVideoState = {
   volume: 1,
   playerLevels: [],
   playerCurrentLevel: undefined,
+  qualityLevel: -1,
+  qualityAutoLabel: "Auto",
   playerAudioTracks: [],
   playerCurrentAudioTrack: undefined,
   playerTextTracks: [],
@@ -214,6 +226,15 @@ export const useVideoStore = create<VideoState>((set, get) => ({
   setPlayerLevels: ({ levels, currentLevel }) =>
     set({ playerLevels: levels, playerCurrentLevel: currentLevel }),
 
+  setQualityLevel: (level) => {
+    get()._qualitySetter?.(level);
+  },
+
+  updateQualityDisplay: ({ level, autoLabel }) =>
+    set({ qualityLevel: level, qualityAutoLabel: autoLabel }),
+
+  registerQualitySetter: (setter) => set({ _qualitySetter: setter }),
+
   setTextTracks: ({ tracks, currentTrack }) => {
     if (tracks) {
       set({
@@ -274,9 +295,33 @@ export const useVideoStore = create<VideoState>((set, get) => ({
     void get().loadVideo({ contentId });
   },
 
-  setPlayoutType: (playoutType) => set({ playoutType }),
+  setPlayoutType: (playoutType) => {
+    const previousType = get().playoutType;
+    set({ playoutType });
 
-  setPlayoutHandler: (playoutHandler) => set({ playoutHandler }),
+    void (async () => {
+      const success = await get().reloadPlayout();
+      if (!success) {
+        set({ playoutType: previousType });
+      }
+    })();
+  },
+
+  setPlayoutHandler: (playoutHandler) => {
+    const previousHandler = get().playoutHandler;
+    if (previousHandler === playoutHandler) {
+      return;
+    }
+
+    set({ playoutHandler });
+
+    void (async () => {
+      const success = await get().reloadPlayout();
+      if (!success) {
+        set({ playoutHandler: previousHandler });
+      }
+    })();
+  },
 
   setPlayerProfile: (nextProfile) => {
     set({
@@ -329,6 +374,11 @@ export const useVideoStore = create<VideoState>((set, get) => ({
       } else if (contentId.startsWith("hq")) {
         versionHash = contentId;
         objectId = Utils.DecodeVersionHash(versionHash).objectId;
+        libraryId = await (
+          client as unknown as {
+            ContentObjectLibraryId: (args: { objectId: string }) => Promise<string>;
+          }
+        ).ContentObjectLibraryId({ objectId });
       } else {
         set({ error: `Invalid content ID: ${contentId}`, loading: false });
         return;
@@ -391,7 +441,9 @@ export const useVideoStore = create<VideoState>((set, get) => ({
       ).AvailableOfferings({
         objectId,
         versionHash,
-        handler: get().playoutHandler,
+      }).catch((error) => {
+        console.warn("AvailableOfferings failed:", error);
+        return get().availableOfferings;
       });
 
       let offering = get().offering;
@@ -400,7 +452,10 @@ export const useVideoStore = create<VideoState>((set, get) => ({
       }
 
       set({ title, availableChannels, availableOfferings, offering });
-      await get().loadVideoPlayout({ objectId, versionHash });
+      const playoutLoaded = await get().loadVideoPlayout({ objectId, versionHash });
+      if (!playoutLoaded) {
+        return;
+      }
       await get().generateSrtUrl({ libraryId, objectId });
       set({ loadId: get().loadId + 1 });
     } catch (error) {
@@ -418,6 +473,38 @@ export const useVideoStore = create<VideoState>((set, get) => ({
     }
   },
 
+  reloadPlayout: async () => {
+    const state = get();
+    const client = useRootStore.getState().client;
+
+    if (!client || !state.contentId || !state.playoutOptions) {
+      return true;
+    }
+
+    let objectId: string | undefined;
+    let versionHash: string | undefined;
+
+    if (state.contentId.startsWith("iq__")) {
+      objectId = state.contentId;
+    } else if (state.contentId.startsWith("hq")) {
+      versionHash = state.contentId;
+      objectId = Utils.DecodeVersionHash(versionHash).objectId;
+    } else {
+      return true;
+    }
+
+    set({ loading: true, error: "" });
+
+    const playoutLoaded = await get().loadVideoPlayout({ objectId, versionHash });
+
+    if (playoutLoaded) {
+      set({ loadId: get().loadId + 1 });
+    }
+
+    set({ loading: false });
+    return playoutLoaded;
+  },
+
   loadVideoPlayout: async ({ objectId, versionHash }) => {
     const client = useRootStore.getState().client as unknown as Record<string, unknown> & {
       utils: { DecodeVersionHash: (hash: string) => { objectId: string } };
@@ -427,7 +514,7 @@ export const useVideoStore = create<VideoState>((set, get) => ({
     };
 
     if (!client) {
-      return;
+      return false;
     }
 
     const rootStore = useRootStore.getState();
@@ -449,14 +536,37 @@ export const useVideoStore = create<VideoState>((set, get) => ({
       options = { dvr: 1 };
     }
 
-    const playoutOptions = await client.PlayoutOptions({
-      objectId,
-      versionHash,
-      handler: isChannel ? "channel" : state.playoutHandler,
-      offering: isChannel ? state.offering.replace("channel--", "") : state.offering,
-      playoutType: state.playoutType,
-      options: JSON.parse(JSON.stringify(options)),
-    });
+    let playoutOptions: PlayoutOptions;
+
+    try {
+      playoutOptions = await client.PlayoutOptions({
+        objectId,
+        versionHash,
+        handler: isChannel ? "channel" : state.playoutHandler,
+        offering: isChannel ? state.offering.replace("channel--", "") : state.offering,
+        playoutType: state.playoutType,
+        options: JSON.parse(JSON.stringify(options)),
+      });
+    } catch (error) {
+      console.error("PlayoutOptions failed:", error);
+      set({
+        error:
+          state.playoutHandler === "playout_scte"
+            ? "SCTE playout handler is not available for this content"
+            : "Failed to load playout options",
+      });
+      return false;
+    }
+
+    if (!playoutOptions || Object.keys(playoutOptions).length === 0) {
+      set({
+        error:
+          state.playoutHandler === "playout_scte"
+            ? "SCTE playout handler is not available for this content"
+            : "No playout options available",
+      });
+      return false;
+    }
 
     let protocol = state.protocol;
     if (!playoutOptions[protocol]) {
@@ -474,12 +584,17 @@ export const useVideoStore = create<VideoState>((set, get) => ({
         protocol = switchedProtocol;
       } else {
         set({ error: "No playout formats compatible with this browser are available." });
-        return;
+        return false;
       }
     }
 
     let drm = state.drm;
-    const playoutMethods = playoutOptions[protocol].playoutMethods;
+    const playoutMethods = playoutOptions[protocol]?.playoutMethods;
+
+    if (!playoutMethods) {
+      set({ error: "No playout formats compatible with this browser are available." });
+      return false;
+    }
 
     if (!playoutMethods[drm]) {
       if (playoutMethods.clear) {
@@ -494,7 +609,7 @@ export const useVideoStore = create<VideoState>((set, get) => ({
         drm = "playready";
       } else {
         set({ error: "No playout formats compatible with this browser are available." });
-        return;
+        return false;
       }
     }
 
@@ -539,6 +654,7 @@ export const useVideoStore = create<VideoState>((set, get) => ({
     }
 
     set({ playoutOptions, protocol, drm });
+    return true;
   },
 
   generateEmbedUrl: async ({ objectId, versionHash }) => {
@@ -628,6 +744,7 @@ export const useVideoStore = create<VideoState>((set, get) => ({
 
   generateSrtUrl: async ({ libraryId, objectId }) => {
     const client = useRootStore.getState().client as unknown as Record<string, unknown> & {
+      ContentObjectLibraryId: (args: { objectId: string }) => Promise<string>;
       ContentObjectMetadata: (args: Record<string, unknown>) => Promise<
         | {
             srt_egress_enabled?: boolean;
@@ -641,7 +758,7 @@ export const useVideoStore = create<VideoState>((set, get) => ({
       utils: { B64: (value: string) => string };
     };
 
-    if (!client) {
+    if (!client || !objectId) {
       return;
     }
 
@@ -649,6 +766,14 @@ export const useVideoStore = create<VideoState>((set, get) => ({
     const state = get();
 
     try {
+      if (!libraryId) {
+        libraryId = await client.ContentObjectLibraryId({ objectId });
+      }
+
+      if (!libraryId) {
+        return;
+      }
+
       const srtInfo =
         (await client.ContentObjectMetadata({
           libraryId,

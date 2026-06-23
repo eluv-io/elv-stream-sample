@@ -47,25 +47,27 @@ export function PlayoutControls() {
 
   return (
     <div className="rounded-lg border p-4">
-      <h3 className="mb-3 text-sm font-semibold text-muted-foreground">Playout Options</h3>
-      <div className="mb-3 flex flex-wrap gap-2">
+      <h3 className="mb-3 text-sm font-semibold text-primary">Playout Options</h3>
+      <div className="mb-2 grid grid-cols-2 gap-2">
         {protocols.map((protocolKey) => (
           <Button
             key={`protocol-${protocolKey}`}
             type="button"
-            variant={protocol === protocolKey ? "default" : "secondary"}
+            className="w-full"
+            variant={protocol === protocolKey ? "default" : "outline"}
             onClick={() => setProtocol(protocolKey)}
           >
             {DISPLAY_MAP[protocolKey]}
           </Button>
         ))}
       </div>
-      <div className="flex flex-wrap gap-2">
+      <div className="grid grid-cols-2 gap-2">
         {drms.map((drmKey) => (
           <Button
             key={`drm-${drmKey}`}
             type="button"
-            variant={drm === drmKey ? "default" : "secondary"}
+            className="w-full"
+            variant={drm === drmKey ? "default" : "outline"}
             onClick={() => setDrm(drmKey)}
           >
             {DISPLAY_MAP[drmKey]}

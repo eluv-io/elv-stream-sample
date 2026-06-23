@@ -70,16 +70,16 @@ export function ContentInfo() {
       </div>
 
       {error ? (
-        <h1 className="px-4 py-3 text-2xl font-medium text-destructive">{error}</h1>
+        <h1 className="px-4 py-3 text-center text-2xl font-medium text-destructive">{error}</h1>
       ) : sampleContent ? (
-        <div className="px-4 py-3">
+        <div className="px-4 py-3 text-center">
           <h1 className="text-2xl font-medium">{sampleContent.title || title}</h1>
           {sampleContent.subHeader ? (
             <h3 className="mt-1 text-lg text-muted-foreground">{sampleContent.subHeader}</h3>
           ) : null}
         </div>
       ) : title ? (
-        <h1 className="px-4 py-3 text-2xl font-medium">{title}</h1>
+        <h1 className="px-4 py-3 text-center text-2xl font-medium">{title}</h1>
       ) : null}
     </>
   );

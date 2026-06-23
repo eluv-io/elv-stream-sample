@@ -1,29 +1,21 @@
 import { ThemeSelector } from "@/components/ThemeSelector";
-import { AdvancedControls } from "@/components/AdvancedControls";
-import { BufferGraph } from "@/components/BufferGraph";
 import { ContentInfo } from "@/components/ContentInfo";
-import { PlayoutControls } from "@/components/PlayoutControls";
-import { PlayoutInfo } from "@/components/PlayoutInfo";
-import { Segments } from "@/components/Segments";
+import { DashboardMain } from "@/components/DashboardMain";
+import { DashboardSidebar } from "@/components/DashboardSidebar";
 import { LoadingOverlay } from "@/components/ui/loading-overlay";
-import { VideoPlayer } from "@/components/VideoPlayer";
 import { getEluvioConfiguration } from "@/lib/utils";
 import { useRootStore } from "@/stores/useRootStore";
 
-function AppContent() {
+function DashboardLayout({ showContentInfo = false }: { showContentInfo?: boolean }) {
   const devMode = useRootStore((state) => state.devMode);
   const toggleDevMode = useRootStore((state) => state.toggleDevMode);
 
   return (
-    <main className="flex flex-1 flex-col overflow-auto">
-      <ContentInfo />
-      <VideoPlayer />
-      <PlayoutControls />
-      <Segments />
-      <div className="grid gap-4 p-4 lg:grid-cols-2">
-        <BufferGraph />
-        <PlayoutInfo />
-        <AdvancedControls />
+    <main className="flex min-h-0 flex-1 flex-col">
+      {showContentInfo ? <ContentInfo /> : null}
+      <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[minmax(0,65fr)_minmax(400px,35fr)] lg:items-stretch">
+        <DashboardMain />
+        <DashboardSidebar />
       </div>
       <button
         type="button"
@@ -35,28 +27,12 @@ function AppContent() {
   );
 }
 
-function DisplayAppContent() {
-  const devMode = useRootStore((state) => state.devMode);
-  const toggleDevMode = useRootStore((state) => state.toggleDevMode);
+function AppContent() {
+  return <DashboardLayout showContentInfo />;
+}
 
-  return (
-    <main className="flex flex-1 flex-col overflow-auto">
-      <VideoPlayer />
-      <PlayoutControls />
-      <Segments />
-      <div className="grid gap-4 p-4 lg:grid-cols-2">
-        <BufferGraph />
-        <PlayoutInfo />
-        <AdvancedControls />
-      </div>
-      <button
-        type="button"
-        className="dev-mode-button"
-        aria-label="Toggle dev mode"
-        onClick={() => toggleDevMode(!devMode)}
-      />
-    </main>
-  );
+function DisplayAppContent() {
+  return <DashboardLayout />;
 }
 
 export default function App() {

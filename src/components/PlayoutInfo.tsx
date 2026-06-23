@@ -15,7 +15,7 @@ function UrlSection({
   return (
     <div className="rounded-lg border p-4">
       <div className="mb-2 flex items-center justify-between gap-2">
-        <h3 className="text-sm font-semibold text-muted-foreground">{title}</h3>
+        <h3 className="text-sm font-semibold text-primary">{title}</h3>
         <div className="flex items-center gap-1">
           <CopyButton value={value} />
           {editHref ? (

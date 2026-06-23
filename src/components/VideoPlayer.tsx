@@ -32,18 +32,16 @@ export function VideoPlayer() {
   const posterUrl = useVideoStore((state) => state.posterUrl);
   const muted = useVideoStore((state) => state.muted);
   const volume = useVideoStore((state) => state.volume);
-  const offering = useVideoStore((state) => state.offering);
   const title = useVideoStore((state) => state.title);
-  const availableOfferings = useVideoStore((state) => state.availableOfferings);
-  const availableChannels = useVideoStore((state) => state.availableChannels);
   const playerLevels = useVideoStore((state) => state.playerLevels);
   const playerCurrentLevel = useVideoStore((state) => state.playerCurrentLevel);
   const playerAudioTracks = useVideoStore((state) => state.playerAudioTracks);
   const playerCurrentAudioTrack = useVideoStore((state) => state.playerCurrentAudioTrack);
   const playerTextTracks = useVideoStore((state) => state.playerTextTracks);
   const playerCurrentTextTrack = useVideoStore((state) => state.playerCurrentTextTrack);
-  const setOffering = useVideoStore((state) => state.setOffering);
   const setPlayerLevels = useVideoStore((state) => state.setPlayerLevels);
+  const updateQualityDisplay = useVideoStore((state) => state.updateQualityDisplay);
+  const registerQualitySetter = useVideoStore((state) => state.registerQualitySetter);
   const setAudioTracks = useVideoStore((state) => state.setAudioTracks);
   const setTextTracks = useVideoStore((state) => state.setTextTracks);
   const setBandwidthEstimate = useVideoStore((state) => state.setBandwidthEstimate);
@@ -504,11 +502,7 @@ export function VideoPlayer() {
     setQualityLevel(-1);
   }, [loadId, contentId, protocol, drm]);
 
-  const hasOfferings =
-    Object.keys(availableOfferings || {}).length > 0 ||
-    Object.keys(availableChannels || {}).length > 0;
-
-  const setHlsLevel = (value: number) => {
+  const setHlsLevel = useCallback((value: number) => {
     const player = playerRef.current as HLSPlayer | null;
     const video = videoRef.current;
     if (!player || !video || !("currentLevel" in player)) {
@@ -518,9 +512,9 @@ export function VideoPlayer() {
     player.currentLevel = value;
     video.currentTime = Math.max(video.currentTime - 0.1, 0);
     setQualityLevel(value);
-  };
+  }, []);
 
-  const setDashLevel = (value: number) => {
+  const setDashLevel = useCallback((value: number) => {
     const player = playerRef.current as ReturnType<typeof DashJS.MediaPlayer.prototype.create>;
     const video = videoRef.current;
     if (!player || !video) {
@@ -538,7 +532,23 @@ export function VideoPlayer() {
 
     video.currentTime = Math.max(video.currentTime - 0.1, 0);
     setQualityLevel(value >= 0 ? player.getQualityFor("video") : -1);
-  };
+  }, []);
+
+  const applyQualityLevel = useCallback(
+    (value: number) => {
+      if (protocol === "hls") {
+        setHlsLevel(value);
+      } else {
+        setDashLevel(value);
+      }
+    },
+    [protocol, setDashLevel, setHlsLevel],
+  );
+
+  useEffect(() => {
+    registerQualitySetter(applyQualityLevel);
+    return () => registerQualitySetter(null);
+  }, [applyQualityLevel, registerQualitySetter]);
 
   const currentLevel = playerLevels.find(
     (level) => level.qualityIndex === playerCurrentLevel,
@@ -547,6 +557,14 @@ export function VideoPlayer() {
     qualityLevel < 0 && currentLevel
       ? `Auto (${currentLevel.resolution})`
       : "Auto";
+
+  useEffect(() => {
+    updateQualityDisplay({ level: qualityLevel, autoLabel });
+  }, [autoLabel, qualityLevel, updateQualityDisplay]);
+
+  const hasTrackControls =
+    playerTextTracks.length > 0 ||
+    playerAudioTracks.length > 1;
 
   return (
     <div className="p-4">
@@ -564,131 +582,80 @@ export function VideoPlayer() {
           className="aspect-video w-full rounded-lg bg-black"
         />
 
-        <div className="mt-3 flex flex-wrap gap-2">
-          {hasOfferings ? (
-            <Select value={offering} onValueChange={setOffering}>
-              <SelectTrigger className="w-[220px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.keys(availableOfferings).map((offeringKey) => (
-                  <SelectItem key={offeringKey} value={offeringKey}>
-                    Offering: {availableOfferings[offeringKey].display_name || offeringKey}
-                  </SelectItem>
-                ))}
-                {Object.keys(availableChannels || {}).map((channelKey) => (
-                  <SelectItem key={channelKey} value={`channel--${channelKey}`}>
-                    Channel: {availableChannels[channelKey].display_name || channelKey}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          ) : null}
+        {hasTrackControls ? (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {playerTextTracks.length > 0 ? (
+              <Select
+                value={String(playerCurrentTextTrack)}
+                onValueChange={(value) => {
+                  const index = parseInt(value, 10);
+                  const player = playerRef.current;
 
-          {playerTextTracks.length > 0 ? (
-            <Select
-              value={String(playerCurrentTextTrack)}
-              onValueChange={(value) => {
-                const index = parseInt(value, 10);
-                const player = playerRef.current;
-
-                if (player && "subtitleTrack" in player) {
-                  (player as HLSPlayer).subtitleTrack = index;
-                } else if (player && "setTextTrack" in player) {
-                  (player as ReturnType<typeof DashJS.MediaPlayer.prototype.create>).setTextTrack(
-                    index,
-                  );
-                }
-
-                setTextTracks({ currentTrack: index });
-              }}
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Subtitles" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="-1">Subtitles: None</SelectItem>
-                {playerTextTracks.map((track) => (
-                  <SelectItem key={track.index} value={String(track.index)}>
-                    Subtitles: {track.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          ) : null}
-
-          {playerAudioTracks.length > 1 ? (
-            <Select
-              value={String(playerCurrentAudioTrack)}
-              onValueChange={(value) => {
-                const index = parseInt(value, 10);
-                const player = playerRef.current;
-
-                if (player && "audioTrack" in player) {
-                  (player as HLSPlayer).audioTrack = index;
-                } else if (player && "setCurrentTrack" in player) {
-                  const track = (
-                    player as ReturnType<typeof DashJS.MediaPlayer.prototype.create>
-                  )
-                    .getTracksFor("audio")
-                    .find((audioTrack: { index: number | null }) => audioTrack.index === index);
-
-                  if (track) {
-                    (
-                      player as ReturnType<typeof DashJS.MediaPlayer.prototype.create>
-                    ).setCurrentTrack(track);
+                  if (player && "subtitleTrack" in player) {
+                    (player as HLSPlayer).subtitleTrack = index;
+                  } else if (player && "setTextTrack" in player) {
+                    (player as ReturnType<typeof DashJS.MediaPlayer.prototype.create>).setTextTrack(
+                      index,
+                    );
                   }
-                }
 
-                setAudioTracks({ currentTrack: index });
-              }}
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Audio" />
-              </SelectTrigger>
-              <SelectContent>
-                {playerAudioTracks.map(({ index, label }) => (
-                  <SelectItem key={index} value={String(index)}>
-                    Audio: {label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          ) : null}
-
-          {playerLevels.length > 0 ? (
-            <Select
-              value={String(qualityLevel)}
-              onValueChange={(value) => {
-                const index = parseInt(value, 10);
-                if (protocol === "hls") {
-                  setHlsLevel(index);
-                } else {
-                  setDashLevel(index);
-                }
-              }}
-            >
-              <SelectTrigger className="w-[220px]">
-                <SelectValue placeholder="Quality" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="-1">{autoLabel}</SelectItem>
-                {playerLevels.map((level, levelIndex) => {
-                  const value =
-                    typeof level.qualityIndex === "undefined"
-                      ? levelIndex
-                      : level.qualityIndex;
-
-                  return (
-                    <SelectItem key={`level-${levelIndex}`} value={String(value)}>
-                      {`${level.resolution} (${(level.bitrate / 1000 / 1000).toFixed(1)}Mbps)`}
+                  setTextTracks({ currentTrack: index });
+                }}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Subtitles" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="-1">Subtitles: None</SelectItem>
+                  {playerTextTracks.map((track) => (
+                    <SelectItem key={track.index} value={String(track.index)}>
+                      Subtitles: {track.label}
                     </SelectItem>
-                  );
-                })}
-              </SelectContent>
-            </Select>
-          ) : null}
-        </div>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : null}
+
+            {playerAudioTracks.length > 1 ? (
+              <Select
+                value={String(playerCurrentAudioTrack)}
+                onValueChange={(value) => {
+                  const index = parseInt(value, 10);
+                  const player = playerRef.current;
+
+                  if (player && "audioTrack" in player) {
+                    (player as HLSPlayer).audioTrack = index;
+                  } else if (player && "setCurrentTrack" in player) {
+                    const track = (
+                      player as ReturnType<typeof DashJS.MediaPlayer.prototype.create>
+                    )
+                      .getTracksFor("audio")
+                      .find((audioTrack: { index: number | null }) => audioTrack.index === index);
+
+                    if (track) {
+                      (
+                        player as ReturnType<typeof DashJS.MediaPlayer.prototype.create>
+                      ).setCurrentTrack(track);
+                    }
+                  }
+
+                  setAudioTracks({ currentTrack: index });
+                }}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Audio" />
+                </SelectTrigger>
+                <SelectContent>
+                  {playerAudioTracks.map(({ index, label }) => (
+                    <SelectItem key={index} value={String(index)}>
+                      Audio: {label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : null}
+          </div>
+        ) : null}
       </LoadingOverlay>
     </div>
   );

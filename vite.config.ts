@@ -7,6 +7,19 @@ import tailwindcss from "@tailwindcss/vite";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const configurationPath = path.resolve(__dirname, "configuration.js");
+const configurationExamplePath = path.resolve(__dirname, "configuration.example.js");
+
+function resolveConfigurationSource() {
+  if (fs.existsSync(configurationPath)) {
+    return configurationPath;
+  }
+
+  if (fs.existsSync(configurationExamplePath)) {
+    return configurationExamplePath;
+  }
+
+  return null;
+}
 
 function configurationPlugin(): Plugin {
   return {
@@ -18,23 +31,25 @@ function configurationPlugin(): Plugin {
           return;
         }
 
-        if (!fs.existsSync(configurationPath)) {
+        const sourcePath = resolveConfigurationSource();
+        if (!sourcePath) {
           res.statusCode = 404;
           res.end("configuration.js not found");
           return;
         }
 
         res.setHeader("Content-Type", "application/javascript");
-        res.end(fs.readFileSync(configurationPath, "utf-8"));
+        res.end(fs.readFileSync(sourcePath, "utf-8"));
       });
     },
     closeBundle() {
-      if (!fs.existsSync(configurationPath)) {
+      const sourcePath = resolveConfigurationSource();
+      if (!sourcePath) {
         return;
       }
 
       fs.copyFileSync(
-        configurationPath,
+        sourcePath,
         path.resolve(__dirname, "dist/configuration.js"),
       );
     },
