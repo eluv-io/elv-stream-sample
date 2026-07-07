@@ -24,12 +24,14 @@ class PlayoutInfo extends React.Component {
       <div className="controls-container">
         <h3 className="controls-header controls-header--secondary">
           License Server URL
-          <Copy className="copy-button" copy={licenseServer}>
-            <ImageIcon icon={CopyIcon} />
-          </Copy>
+          <div className="controls-header-actions">
+            <Copy className="copy-button" copy={licenseServer}>
+              <ImageIcon icon={CopyIcon}/>
+            </Copy>
+          </div>
         </h3>
         <h6 className="playout-url">
-          { licenseServer }
+        { licenseServer }
         </h6>
       </div>
     );
