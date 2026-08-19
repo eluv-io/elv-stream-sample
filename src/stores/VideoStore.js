@@ -381,33 +381,78 @@ class VideoStore {
     }
 
     const publiclyAccessible = ["listable", "public"].includes(yield this.rootStore.client.Permission({objectId}));
+
+    let canEdit = false;
+    let editorToken;
+    if(!publiclyAccessible) {
+      canEdit = yield this.rootStore.client.CallContractMethod({
+        contractAddress: Utils.HashToAddress(objectId),
+        methodName: "canEdit"
+      });
+
+      if(canEdit) {
+        editorToken = yield this.rootStore.client.CreateSignedToken({
+          objectId,
+          duration: 14 * 24 * 60 * 60 * 1000 // 2 weeks
+        });
+      }
+    }
+
+    let anonymousToken;
     if(publiclyAccessible) {
+      const contentSpaceId = yield this.rootStore.client.ContentSpaceId();
+      anonymousToken = this.rootStore.client.utils.B64(JSON.stringify({qspace_id: contentSpaceId}));
+    }
+
+    if(publiclyAccessible || canEdit) {
+      const currentVersionHash = versionHash || (yield this.rootStore.client.LatestVersionHash({objectId}));
+      const qid = isChannel ? objectId : currentVersionHash;
+
+      const configUrl = this.rootStore.client.NetworkInfo().configUrl || "";
+      const isMainNetwork = configUrl.includes("main.net955305");
+      const network = isMainNetwork ? "main" : "demov3";
+      const networkHost = isMainNetwork ?
+        "main.net955305.contentfabric.io" :
+        "demov3.net955210.contentfabric.io";
+
       for(const protocol of Object.keys(playoutOptions)) {
         for(const drm of Object.keys(playoutOptions[protocol].playoutMethods || {})) {
           try {
-            let playoutUrl = new URL(playoutOptions[protocol].playoutMethods[drm].playoutUrl);
+            const playoutMethod = playoutOptions[protocol].playoutMethods[drm];
+            const originalPlayoutUrl = new URL(playoutMethod.playoutUrl);
 
-            playoutUrl = new URL(playoutUrl);
-            playoutUrl.searchParams.delete("authorization");
-            playoutOptions[protocol].playoutMethods[drm].staticPlayoutUrl = playoutUrl.toString();
-
-            let path = UrlJoin("rep", playoutUrl.pathname.split("/rep")[1]);
-            if(playoutUrl.pathname.includes("/meta")) {
-              path = UrlJoin("meta", playoutUrl.pathname.split("/meta")[1]);
+            let path = UrlJoin("rep", originalPlayoutUrl.pathname.split("/rep")[1]);
+            if(originalPlayoutUrl.pathname.includes("/meta")) {
+              path = UrlJoin("meta", originalPlayoutUrl.pathname.split("/meta")[1]);
             }
 
-            const queryParams = {};
-            playoutUrl.searchParams.keys().forEach(key =>
-              queryParams[key] = playoutUrl.searchParams.get(key)
-            );
 
-            playoutOptions[protocol].playoutMethods[drm].globalPlayoutUrl = yield this.rootStore.client.GlobalUrl({
-              objectId,
-              path,
-              queryParams,
-              noAuth: true,
-              resolve: false
-            });
+            const strippedPlayoutUrl = new URL(originalPlayoutUrl);
+            strippedPlayoutUrl.searchParams.delete("authorization");
+
+            if(publiclyAccessible) {
+              playoutMethod.staticPlayoutUrl = strippedPlayoutUrl.toString();
+            }
+
+            const globalPlayoutUrl = new URL(`https://${networkHost}`);
+            globalPlayoutUrl.pathname = UrlJoin("s", network, "q", qid, path);
+            strippedPlayoutUrl.searchParams.forEach((value, key) => globalPlayoutUrl.searchParams.set(key, value));
+
+
+            if(publiclyAccessible) {
+              globalPlayoutUrl.searchParams.delete("authorization");
+            } else {
+              globalPlayoutUrl.searchParams.set("authorization", editorToken);
+            }
+            playoutMethod.globalPlayoutUrl = globalPlayoutUrl.toString();
+
+            const licenseServers = playoutMethod.drms?.[drm]?.licenseServers;
+            if(licenseServers && licenseServers.length > 0) {
+              const licenseServerUrl = new URL(licenseServers[0]);
+              licenseServerUrl.searchParams.set("qhash", currentVersionHash);
+              licenseServerUrl.searchParams.set("authorization", publiclyAccessible ? anonymousToken : editorToken);
+              playoutMethod.licenseServerUrl = licenseServerUrl.toString();
+            }
           } catch(error) {
             // eslint-disable-next-line no-console
             console.error(error);
