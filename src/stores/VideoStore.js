@@ -408,10 +408,8 @@ class VideoStore {
       const currentVersionHash = versionHash || (yield this.rootStore.client.LatestVersionHash({objectId}));
       const qid = isChannel ? objectId : currentVersionHash;
 
-      const configUrl = this.rootStore.client.NetworkInfo().configUrl || "";
-      const isMainNetwork = configUrl.includes("main.net955305");
-      const network = isMainNetwork ? "main" : "demov3";
-      const networkHost = isMainNetwork ?
+      const network = (yield this.rootStore.client.NetworkInfo()).name;
+      const networkHost = network === "main" ?
         "main.net955305.contentfabric.io" :
         "demov3.net955210.contentfabric.io";
 
