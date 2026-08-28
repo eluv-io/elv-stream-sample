@@ -18,7 +18,7 @@ class PlayoutInfo extends React.Component {
     const playoutMethods = this.props.videoStore.playoutOptions[this.props.videoStore.protocol]
       .playoutMethods[this.props.videoStore.drm];
 
-    const licenseServer = playoutMethods.drms[this.props.videoStore.drm].licenseServers[0];
+    const licenseServer = playoutMethods.licenseServerUrl || playoutMethods.drms[this.props.videoStore.drm].licenseServers[0];
 
     return (
       <div className="controls-container">
@@ -79,7 +79,7 @@ class PlayoutInfo extends React.Component {
           !playoutInfo.globalPlayoutUrl ? null :
             <div className="controls-container">
               <h3 className="controls-header">
-                Global Playout URL
+                Playout URL
                 <div className="controls-header-actions">
                   <Copy className="copy-button" copy={playoutInfo.globalPlayoutUrl}>
                     <ImageIcon icon={CopyIcon}/>
@@ -93,7 +93,7 @@ class PlayoutInfo extends React.Component {
         }
         <div className="controls-container">
           <h3 className="controls-header">
-            Playout URL
+            Localized Playout URL
             <div className="controls-header-actions">
               <Copy className="copy-button" copy={playoutUrl}>
                 <ImageIcon icon={CopyIcon}/>
