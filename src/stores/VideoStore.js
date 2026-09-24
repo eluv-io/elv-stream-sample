@@ -433,13 +433,13 @@ class VideoStore {
             }
 
             const globalPlayoutUrl = new URL(`https://${networkHost}`);
-            globalPlayoutUrl.pathname = UrlJoin("s", network, "q", qid, path);
             strippedPlayoutUrl.searchParams.forEach((value, key) => globalPlayoutUrl.searchParams.set(key, value));
 
-
             if(publiclyAccessible) {
+              globalPlayoutUrl.pathname = UrlJoin("s", network, "q", qid, path);
               globalPlayoutUrl.searchParams.delete("authorization");
             } else {
+              globalPlayoutUrl.pathname = UrlJoin("q", qid, path);
               globalPlayoutUrl.searchParams.set("authorization", editorToken);
             }
             playoutMethod.globalPlayoutUrl = globalPlayoutUrl.toString();
